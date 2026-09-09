@@ -5,96 +5,50 @@ Chat - {{ application.application_code }}
 {% endblock %}
 
 {% block content %}
-
 <header class="topbar">
-
     <div>
-
         <div class="brand">
-            💬 {{ application.application_code }}
+            {{ application.application_code }}
         </div>
-
         <div class="muted">
-            {{ application.username }}
-            ·
-            {{ application.network }}
+            {{ application.username }} · {{ application.network }}
         </div>
-
     </div>
-
-    <a
-        href="{{ url_for('dashboard') }}"
-        class="icon-btn"
-    >
+    <a href="{{ url_for('dashboard') }}" class="icon-btn">
         ←
     </a>
-
 </header>
 
-
 <div class="page">
-
     <div class="card">
-
-        <strong>
-            {{ application.service_type }}
-        </strong>
-
-        <div class="muted"
-             style="margin-top:6px;">
-
-            {{ application.full_name }}
-            ·
-            {{ application.phone }}
-
+        <strong>{{ application.service_type }}</strong>
+        <div class="muted" style="margin-top:6px;">
+            {{ application.full_name }} · {{ application.phone }}
         </div>
-
     </div>
-
 
     <div class="chat-box">
-
         {% for message in messages %}
-
-            <div
-                class="
-                    chat-message
-                    {{ message.sender }}
-                "
-            >
-
+            <div class="chat-message {{ message.sender }}">
                 {{ message.message }}
-
                 <span class="chat-time">
-                    {{ message.created_at }}
+                    {{ message.created_at.strftime('%d/%m/%Y %H:%M') if message.created_at else message.created_at }}
                 </span>
-
             </div>
-
         {% endfor %}
-
     </div>
 
-
-    <form
-        method="POST"
-        class="chat-form"
-    >
-
+    <form method="POST" class="chat-form">
         <input
             type="text"
             name="message"
-            placeholder="Mjibu mteja..."
+            placeholder="Andika ujumbe..."
             autocomplete="off"
             required
         >
-
         <button type="submit">
-            ➤
+            Tuma
         </button>
-
     </form>
-
 </div>
-
 {% endblock %}

@@ -5,83 +5,38 @@
 {% block content %}
 
 <header class="topbar">
-
     <div>
-
-        <div class="brand">
-            {{ service.network }}
-        </div>
-
-        <div class="muted">
-            {{ service.title }}
-        </div>
-
+        <div class="brand">{{ service.network }}</div>
+        <div class="muted">{{ service.title }}</div>
     </div>
-
-    <a
-        href="{{ url_for(
-            'agency_network',
-            network=service.network
-        ) }}"
-        class="icon-btn"
-    >
+    <a href="{{ url_for('agency_network', network=service.network) }}" class="icon-btn">
         ←
     </a>
-
 </header>
-
 
 <div class="page">
 
+    <!-- Service Info -->
     <div class="card">
-
-        <div style="font-size:36px;">
-            {{ service.icon }}
-        </div>
-
-        <div class="title">
-            {{ service.title }}
-        </div>
-
-        <p class="muted">
-            {{ service.description }}
-        </p>
-
+        <div class="title" style="font-size:18px;">{{ service.title }}</div>
+        <p class="muted" style="margin-top:6px;">{{ service.description }}</p>
     </div>
 
-
+    <!-- Warning -->
     <div class="info-box">
-
         <strong>Jambo muhimu:</strong><br>
-
-        Taarifa zako zitumike kwa ombi hili
-        tu. Usitume PIN, password, OTP au
-        taarifa za siri za akaunti zako.
-
+        Taarifa zako zitatumika kwa ombi hili tu.
+        Usitume PIN, password, OTP au taarifa za siri za akaunti zako.
     </div>
 
-
-    <form
-        method="POST"
-        action="{{ url_for(
-            'agency_apply',
-            service_id=service.id
-        ) }}"
-    >
-
-
+    <!-- Form -->
+    <form method="POST" action="{{ url_for('agency_apply', service_id=service.id) }}">
         <div class="card">
-
-            <div class="title"
-                 style="font-size:18px;">
+            <div class="title" style="font-size:17px; margin-bottom:4px;">
                 Taarifa zako
             </div>
 
-
-            <label class="form-label">
-                Jina kamili
-            </label>
-
+            <label class="form-label">Jina kamili</label>
             <input
                 class="input"
                 type="text"
@@ -90,11 +45,7 @@
                 required
             >
 
-
-            <label class="form-label">
-                Namba ya simu
-            </label>
-
+            <label class="form-label">Namba ya simu</label>
             <input
                 class="input"
                 type="tel"
@@ -103,44 +54,16 @@
                 required
             >
 
-
-            <label class="form-label">
-                Aina ya Kitambulisho
-            </label>
-
-            <select
-                class="input"
-                name="id_type"
-                required
-            >
-
-                <option value="">
-                    Chagua kitambulisho
-                </option>
-
-                <option value="NIDA">
-                    NIDA / NIN
-                </option>
-
-                <option value="Passport">
-                    Passport
-                </option>
-
-                <option value="Driving Licence">
-                    Driving Licence
-                </option>
-
-                <option value="Voter ID">
-                    Voter ID
-                </option>
-
+            <label class="form-label">Aina ya Kitambulisho</label>
+            <select class="input" name="id_type" required>
+                <option value="">Chagua kitambulisho</option>
+                <option value="NIDA">NIDA / NIN</option>
+                <option value="Passport">Passport</option>
+                <option value="Driving Licence">Driving Licence</option>
+                <option value="Voter ID">Voter ID</option>
             </select>
 
-
-            <label class="form-label">
-                Namba ya Kitambulisho
-            </label>
-
+            <label class="form-label">Namba ya Kitambulisho</label>
             <input
                 class="input"
                 type="text"
@@ -149,47 +72,17 @@
                 required
             >
 
-
-            <label class="form-label">
-                Aina ya huduma/laini
-            </label>
-
-            <select
-                class="input"
-                name="line_type"
-            >
-
-                <option value="">
-                    Chagua aina
-                </option>
-
-                <option value="Kawaida">
-                    Laini ya Kawaida
-                </option>
-
-                <option value="Uwakala">
-                    Laini ya Uwakala
-                </option>
-
-                <option value="Merchant">
-                    Lipa kwa Simu / Merchant
-                </option>
-
-                <option value="Biashara">
-                    Laini ya Biashara
-                </option>
-
-                <option value="Replacement">
-                    Replacement
-                </option>
-
+            <label class="form-label">Aina ya huduma / laini</label>
+            <select class="input" name="line_type">
+                <option value="">Chagua aina</option>
+                <option value="Kawaida">Laini ya Kawaida</option>
+                <option value="Uwakala">Laini ya Uwakala</option>
+                <option value="Merchant">Lipa kwa Simu / Merchant</option>
+                <option value="Biashara">Laini ya Biashara</option>
+                <option value="Replacement">Replacement</option>
             </select>
 
-
-            <label class="form-label">
-                Mkoa
-            </label>
-
+            <label class="form-label">Mkoa</label>
             <input
                 class="input"
                 type="text"
@@ -197,11 +90,7 @@
                 placeholder="Mfano: Mbeya"
             >
 
-
-            <label class="form-label">
-                Wilaya
-            </label>
-
+            <label class="form-label">Wilaya</label>
             <input
                 class="input"
                 type="text"
@@ -209,11 +98,7 @@
                 placeholder="Weka wilaya"
             >
 
-
-            <label class="form-label">
-                Kata / Eneo
-            </label>
-
+            <label class="form-label">Kata / Eneo</label>
             <input
                 class="input"
                 type="text"
@@ -221,28 +106,17 @@
                 placeholder="Weka kata au eneo"
             >
 
-
-            <label class="form-label">
-                Maelezo ya ziada
-            </label>
-
+            <label class="form-label">Maelezo ya ziada</label>
             <textarea
                 class="input"
                 name="description"
                 placeholder="Eleza huduma unayohitaji..."
             ></textarea>
 
-
-            <button
-                class="btn orange"
-                type="submit"
-                style="margin-top:16px;"
-            >
-                🚀 Tuma Ombi
+            <button class="btn orange" type="submit" style="margin-top:18px;">
+                Tuma Ombi
             </button>
-
         </div>
-
     </form>
 
 </div>

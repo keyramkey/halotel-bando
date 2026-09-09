@@ -1,342 +1,82 @@
 {% extends "base.html" %}
 
-{% block title %}Request Bundle{% endblock %}
+{% block title %}Agiza Bando{% endblock %}
 
 {% block content %}
 
-<style>
-    .order-head {
-        background: #151515;
-        color: white;
-        padding: 24px 18px;
-    }
+<header class="topbar">
+    <div>
+        <div class="brand">Nunua <span>Bundle</span></div>
+        <div class="muted">Chagua kifurushi & Lipa kwa Simu</div>
+    </div>
+    <a href="{{ url_for('home') }}" class="icon-btn">←</a>
+</header>
 
-    .order-head h1 {
-        font-size: 27px;
-        margin-bottom: 7px;
-    }
-
-    .order-head p {
-        color: #aaa;
-        font-size: 13px;
-    }
-
-    .order-page {
-        padding: 15px;
-    }
-
-    .phone-card {
-        background: white;
-        padding: 18px;
-        border-radius: 18px;
-        margin-bottom: 15px;
-    }
-
-    .phone-card label {
-        display: block;
-        font-size: 13px;
-        font-weight: bold;
-        margin-bottom: 8px;
-    }
-
-    .choices {
-        display: grid;
-        gap: 10px;
-    }
-
-    .choice {
-        background: white;
-        border: 2px solid transparent;
-        border-radius: 16px;
-        padding: 16px;
-        cursor: pointer;
-    }
-
-    .choice.selected {
-        border-color: #f56b00;
-    }
-
-    .choice-top {
-        display: flex;
-        justify-content: space-between;
-    }
-
-    .choice h3 {
-        font-size: 22px;
-        margin-top: 4px;
-    }
-
-    .choice-price {
-        font-weight: 900;
-    }
-
-    .custom {
-        background: white;
-        border-radius: 18px;
-        padding: 18px;
-        margin-top: 15px;
-    }
-
-    .custom label {
-        display: block;
-        font-size: 13px;
-        font-weight: bold;
-        margin-bottom: 7px;
-    }
-
-    .summary {
-        background: #151515;
-        color: white;
-        border-radius: 18px;
-        padding: 18px;
-        margin-top: 15px;
-    }
-
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 10px;
-        font-size: 13px;
-    }
-
-    .summary-row span {
-        color: #aaa;
-    }
-</style>
-
-
-<div class="order-head">
-
-    <h1>Request Bundle</h1>
-
-    <p>
-        Chagua kiasi unachotaka au andika MB/GB zako.
-    </p>
-
-</div>
-
-
-<div class="order-page">
-
-    <form method="POST" id="orderForm">
-
-        <div class="phone-card">
-
-            <label>Namba ya kuweka bundle</label>
-
-            <input
-                class="input"
-                name="phone"
-                id="phone"
-                required
-                placeholder="07XXXXXXXX"
-            >
-
-        </div>
-
-
+<div class="page">
+    <form method="POST" action="{{ url_for('order') }}">
         <div class="card">
+            <div class="title" style="font-size:18px; margin-bottom:12px;">Chagua Kifurushi</div>
 
-            <div style="font-weight:800;margin-bottom:12px;">
-                Suggested Bundles
-            </div>
+            <label class="form-label">Kifurushi / Offer</label>
+            <select class="input" id="bundleSelect" onchange="updateBundleDetails()" required>
+                <option value="" data-amount="" data-price="0">-- Chagua Kifurushi --</option>
+                
+                {% if offer_title %}
+                    <option value="offer" data-amount="{{ offer_title }} - {{ offer_amount }}" data-price="{{ offer_price }}" selected>
+                        🔥 {{ offer_title }} | {{ offer_amount }} — TSh {{ "{:,}".format(offer_price|int) }}
+                    </option>
+                {% endif %}
 
-            <div class="choices">
-
-                {% for bundle in bundles %}
-
-                <div
-                    class="choice"
-                    data-amount="{{ bundle.amount }}"
-                    data-price="{{ bundle.price }}"
-                >
-
-                    <div class="choice-top">
-
-                        <div>
-
-                            <div class="muted">
-                                {{ bundle.name }}
-                            </div>
-
-                            <h3>
-                                {{ bundle.amount }}
-                            </h3>
-
-                        </div>
-
-                        <div class="choice-price">
-                            TSh {{ "{:,}".format(bundle.price) }}
-                        </div>
-
-                    </div>
-
-                    <div class="muted" style="margin-top:8px;">
-                        {{ bundle.validity }}
-                    </div>
-
-                </div>
-
+                {% for b in bundles %}
+                    <option value="{{ b.id }}" 
+                            data-amount="{{ b.name }} - {{ b.amount }}" 
+                            data-price="{{ b.price }}"
+                            {% if selected_bundle and selected_bundle.id == b.id and not offer_title %}selected{% endif %}>
+                        {{ b.name }} | {{ b.amount }} — TSh {{ "{:,}".format(b.price) }} ({{ b.validity }})
+                    </option>
                 {% endfor %}
+            </select>
 
+            <input type="hidden" name="amount" id="amountInput" value="{% if offer_title %}{{ offer_title }} - {{ offer_amount }}{% elif selected_bundle %}{{ selected_bundle.name }} - {{ selected_bundle.amount }}{% endif %}">
+            <input type="hidden" name="price" id="priceInput" value="{% if offer_price %}{{ offer_price }}{% elif selected_bundle %}{{ selected_bundle.price }}{% else %}0{% endif %}">
+
+            <div style="margin-top:15px;" class="info-box">
+                <strong>Gharama:</strong> TSh <span id="displayPrice">{% if offer_price %}{{ "{:,}".format(offer_price|int) }}{% elif selected_bundle %}{{ "{:,}".format(selected_bundle.price) }}{% else %}0{% endif %}</span>
             </div>
-
         </div>
 
+        <div class="card" style="margin-top:15px;">
+            <div class="title" style="font-size:18px; margin-bottom:12px;">Taarifa za Malipo</div>
 
-        <div class="custom">
+            <label class="form-label">1. Namba ya Kulipia (M-Pesa / Tigo / Airtel n.k)</label>
+            <input class="input" type="tel" name="payment_phone" placeholder="07XXXXXXXX" value="{{ current_user.phone if current_user else '' }}" required>
+            <span class="muted" style="display:block; margin-top:4px;">Ujumbe wa PIN ya ClickPesa utatumwa kwenye namba hii.</span>
 
-            <label>
-                Au andika kiasi unachotaka
-            </label>
+            <label class="form-label">2. Namba ya Kuwekewa Bando (Halotel, Vodacom n.k)</label>
+            <input class="input" type="tel" name="target_phone" placeholder="062XXXXXXX" required>
 
-            <input
-                class="input"
-                id="customAmount"
-                placeholder="Mfano 750 MB au 12 GB"
-            >
+            <label class="form-label">Maelezo ya ziada (Hiari)</label>
+            <textarea class="input" name="note" placeholder="Weka maelezo ziada kama yapo..."></textarea>
 
-            <p class="muted" style="margin-top:8px;">
-                Bei ya kiasi maalum itathibitishwa na muuza bundle.
-            </p>
-
-        </div>
-
-
-        <div class="custom">
-
-            <label>
-                Ujumbe / Maelezo
-            </label>
-
-            <textarea
-                class="input"
-                name="note"
-                placeholder="Mfano: Naomba bundle liwekwe kwenye namba hii..."
-            ></textarea>
-
-        </div>
-
-
-        <input type="hidden" name="amount" id="amount">
-        <input type="hidden" name="price" id="price">
-
-
-        <div class="summary">
-
-            <div class="summary-row">
-                <span>Bundle</span>
-                <strong id="summaryAmount">Haijachaguliwa</strong>
-            </div>
-
-            <div class="summary-row">
-                <span>Bei</span>
-                <strong id="summaryPrice">Itathibitishwa</strong>
-            </div>
-
-        </div>
-
-
-
-        <div class="card" style="margin-top:15px;background:#fff7ed;border:1px solid #ffd8b5;">
-            <div style="font-weight:800;margin-bottom:8px;color:#744210;">
-                💳 Maelekezo ya Malipo
-            </div>
-            <p style="font-size:13px;line-height:1.6;color:#744210;">
-                Baada ya kutuma request, lipa kupitia <strong>Vodacom M-Pesa</strong>:<br>
-                <strong style="font-size:18px;">{{ PAYMENT_NUMBER }}</strong><br>
-                Jina: <strong>{{ PAYMENT_NAME }}</strong><br>
-                Baada ya malipo, tuma screenshot kwenye Chat au andika namba yako ya malipo kwenye maelezo.
-            </p>
-        </div>
-
-        <div style="margin-top:15px;">
-
-            <button
-                type="submit"
-                class="btn orange"
-            >
-                Tuma Request
+            <button class="btn orange" type="submit" style="margin-top:16px;">
+                💳 Lipa na Tuma Ombi
             </button>
-
         </div>
-
     </form>
-
 </div>
-
 
 <script>
+function updateBundleDetails() {
+    const select = document.getElementById("bundleSelect");
+    const selectedOption = select.options[select.selectedIndex];
+    
+    const amount = selectedOption.getAttribute("data-amount") || "";
+    const price = selectedOption.getAttribute("data-price") || "0";
 
-const choices = document.querySelectorAll(".choice");
-
-const amountInput = document.getElementById("amount");
-const priceInput = document.getElementById("price");
-
-const customAmount = document.getElementById("customAmount");
-
-const summaryAmount =
-    document.getElementById("summaryAmount");
-
-const summaryPrice =
-    document.getElementById("summaryPrice");
-
-
-choices.forEach(choice => {
-
-    choice.addEventListener("click", () => {
-
-        choices.forEach(c => {
-            c.classList.remove("selected");
-        });
-
-        choice.classList.add("selected");
-
-        const amount =
-            choice.dataset.amount;
-
-        const price =
-            choice.dataset.price;
-
-        amountInput.value = amount;
-        priceInput.value = price;
-
-        customAmount.value = "";
-
-        summaryAmount.textContent = amount;
-
-        summaryPrice.textContent =
-            "TSh " +
-            Number(price).toLocaleString();
-
-    });
-
-});
-
-
-customAmount.addEventListener("input", () => {
-
-    if (customAmount.value.trim()) {
-
-        choices.forEach(c => {
-            c.classList.remove("selected");
-        });
-
-        amountInput.value =
-            customAmount.value.trim();
-
-        priceInput.value = "0";
-
-        summaryAmount.textContent =
-            customAmount.value.trim();
-
-        summaryPrice.textContent =
-            "Itathibitishwa";
-
-    }
-
-});
-
+    document.getElementById("amountInput").value = amount;
+    document.getElementById("priceInput").value = price;
+    document.getElementById("displayPrice").innerText = Number(price).toLocaleString();
+}
 </script>
 
 {% endblock %}

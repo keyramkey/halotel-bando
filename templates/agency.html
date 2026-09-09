@@ -5,95 +5,57 @@
 {% block content %}
 
 <div class="agency-hero">
-
-    <div class="agency-hero-icon">
-        🏪
-    </div>
-
-    <h1>
-        Uwakala & Usajili
-    </h1>
-
+    <h1>Uwakala & Usajili</h1>
     <p>
         Chagua mtandao unaotaka kupata huduma.
-        Unaweza kuomba usajili wa laini,
-        huduma za wakala, merchant na huduma
-        za fedha kwa simu.
+        Unaweza kuomba usajili wa laini, huduma za wakala,
+        merchant na huduma za fedha kwa simu.
     </p>
-
 </div>
 
-
-<div class="section-title">
-    <h2>Chagua Mtandao</h2>
-</div>
-
-
-<div class="network-grid">
-
-{% for network in networks %}
-
-<a
-    href="{{ url_for(
-        'agency_network',
-        network=network.network
-    ) }}"
-    class="network-card"
->
-
-    <div class="network-icon">
-        📡
+<div class="page">
+    <div class="section-title" style="margin-bottom:14px;">
+        <h2 style="font-size:17px; font-weight:800;">Chagua Mtandao</h2>
     </div>
 
-    <h3>
-        {{ network.network }}
-    </h3>
+    <div class="network-grid">
+        {% for network in networks %}
+        <a href="{{ url_for('agency_network', network=network.network) }}" class="network-card">
+            <div class="network-icon">
+                {{ network.network[0] }}
+            </div>
+            <h3>{{ network.network }}</h3>
+            <p>Angalia huduma zinazopatikana</p>
+        </a>
+        {% endfor %}
+    </div>
 
-    <p>
-        Angalia huduma zinazopatikana
-    </p>
-
-</a>
-
-{% endfor %}
-
-</div>
-
-
-<div class="section-title">
-    <h2>Haraka</h2>
-</div>
-
-
-<div style="padding:0 14px;">
-
-    <a
-        href="{{ url_for('my_applications') }}"
-        class="main-service"
-    >
-
-        <div class="main-service-icon">
-            📋
+    <div style="margin-top:24px;">
+        <div class="section-title" style="margin-bottom:12px;">
+            <h2 style="font-size:17px; font-weight:800;">Haraka</h2>
         </div>
 
-        <div class="main-service-content">
-
-            <h3>
-                Maombi Yangu
-            </h3>
-
-            <p>
-                Angalia maombi na status zake.
-            </p>
-
-        </div>
-
-        <div class="main-arrow">
-            →
-        </div>
-
-    </a>
-
+        <a href="{{ url_for('my_applications') }}" class="card" style="display:flex; align-items:center; gap:14px; text-decoration:none;">
+            <div style="
+                width:48px;
+                height:48px;
+                border-radius:14px;
+                background:#fff1e7;
+                display:grid;
+                place-items:center;
+                font-weight:800;
+                color:#f56b00;
+                flex-shrink:0;
+            ">
+                MA
+            </div>
+            <div style="flex:1;">
+                <h3 style="font-size:15px; margin-bottom:3px;">Maombi Yangu</h3>
+                <p class="muted" style="font-size:12px;">Angalia maombi na status zake</p>
+            </div>
+            <div style="color:#f56b00; font-size:18px;">→</div>
+        </a>
+    </div>
 </div>
 
 {% endblock %}

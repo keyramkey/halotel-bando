@@ -2,22 +2,13 @@
 <html lang="sw">
 
 <head>
-
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        {% block title %}
-        MR. SULE DIGITAL SERVICES BUSINESS
-        {% endblock %}
+        {% block title %}MR. SULE DIGITAL SERVICES BUSINESS{% endblock %}
     </title>
 
     <style>
-
         * {
             box-sizing: border-box;
             margin: 0;
@@ -35,12 +26,7 @@
             text-decoration: none;
         }
 
-        button,
-        input,
-        textarea,
-        select {
-            font: inherit;
-        }
+        button, input, textarea, select { font: inherit; }
 
         .app {
             width: 100%;
@@ -65,9 +51,7 @@
             font-weight: 900;
         }
 
-        .brand span {
-            color: #f56b00;
-        }
+        .brand span { color: #f56b00; }
 
         .icon-btn {
             border: 0;
@@ -79,9 +63,7 @@
             place-items: center;
         }
 
-        .page {
-            padding: 16px;
-        }
+        .page { padding: 16px; }
 
         .card {
             background: #fff;
@@ -112,9 +94,7 @@
             margin-top: 7px;
         }
 
-        .input:focus {
-            border-color: #f56b00;
-        }
+        .input:focus { border-color: #f56b00; }
 
         textarea.input {
             height: 100px;
@@ -134,17 +114,9 @@
             padding: 10px 15px;
         }
 
-        .btn.orange {
-            background: #f56b00;
-        }
-
-        .btn.green {
-            background: #159447;
-        }
-
-        .btn.danger {
-            background: #d92d20;
-        }
+        .btn.orange { background: #f56b00; }
+        .btn.green { background: #159447; }
+        .btn.danger { background: #d92d20; }
 
         .flash {
             margin: 12px 16px;
@@ -154,13 +126,8 @@
             font-size: 13px;
         }
 
-        .flash.success {
-            border-left: 4px solid #169b45;
-        }
-
-        .flash.error {
-            border-left: 4px solid #d92d20;
-        }
+        .flash.success { border-left: 4px solid #169b45; }
+        .flash.error { border-left: 4px solid #d92d20; }
 
         .bottom-nav {
             position: fixed;
@@ -189,9 +156,7 @@
             margin-top: 4px;
         }
 
-        .nav-item.active {
-            color: #f56b00;
-        }
+        .nav-item.active { color: #f56b00; }
 
         .network-grid {
             display: grid;
@@ -232,17 +197,10 @@
             padding: 23px;
             border-radius: 22px;
             color: white;
-            background:
-                linear-gradient(
-                    135deg,
-                    #111,
-                    #2d2d2d
-                );
+            background: linear-gradient(135deg, #111, #2d2d2d);
         }
 
-        .agency-hero-icon {
-            font-size: 43px;
-        }
+        .agency-hero-icon { font-size: 43px; }
 
         .agency-hero h1 {
             font-size: 27px;
@@ -282,9 +240,7 @@
             flex-shrink: 0;
         }
 
-        .service-info {
-            flex: 1;
-        }
+        .service-info { flex: 1; }
 
         .service-info h3 {
             font-size: 15px;
@@ -317,25 +273,10 @@
             font-weight: bold;
         }
 
-        .status.pending {
-            background: #fff4d6;
-            color: #996b00;
-        }
-
-        .status.processing {
-            background: #e7f0ff;
-            color: #2761ad;
-        }
-
-        .status.completed {
-            background: #e4f8eb;
-            color: #168044;
-        }
-
-        .status.rejected {
-            background: #ffe7e7;
-            color: #b42318;
-        }
+        .status.pending { background: #fff4d6; color: #996b00; }
+        .status.processing { background: #e7f0ff; color: #2761ad; }
+        .status.completed { background: #e4f8eb; color: #168044; }
+        .status.rejected { background: #ffe7e7; color: #b42318; }
 
         .application-card {
             background: #fff;
@@ -441,97 +382,51 @@
             line-height: 1.5;
             margin-bottom: 15px;
         }
-
     </style>
-
 </head>
 
 <body>
-
 <div class="app">
 
     {% with messages = get_flashed_messages(with_categories=true) %}
-
         {% for category, message in messages %}
-
             <div class="flash {{ category }}">
                 {{ message }}
             </div>
-
         {% endfor %}
-
     {% endwith %}
 
-
     {% block content %}
-
     {% endblock %}
 
-
     <nav class="bottom-nav">
-
-        <a
-            href="{{ url_for('home') }}"
-            class="nav-item"
-        >
-            🏠
-            <small>Home</small>
+        <a href="{{ url_for('home') }}" class="nav-item">
+            🏠<small>Home</small>
         </a>
 
-
-        <a
-            href="{{ url_for('order') }}"
-            class="nav-item"
-        >
-            📦
-            <small>Bando</small>
+        <a href="{{ url_for('order') }}" class="nav-item">
+            📦<small>Bando</small>
         </a>
 
-
-        <a
-            href="{{ url_for('agency') }}"
-            class="nav-item"
-        >
-            🏪
-            <small>Uwakala</small>
+        <a href="{{ url_for('agency') }}" class="nav-item">
+            🏪<small>Uwakala</small>
         </a>
-
 
         {% if current_user %}
-
-            <a
-                href="{{ url_for('chat') }}"
-                class="nav-item"
-            >
-                💬
-                <small>Chat</small>
+            <a href="{{ url_for('chat') }}" class="nav-item">
+                💬<small>Chat</small>
             </a>
 
-
-            <a
-                href="{{ url_for('profile') }}"
-                class="nav-item"
-            >
-                👤
-                <small>Profile</small>
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                👤<small>Profile</small>
             </a>
-
         {% else %}
-
-            <a
-                href="{{ url_for('login') }}"
-                class="nav-item"
-            >
-                🔐
-                <small>Login</small>
+            <a href="{{ url_for('login') }}" class="nav-item">
+                🔐<small>Login</small>
             </a>
-
         {% endif %}
-
     </nav>
 
 </div>
-
 </body>
-
 </html>

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MR. SULE DIGITAL SERVICES{% endblock %}</title>
+    <!-- Font Awesome CDN kwa ajili ya Icons za kisasa kabisa -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
@@ -11,10 +13,11 @@
             padding: 0;
         }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             background: #f4f5f7;
             color: #161616;
             line-height: 1.4;
+            -webkit-tap-highlight-color: transparent;
         }
         a {
             color: inherit;
@@ -70,6 +73,7 @@
             padding: 18px;
             margin-bottom: 14px;
             border: 1px solid #eee;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
         }
         .title {
             font-size: 22px;
@@ -89,10 +93,11 @@
             outline: none;
             background: #fff;
             margin-top: 7px;
-            transition: border-color 0.2s;
+            transition: all 0.2s;
         }
         .input:focus {
             border-color: #f56b00;
+            box-shadow: 0 0 0 3px rgba(245, 107, 0, 0.15);
         }
         textarea.input {
             height: 100px;
@@ -109,14 +114,16 @@
             font-weight: 800;
             cursor: pointer;
             padding: 10px 15px;
-            transition: opacity 0.2s;
+            transition: opacity 0.2s, transform 0.1s;
         }
         .btn:active {
             opacity: 0.85;
+            transform: scale(0.98);
         }
         .btn.orange { background: #f56b00; }
         .btn.green { background: #159447; }
         .btn.danger { background: #d92d20; }
+        
         .flash {
             margin: 12px 16px;
             padding: 13px 15px;
@@ -124,232 +131,87 @@
             background: #fff;
             font-size: 13px;
             border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
         }
         .flash.success {
             border-left: 4px solid #169b45;
             background: #f0fdf4;
+            color: #14532d;
         }
-        .flash.error {
+        .flash.error, .flash.danger {
             border-left: 4px solid #d92d20;
             background: #fef2f2;
+            color: #7f1d1d;
+        }
+        .flash.warning {
+            border-left: 4px solid #f59e0b;
+            background: #fffbeb;
+            color: #78350f;
         }
 
-        /* ==================== BOTTOM NAV ==================== */
+        /* ==================== BOTTOM NAVIGATION (KIMODERN) ==================== */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
             width: min(520px, 100%);
-            height: 68px;
-            background: #ffffff;
-            border-top: 1px solid #eee;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            z-index: 100;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
+            z-index: 1000;
+            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.05);
+            padding: 0 6px;
         }
         .nav-item {
             text-align: center;
-            color: #777;
+            color: #8e8e93;
             font-size: 11px;
             font-weight: 600;
             flex: 1;
-            padding: 8px 2px;
-            transition: color 0.2s;
+            padding: 8px 0;
+            transition: all 0.25s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             gap: 4px;
+            border-radius: 12px;
+            position: relative;
         }
+        .nav-item i {
+            font-size: 20px;
+            transition: transform 0.2s ease, color 0.2s ease;
+        }
+        
+        /* Active State Enhancements */
         .nav-item.active {
             color: #f56b00;
-            font-weight: 800;
+            font-weight: 700;
         }
-
-        /* ==================== CSS ICONS ==================== */
-        .nav-icon {
-            width: 22px;
-            height: 22px;
-            position: relative;
-            display: inline-block;
+        .nav-item.active i {
+            transform: translateY(-2px) scale(1.1);
+            color: #f56b00;
         }
-
-        /* Home Icon */
-        .icon-home {
-            width: 18px;
-            height: 14px;
-            border: 2px solid currentColor;
-            border-top: 0;
-            border-radius: 0 0 3px 3px;
-            position: relative;
-            margin-top: 6px;
-        }
-        .icon-home::before {
-            content: "";
+        .nav-item.active::after {
+            content: '';
             position: absolute;
-            width: 12px;
-            height: 12px;
-            border-left: 2px solid currentColor;
-            border-top: 2px solid currentColor;
-            transform: rotate(45deg);
-            top: -8px;
-            left: 1px;
-        }
-
-        /* Bando / Package Icon */
-        .icon-bando {
-            width: 16px;
-            height: 14px;
-            border: 2px solid currentColor;
-            border-radius: 2px;
-            position: relative;
-            margin-top: 4px;
-        }
-        .icon-bando::before {
-            content: "";
-            position: absolute;
-            width: 8px;
-            height: 2px;
-            background: currentColor;
-            top: 3px;
-            left: 2px;
-        }
-        .icon-bando::after {
-            content: "";
-            position: absolute;
-            width: 6px;
-            height: 2px;
-            background: currentColor;
-            top: 7px;
-            left: 2px;
-        }
-
-        /* Uwakala / Store Icon */
-        .icon-uwakala {
-            width: 18px;
-            height: 14px;
-            border: 2px solid currentColor;
-            border-top: 0;
-            border-radius: 0 0 2px 2px;
-            position: relative;
-            margin-top: 6px;
-        }
-        .icon-uwakala::before {
-            content: "";
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 9px solid transparent;
-            border-right: 9px solid transparent;
-            border-bottom: 7px solid currentColor;
-            top: -9px;
-            left: -2px;
-        }
-
-        /* Chat Icon */
-        .icon-chat {
-            width: 18px;
-            height: 14px;
-            border: 2px solid currentColor;
-            border-radius: 10px 10px 10px 2px;
-            position: relative;
-            margin-top: 4px;
-        }
-        .icon-chat::before {
-            content: "";
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: currentColor;
-            border-radius: 50%;
-            top: 3px;
-            left: 3px;
-        }
-        .icon-chat::after {
-            content: "";
-            position: absolute;
-            width: 4px;
-            height: 4px;
-            background: currentColor;
-            border-radius: 50%;
-            top: 3px;
-            right: 3px;
-        }
-
-        /* Profile Icon */
-        .icon-profile {
-            width: 14px;
-            height: 14px;
-            border: 2px solid currentColor;
-            border-radius: 50%;
-            position: relative;
-            margin-top: 2px;
-        }
-        .icon-profile::after {
-            content: "";
-            position: absolute;
-            width: 18px;
-            height: 9px;
-            border: 2px solid currentColor;
-            border-bottom: 0;
-            border-radius: 18px 18px 0 0;
-            bottom: -11px;
-            left: -4px;
-        }
-
-        /* Login Icon */
-        .icon-login {
-            width: 14px;
-            height: 16px;
-            border: 2px solid currentColor;
-            border-radius: 3px;
-            position: relative;
-            margin-top: 3px;
-        }
-        .icon-login::before {
-            content: "";
-            position: absolute;
-            width: 6px;
-            height: 2px;
-            background: currentColor;
-            top: 5px;
-            left: 2px;
-        }
-        .icon-login::after {
-            content: "";
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-top: 4px solid transparent;
-            border-bottom: 4px solid transparent;
-            border-left: 5px solid currentColor;
-            top: 3px;
-            right: -1px;
-        }
-
-        /* Admin Icon */
-        .icon-admin {
-            width: 16px;
-            height: 16px;
-            border: 2px solid currentColor;
-            border-radius: 3px;
-            position: relative;
-            margin-top: 3px;
-        }
-        .icon-admin::before {
-            content: "";
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            border: 2px solid currentColor;
-            border-radius: 50%;
             top: 2px;
-            left: 3px;
+            width: 16px;
+            height: 3px;
+            background: #f56b00;
+            border-radius: 10px;
+        }
+        .nav-item:active {
+            transform: scale(0.92);
         }
 
-        /* Common styles */
+        /* Common Layouts */
         .network-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -418,8 +280,7 @@
             background: #fff1e7;
             display: grid;
             place-items: center;
-            font-size: 16px;
-            font-weight: 800;
+            font-size: 18px;
             color: #f56b00;
             flex-shrink: 0;
         }
@@ -434,18 +295,6 @@
             font-size: 11px;
             color: #777;
             line-height: 1.4;
-        }
-        .arrow {
-            font-size: 18px;
-            color: #f56b00;
-            font-weight: 700;
-        }
-        .form-label {
-            display: block;
-            margin-top: 14px;
-            font-size: 12px;
-            font-weight: 700;
-            color: #333;
         }
         .status {
             display: inline-block;
@@ -464,21 +313,6 @@
             padding: 17px;
             margin-bottom: 12px;
             border: 1px solid #eee;
-        }
-        .application-top {
-            display: flex;
-            justify-content: space-between;
-            gap: 10px;
-            align-items: flex-start;
-        }
-        .application-code {
-            font-size: 13px;
-            font-weight: 900;
-        }
-        .application-network {
-            margin-top: 6px;
-            font-size: 12px;
-            color: #777;
         }
         .chat-box {
             background: #eee;
@@ -507,20 +341,6 @@
             margin-right: auto;
             background: white;
             border-bottom-left-radius: 4px;
-        }
-        .chat-message.system {
-            margin: 10px auto;
-            background: #ddd;
-            color: #555;
-            text-align: center;
-            font-size: 11px;
-            max-width: 90%;
-        }
-        .chat-time {
-            display: block;
-            margin-top: 4px;
-            opacity: 0.65;
-            font-size: 9px;
         }
         .chat-form {
             display: flex;
@@ -577,42 +397,42 @@
     <!-- ==================== BOTTOM NAVIGATION ==================== -->
     <nav class="bottom-nav">
 
-        {% if not current_user %}
+        {% if not current_user or not current_user.is_authenticated %}
             <a href="{{ url_for('home') }}" class="nav-item {% if request.endpoint == 'home' %}active{% endif %}">
-                <span class="nav-icon"><span class="icon-home"></span></span>
-                Home
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
             </a>
             <a href="{{ url_for('login') }}" class="nav-item {% if request.endpoint in ['login', 'register'] %}active{% endif %}">
-                <span class="nav-icon"><span class="icon-login"></span></span>
-                Login
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>Ingia</span>
             </a>
 
         {% else %}
             <a href="{{ url_for('home') }}" class="nav-item {% if request.endpoint == 'home' %}active{% endif %}">
-                <span class="nav-icon"><span class="icon-home"></span></span>
-                Home
+                <i class="fa-solid fa-house"></i>
+                <span>Home</span>
             </a>
             <a href="{{ url_for('order') }}" class="nav-item {% if request.endpoint == 'order' %}active{% endif %}">
-                <span class="nav-icon"><span class="icon-bando"></span></span>
-                Bando
+                <i class="fa-solid fa-wifi"></i>
+                <span>Bando</span>
             </a>
             <a href="{{ url_for('agency') }}" class="nav-item {% if request.endpoint and 'agency' in request.endpoint %}active{% endif %}">
-                <span class="nav-icon"><span class="icon-uwakala"></span></span>
-                Uwakala
+                <i class="fa-solid fa-store"></i>
+                <span>Uwakala</span>
             </a>
             <a href="{{ url_for('chat') }}" class="nav-item {% if request.endpoint == 'chat' %}active{% endif %}">
-                <span class="nav-icon"><span class="icon-chat"></span></span>
-                Chat
+                <i class="fa-solid fa-comments"></i>
+                <span>Chat</span>
             </a>
             <a href="{{ url_for('profile') }}" class="nav-item {% if request.endpoint in ['profile', 'settings', 'my_applications'] %}active{% endif %}">
-                <span class="nav-icon"><span class="icon-profile"></span></span>
-                Profile
+                <i class="fa-solid fa-user"></i>
+                <span>Profile</span>
             </a>
 
             {% if current_user.is_admin %}
                 <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                    <span class="nav-icon"><span class="icon-admin"></span></span>
-                    Admin
+                    <i class="fa-solid fa-user-shield"></i>
+                    <span>Admin</span>
                 </a>
             {% endif %}
         {% endif %}

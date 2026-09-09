@@ -4,10 +4,9 @@ import time
 import requests
 from datetime import datetime
 from functools import wraps
-
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    flash, session, jsonify, send_from_directory
+    flash, session, jsonify
 )
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -18,18 +17,17 @@ from werkzeug.utils import secure_filename
 # ---------------------------------------------------------------------------
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "kijiji-tanzania-secret-key-change-me")
+
 basedir = os.path.abspath(os.path.dirname(__file__))
 
-# 1. Mfumo utachukua DATABASE_URL ya PostgreSQL mtandaoni (k.m. Render/Railway)
-# 2. Kama upo kwenye kompyuta yako (Local), itatumia SQLite
+# Database - Railway PostgreSQL
 database_url = os.environ.get("DATABASE_URL")
-
 if database_url:
-    # Render hutoa URL inayoanza na 'postgres://', inabidi ibadilishwe kuwa 'postgresql://'
     if database_url.startswith("postgres://"):
         database_url = database_url.replace("postgres://", "postgresql://", 1)
     app.config["SQLALCHEMY_DATABASE_URI"] = database_url
 else:
+    # Local development
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "instance", "kijiji.db")
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -41,12 +39,12 @@ os.makedirs(os.path.join(basedir, "instance"), exist_ok=True)
 
 db = SQLAlchemy(app)
 
-# Manual payment fallback
+# Manual payment
 PAYMENT_NUMBER = os.environ.get("PAYMENT_NUMBER", "37912416")
 PAYMENT_NAME = os.environ.get("PAYMENT_NAME", "Matondo Maduhu")
 PAYMENT_NETWORK = os.environ.get("PAYMENT_NETWORK", "Vodacom")
 
-# ClickPesa credentials
+# ClickPesa
 CLICKPESA_CLIENT_ID = os.environ.get("CLICKPESA_CLIENT_ID")
 CLICKPESA_API_KEY = os.environ.get("CLICKPESA_API_KEY")
 
@@ -61,7 +59,6 @@ class User(db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     orders = db.relationship("Order", backref="user", lazy=True)
     messages = db.relationship("Message", backref="user", lazy=True, foreign_keys="Message.user_id")
     applications = db.relationship("Application", backref="user", lazy=True)
@@ -242,34 +239,27 @@ def normalize_phone(phone):
 def register():
     if get_current_user():
         return redirect(url_for("home"))
-
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         phone = request.form.get("phone", "").strip()
         email = request.form.get("email", "").strip() or None
         password = request.form.get("password", "")
-
         if not username or not phone or not password:
             flash("Jaza taarifa zote muhimu.", "error")
             return redirect(url_for("register"))
-
         if User.query.filter((User.username == username) | (User.phone == phone)).first():
             flash("Username au namba ya simu tayari inatumika.", "error")
             return redirect(url_for("register"))
-
         if email and User.query.filter_by(email=email).first():
             flash("Email tayari inatumika.", "error")
             return redirect(url_for("register"))
-
         user = User(username=username, phone=phone, email=email)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
-
         session["user_id"] = user.id
         flash("Akaunti imeundwa. Karibu!", "success")
         return redirect(url_for("home"))
-
     return render_template("register.html")
 
 
@@ -277,25 +267,20 @@ def register():
 def login():
     if get_current_user():
         return redirect(url_for("home"))
-
     if request.method == "POST":
         identity = request.form.get("identity", "").strip()
         password = request.form.get("password", "")
-
         user = User.query.filter(
             (User.username == identity)
             | (User.phone == identity)
             | (User.email == identity)
         ).first()
-
         if user and user.check_password(password):
             session["user_id"] = user.id
             flash("Umefanikiwa kuingia.", "success")
             return redirect(url_for("home"))
-
         flash("Username/namba/email au password si sahihi.", "error")
         return redirect(url_for("login"))
-
     return render_template("login.html")
 
 
@@ -331,24 +316,20 @@ def settings():
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         phone = request.form.get("phone", "").strip()
-
         if not username or not phone:
             flash("Jaza taarifa zote.", "error")
             return redirect(url_for("settings"))
-
         existing = User.query.filter(
             ((User.username == username) | (User.phone == phone)) & (User.id != user.id)
         ).first()
         if existing:
             flash("Username au namba tayari inatumika.", "error")
             return redirect(url_for("settings"))
-
         user.username = username
         user.phone = phone
         db.session.commit()
         flash("Taarifa zimehifadhiwa.", "success")
         return redirect(url_for("settings"))
-
     return render_template("settings.html")
 
 
@@ -360,11 +341,8 @@ def settings():
 def order():
     user = get_current_user()
     bundles = Bundle.query.filter_by(is_active=True).all()
-
     selected_bundle_id = request.args.get("bundle_id")
     selected_bundle = Bundle.query.get(selected_bundle_id) if selected_bundle_id else None
-
-    # Kama offer imechaguliwa kutoka homepage
     offer_title = request.args.get("offer_title")
     offer_price = request.args.get("offer_price")
     offer_amount = request.args.get("offer_amount")
@@ -375,7 +353,6 @@ def order():
         amount = request.form.get("amount", "").strip()
         price_raw = request.form.get("price", "0").strip()
         note = request.form.get("note", "").strip()
-
         try:
             price = int(price_raw) if price_raw else 0
         except ValueError:
@@ -386,7 +363,6 @@ def order():
             return redirect(url_for("order"))
 
         order_note = f"Namba ya Kuwekewa: {target_phone}" + (f" | Maelezo: {note}" if note else "")
-
         new_order = Order(
             user_id=user.id,
             phone=target_phone,
@@ -398,7 +374,6 @@ def order():
         db.session.add(new_order)
         db.session.commit()
 
-        # ONLINE PAYMENT (ClickPesa USSD Push)
         if CLICKPESA_CLIENT_ID and CLICKPESA_API_KEY and price > 0:
             try:
                 token = get_clickpesa_token()
@@ -415,7 +390,6 @@ def order():
                 }
                 response = requests.post(url, json=payload, headers=headers, timeout=20)
                 data = response.json()
-
                 if response.status_code in [200, 201]:
                     flash("Ombi la malipo limeshushwa! Angalia simu yako na uingize PIN.", "success")
                     return redirect(url_for("asante"))
@@ -429,12 +403,11 @@ def order():
                 "Baada ya malipo, wasiliana na chat.",
                 "success",
             )
-
         return redirect(url_for("profile"))
 
     return render_template(
-        "order.html", 
-        bundles=bundles, 
+        "order.html",
+        bundles=bundles,
         selected_bundle=selected_bundle,
         offer_title=offer_title,
         offer_price=offer_price,
@@ -447,14 +420,12 @@ def order():
 def update_order_status(order_id):
     order_item = Order.query.get_or_404(order_id)
     status = request.form.get("status", "pending")
-
     if status in ("pending", "completed", "rejected"):
         order_item.status = status
         db.session.commit()
         flash(f"Status ya Oda #{order_item.id} imebadilishwa kuwa '{status}'.", "success")
     else:
         flash("Status si sahihi.", "error")
-
     return redirect(url_for("dashboard"))
 
 
@@ -505,16 +476,13 @@ def send_message():
     user = get_current_user()
     text = request.form.get("message", "").strip()
     image_file = request.files.get("image")
-
     image_name = None
     if image_file and image_file.filename and allowed_file(image_file.filename):
         filename = secure_filename(f"{user.id}_{secrets.token_hex(4)}_{image_file.filename}")
         image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
         image_name = filename
-
     if not text and not image_name:
         return jsonify({"success": False, "error": "Ujumbe tupu"})
-
     msg = Message(
         user_id=user.id,
         sender="customer",
@@ -540,16 +508,13 @@ def admin_send_message(user_id):
     user = User.query.get_or_404(user_id)
     text = request.form.get("message", "").strip()
     image_file = request.files.get("image")
-
     image_name = None
     if image_file and image_file.filename and allowed_file(image_file.filename):
         filename = secure_filename(f"admin_{user.id}_{secrets.token_hex(4)}_{image_file.filename}")
         image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], filename))
         image_name = filename
-
     if not text and not image_name:
         return jsonify({"success": False})
-
     msg = Message(
         user_id=user.id,
         sender="admin",
@@ -579,7 +544,6 @@ def agency_network(network):
 def agency_apply(service_id):
     service = AgencyService.query.get_or_404(service_id)
     user = get_current_user()
-
     if request.method == "POST":
         full_name = request.form.get("full_name", "").strip()
         phone = request.form.get("phone", "").strip()
@@ -590,15 +554,12 @@ def agency_apply(service_id):
         district = request.form.get("district", "").strip()
         ward = request.form.get("ward", "").strip()
         description = request.form.get("description", "").strip()
-
         if not full_name or not phone or not id_type or not id_number:
             flash("Jaza taarifa muhimu zote.", "error")
             return redirect(url_for("agency_apply", service_id=service.id))
-
         code = generate_application_code()
         while Application.query.filter_by(application_code=code).first():
             code = generate_application_code()
-
         app_obj = Application(
             application_code=code,
             user_id=user.id,
@@ -618,7 +579,6 @@ def agency_apply(service_id):
         )
         db.session.add(app_obj)
         db.session.flush()
-
         sys_msg = AgencyMessage(
             application_id=app_obj.id,
             sender="system",
@@ -626,10 +586,8 @@ def agency_apply(service_id):
         )
         db.session.add(sys_msg)
         db.session.commit()
-
         flash(f"Ombi limetumwa! Code: {code}. Unaweza kufuatilia kwenye Maombi Yangu.", "success")
         return redirect(url_for("my_applications"))
-
     return render_template("line_registration.html", service=service)
 
 
@@ -650,16 +608,13 @@ def my_applications():
 def application_detail(application_id):
     user = get_current_user()
     application = Application.query.get_or_404(application_id)
-
     if application.user_id != user.id and not user.is_admin:
         flash("Huna ruhusa.", "error")
         return redirect(url_for("my_applications"))
-
     if request.method == "POST":
         if application.status in ("completed", "rejected"):
             flash("Ombi hili limefungwa.", "error")
             return redirect(url_for("application_detail", application_id=application.id))
-
         text = request.form.get("message", "").strip()
         if text:
             msg = AgencyMessage(
@@ -671,7 +626,6 @@ def application_detail(application_id):
             db.session.commit()
             flash("Ujumbe umetumwa.", "success")
         return redirect(url_for("application_detail", application_id=application.id))
-
     messages = (
         AgencyMessage.query.filter_by(application_id=application.id)
         .order_by(AgencyMessage.created_at.asc())
@@ -690,10 +644,8 @@ def dashboard():
     users_count = User.query.count()
     pending_count = Order.query.filter_by(status="pending").count()
     agency_pending = Application.query.filter_by(status="pending").count()
-    
     orders = Order.query.order_by(Order.created_at.desc()).limit(50).all()
     applications = Application.query.order_by(Application.created_at.desc()).limit(50).all()
-    
     return render_template(
         "dashboard.html",
         users_count=users_count,
@@ -710,22 +662,18 @@ def update_agency_status(application_id):
     application = Application.query.get_or_404(application_id)
     status = request.form.get("status", "pending")
     note = request.form.get("note", "").strip()
-
     if status not in ("pending", "processing", "completed", "rejected"):
         flash("Status si sahihi.", "error")
         return redirect(url_for("dashboard"))
-
     application.status = status
     application.admin_note = note
     db.session.commit()
-
     db.session.add(AgencyMessage(
         application_id=application.id,
         sender="system",
         message=f"Status: {status}" + (f" — {note}" if note else ""),
     ))
     db.session.commit()
-
     flash("Status imehifadhiwa.", "success")
     return redirect(url_for("dashboard"))
 
@@ -735,7 +683,6 @@ def update_agency_status(application_id):
 def admin_agency_chat(application_id):
     application = Application.query.get_or_404(application_id)
     application.username = application.user.username if application.user else "—"
-
     if request.method == "POST":
         text = request.form.get("message", "").strip()
         if text:
@@ -748,7 +695,6 @@ def admin_agency_chat(application_id):
             db.session.commit()
             flash("Ujumbe umetumwa.", "success")
         return redirect(url_for("admin_agency_chat", application_id=application.id))
-
     messages = (
         AgencyMessage.query.filter_by(application_id=application.id)
         .order_by(AgencyMessage.created_at.asc())
@@ -829,7 +775,6 @@ def seed_data():
             ("🏪", "Uwakala", "Huduma za uwakala TTCL"),
         ],
     }
-
     for net_name, services in networks_data.items():
         net = Network(network=net_name)
         db.session.add(net)

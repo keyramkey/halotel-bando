@@ -5,158 +5,82 @@
 {% block content %}
 
 <header class="topbar">
-
     <div>
-
-        <div class="brand">
-            {{ application.application_code }}
-        </div>
-
-        <div class="muted">
-            {{ application.network }}
-        </div>
-
+        <div class="brand">{{ application.application_code }}</div>
+        <div class="muted">{{ application.network }}</div>
     </div>
-
-    <a
-        href="{{ url_for('my_applications') }}"
-        class="icon-btn"
-    >
-        ←
-    </a>
-
+    <a href="{{ url_for('my_applications') }}" class="icon-btn">←</a>
 </header>
-
 
 <div class="page">
 
+    <!-- Status Card -->
     <div class="card">
-
-        <div style="
-            display:flex;
-            justify-content:space-between;
-            align-items:center;
-            gap:10px;
-        ">
-
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
             <div>
-
-                <div class="muted">
-                    Huduma
+                <div class="muted" style="font-size:12px;">Huduma</div>
+                <strong style="font-size:15px;">{{ application.service_type }}</strong>
+                <div class="muted" style="margin-top:6px; font-size:13px;">
+                    {{ application.full_name }} · {{ application.phone }}
                 </div>
-
-                <strong>
-                    {{ application.service_type }}
-                </strong>
-
             </div>
-
 
             {% if application.status == "pending" %}
-
-                <span class="status pending">
-                    Inasubiri
-                </span>
-
+                <span class="status pending">Inasubiri</span>
             {% elif application.status == "processing" %}
-
-                <span class="status processing">
-                    Inachakatwa
-                </span>
-
+                <span class="status processing">Inachakatwa</span>
             {% elif application.status == "completed" %}
-
-                <span class="status completed">
-                    Imekamilika
-                </span>
-
+                <span class="status completed">Imekamilika</span>
             {% else %}
-
-                <span class="status rejected">
-                    Imekataliwa
-                </span>
-
+                <span class="status rejected">Imekataliwa</span>
             {% endif %}
-
         </div>
-
     </div>
 
-
+    <!-- Messages -->
     <div class="chat-box">
-
-        {% for message in messages %}
-
-            <div
-                class="
-                    chat-message
-                    {{ message.sender }}
-                "
-            >
-
-                {{ message.message }}
-
-                <span class="chat-time">
-                    {{ message.created_at }}
-                </span>
-
+        {% if messages %}
+            {% for message in messages %}
+                <div class="chat-message {{ message.sender }}">
+                    {{ message.message }}
+                    <span class="chat-time">
+                        {{ message.created_at.strftime('%d/%m/%Y %H:%M') if message.created_at else message.created_at }}
+                    </span>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div style="text-align:center; color:#999; padding:30px 10px; font-size:13px;">
+                Hakuna ujumbe bado.
             </div>
-
-        {% endfor %}
-
+        {% endif %}
     </div>
 
-
+    <!-- Admin Note -->
     {% if application.admin_note %}
-
     <div class="info-box">
-
-        <strong>
-            Maelezo kutoka kwa mhudumu:
-        </strong>
-
-        <br>
-
+        <strong>Maelezo kutoka kwa mhudumu:</strong><br>
         {{ application.admin_note }}
-
     </div>
-
     {% endif %}
 
-
-    {% if application.status != "completed" and
-          application.status != "rejected" %}
-
-    <form
-        method="POST"
-        class="chat-form"
-    >
-
-        <input
-            type="text"
-            name="message"
-            placeholder="Andika ujumbe..."
-            autocomplete="off"
-            required
-        >
-
-        <button type="submit">
-            ➤
-        </button>
-
-    </form>
-
+    <!-- Reply Form -->
+    {% if application.status not in ["completed", "rejected"] %}
+        <form method="POST" class="chat-form">
+            <input
+                type="text"
+                name="message"
+                placeholder="Andika ujumbe..."
+                autocomplete="off"
+                required
+            >
+            <button type="submit">Tuma</button>
+        </form>
     {% else %}
-
-    <div class="card">
-
-        <p class="muted">
-            Ombi hili limefungwa. Unaweza kuwasiliana
-            na huduma kwa ombi jipya.
-        </p>
-
-    </div>
-
+        <div class="card">
+            <p class="muted" style="font-size:13px;">
+                Ombi hili limefungwa. Unaweza kuwasiliana na huduma kwa ombi jipya.
+            </p>
+        </div>
     {% endif %}
 
 </div>

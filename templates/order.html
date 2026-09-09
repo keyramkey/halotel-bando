@@ -3,648 +3,421 @@
 {% block title %}Agiza Bando{% endblock %}
 
 {% block content %}
-
 <style>
-:root{
-    --orange:#ff6500;
-    --orange-dark:#e94b00;
-    --bg:#f5f5f5;
-    --white:#fff;
-    --text:#171717;
-    --muted:#888;
-    --border:#e7e7e7;
-    --radius:18px;
+:root {
+    --orange: #ff6500;
+    --orange-dark: #e94b00;
+    --bg: #f5f5f7;
+    --white: #fff;
+    --text: #171717;
+    --muted: #888;
+    --border: #e7e7e7;
+    --radius: 18px;
 }
 
-*{
-    box-sizing:border-box;
+.order-page {
+    min-height: 100vh;
+    background: var(--bg);
+    padding-bottom: 40px;
 }
 
-.order-page{
-    min-height:100vh;
-    background:var(--bg);
-    padding-bottom:35px;
+.order-header {
+    background: linear-gradient(135deg, #ff7800, #ed4d00);
+    color: #fff;
+    padding: 20px 16px;
+    border-radius: 0 0 24px 24px;
+}
+.header-inner {
+    max-width: 620px;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.header-title {
+    font-size: 18px;
+    font-weight: 800;
+}
+.header-sub {
+    margin-top: 3px;
+    font-size: 12px;
+    opacity: 0.8;
+}
+.back-btn {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.16);
+    color: #fff;
+    text-decoration: none;
+    font-size: 18px;
+    font-weight: 700;
 }
 
-/* =========================
-   HEADER
-========================= */
-
-.order-header{
-    background:linear-gradient(135deg,#ff7800,#ed4d00);
-    color:#fff;
-    padding:20px 16px;
-    border-radius:0 0 25px 25px;
+.order-container {
+    width: 100%;
+    max-width: 620px;
+    margin: auto;
+    padding: 16px;
 }
 
-.header-inner{
-    max-width:620px;
-    margin:auto;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
+.order-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
 }
 
-.header-title{
-    font-size:19px;
-    font-weight:800;
+.section-title {
+    margin-bottom: 14px;
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--text);
 }
 
-.header-sub{
-    margin-top:3px;
-    font-size:10px;
-    opacity:.75;
+/* Bundle Selector */
+.bundle-selector {
+    position: relative;
+}
+.bundle-selected {
+    width: 100%;
+    min-height: 56px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    text-align: left;
+}
+.bundle-selected.active {
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(255,101,0,0.08);
+}
+.selected-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+.selected-icon {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: #fff1e8;
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--orange);
+}
+.selected-name {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--text);
+}
+.selected-small {
+    margin-top: 2px;
+    font-size: 11px;
+    color: var(--muted);
+}
+.dropdown-arrow {
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #f6f6f6;
+    color: #777;
+    font-size: 12px;
+    transition: 0.2s;
+}
+.bundle-selected.active .dropdown-arrow {
+    transform: rotate(180deg);
+    color: var(--orange);
+    background: #fff0e8;
 }
 
-.back-btn{
-    width:40px;
-    height:40px;
-    display:grid;
-    place-items:center;
-    border-radius:13px;
-    background:rgba(255,255,255,.16);
-    color:#fff;
-    text-decoration:none;
-    font-size:20px;
+.bundle-options {
+    position: absolute;
+    z-index: 100;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    padding: 6px;
+    background: #fff;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+    max-height: 300px;
+    overflow-y: auto;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-6px);
+    transition: 0.18s;
+}
+.bundle-options.show {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
 }
 
-/* =========================
-   CONTAINER
-========================= */
-
-.order-container{
-    width:100%;
-    max-width:620px;
-    margin:auto;
-    padding:15px;
+.bundle-option {
+    width: 100%;
+    border: 0;
+    background: #fff;
+    padding: 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    text-align: left;
+}
+.bundle-option:hover {
+    background: #fff5ef;
+}
+.bundle-option + .bundle-option {
+    margin-top: 3px;
+}
+.option-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.option-icon {
+    width: 36px;
+    height: 36px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    background: #f5f5f5;
+    font-size: 12px;
+    font-weight: 800;
+    color: #555;
+}
+.special .option-icon {
+    background: #ffe8d8;
+    color: var(--orange);
+}
+.option-info {
+    flex: 1;
+    min-width: 0;
+}
+.option-info strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 800;
+    color: #171717;
+}
+.option-info span {
+    display: block;
+    margin-top: 2px;
+    font-size: 11px;
+    color: #999;
+}
+.option-price {
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--orange-dark);
+}
+.hot-badge {
+    display: inline-block;
+    margin-bottom: 6px;
+    padding: 3px 8px;
+    border-radius: 20px;
+    background: var(--orange);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
 }
 
-/* =========================
-   CARD
-========================= */
-
-.order-card{
-    background:#fff;
-    border:1px solid var(--border);
-    border-radius:var(--radius);
-    padding:17px;
-    margin-bottom:12px;
+.price-box {
+    margin-top: 14px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: #fff5ef;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.price-label {
+    font-size: 11px;
+    color: #999;
+}
+.price-value {
+    margin-top: 2px;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--orange-dark);
+}
+.price-currency {
+    font-size: 12px;
+    font-weight: 700;
+    color: #999;
 }
 
-/* =========================
-   SECTION TITLE
-========================= */
-
-.section-title{
-    margin-bottom:13px;
-    font-size:14px;
-    font-weight:800;
-    color:var(--text);
+.input-group {
+    margin-bottom: 12px;
+}
+.input-label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #555;
+}
+.input {
+    width: 100%;
+    min-height: 48px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    outline: none;
+    background: #fafafa;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+}
+.input:focus {
+    background: #fff;
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(255,101,0,0.07);
+}
+textarea.input {
+    min-height: 80px;
+    resize: vertical;
 }
 
-/* =========================
-   SELECTOR
-========================= */
-
-.bundle-selector{
-    position:relative;
+.submit-btn {
+    width: 100%;
+    min-height: 52px;
+    margin-top: 6px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff7800, #ed4d00);
+    color: #fff;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(237,77,0,0.18);
+    transition: 0.2s;
 }
-
-.bundle-selected{
-    width:100%;
-    min-height:58px;
-    padding:10px 12px;
-    border:1px solid var(--border);
-    border-radius:15px;
-    background:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    cursor:pointer;
-    text-align:left;
+.submit-btn:active {
+    transform: scale(0.98);
 }
-
-.bundle-selected.active{
-    border-color:var(--orange);
-    box-shadow:0 0 0 3px rgba(255,101,0,.08);
+.submit-btn.loading {
+    opacity: 0.75;
+    pointer-events: none;
 }
-
-.selected-left{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    min-width:0;
+.loading-spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    margin-right: 7px;
+    vertical-align: -2px;
+    border: 2px solid rgba(255,255,255,0.35);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
 }
-
-.selected-icon{
-    width:37px;
-    height:37px;
-    display:grid;
-    place-items:center;
-    border-radius:11px;
-    background:#fff1e8;
-    font-size:16px;
-}
-
-.selected-name{
-    font-size:12px;
-    font-weight:800;
-    color:var(--text);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-}
-
-.selected-small{
-    margin-top:2px;
-    font-size:9px;
-    color:var(--muted);
-}
-
-.dropdown-arrow{
-    width:28px;
-    height:28px;
-    display:grid;
-    place-items:center;
-    border-radius:50%;
-    background:#f6f6f6;
-    color:#777;
-    transition:.2s;
-}
-
-.bundle-selected.active .dropdown-arrow{
-    transform:rotate(180deg);
-    color:var(--orange);
-    background:#fff0e8;
-}
-
-/* =========================
-   OPTIONS
-========================= */
-
-.bundle-options{
-    position:absolute;
-    z-index:100;
-    top:calc(100% + 7px);
-    left:0;
-    right:0;
-
-    padding:6px;
-
-    background:#fff;
-    border:1px solid var(--border);
-    border-radius:16px;
-
-    box-shadow:0 15px 35px rgba(0,0,0,.12);
-
-    max-height:300px;
-    overflow-y:auto;
-
-    opacity:0;
-    visibility:hidden;
-    pointer-events:none;
-
-    transform:translateY(-5px);
-
-    transition:.18s;
-}
-
-.bundle-options.show{
-    opacity:1;
-    visibility:visible;
-    pointer-events:auto;
-    transform:translateY(0);
-}
-
-.bundle-option{
-    width:100%;
-    border:0;
-    background:#fff;
-    padding:11px;
-    border-radius:12px;
-    cursor:pointer;
-    text-align:left;
-}
-
-.bundle-option:hover{
-    background:#fff5ef;
-}
-
-.bundle-option + .bundle-option{
-    margin-top:3px;
-}
-
-.option-main{
-    display:flex;
-    align-items:center;
-    gap:10px;
-}
-
-.option-icon{
-    width:35px;
-    height:35px;
-    display:grid;
-    place-items:center;
-    border-radius:10px;
-    background:#f5f5f5;
-    font-size:15px;
-}
-
-.special .option-icon{
-    background:#ffe8d8;
-}
-
-.option-info{
-    flex:1;
-    min-width:0;
-}
-
-.option-info strong{
-    display:block;
-    font-size:12px;
-    font-weight:800;
-    color:#171717;
-}
-
-.option-info span{
-    display:block;
-    margin-top:2px;
-    font-size:9px;
-    color:#999;
-}
-
-.option-price{
-    font-size:11px;
-    font-weight:800;
-    color:var(--orange-dark);
-}
-
-.hot-badge{
-    display:inline-block;
-    margin-bottom:6px;
-    padding:3px 7px;
-    border-radius:20px;
-    background:var(--orange);
-    color:#fff;
-    font-size:7px;
-    font-weight:800;
-}
-
-/* =========================
-   PRICE
-========================= */
-
-.price-box{
-    margin-top:12px;
-    padding:13px 15px;
-    border-radius:14px;
-    background:#fff5ef;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-}
-
-.price-label{
-    font-size:9px;
-    color:#999;
-}
-
-.price-value{
-    margin-top:2px;
-    font-size:21px;
-    font-weight:900;
-    color:var(--orange-dark);
-}
-
-.price-currency{
-    font-size:10px;
-    font-weight:700;
-    color:#999;
-}
-
-/* =========================
-   INPUTS
-========================= */
-
-.input-group{
-    margin-bottom:11px;
-}
-
-.input-label{
-    display:block;
-    margin-bottom:6px;
-    font-size:10px;
-    font-weight:750;
-    color:#555;
-}
-
-.input{
-    width:100%;
-    min-height:47px;
-    padding:12px 13px;
-    border:1px solid var(--border);
-    border-radius:14px;
-    outline:none;
-    background:#fafafa;
-    color:var(--text);
-    font-family:inherit;
-    font-size:12px;
-}
-
-.input:focus{
-    background:#fff;
-    border-color:var(--orange);
-    box-shadow:0 0 0 3px rgba(255,101,0,.07);
-}
-
-textarea.input{
-    min-height:75px;
-    resize:vertical;
-}
-
-/* =========================
-   BUTTON
-========================= */
-
-.submit-btn{
-    width:100%;
-    min-height:50px;
-    margin-top:4px;
-
-    border:0;
-    border-radius:15px;
-
-    background:linear-gradient(135deg,#ff7800,#ed4d00);
-
-    color:#fff;
-    font-family:inherit;
-    font-size:12px;
-    font-weight:800;
-
-    cursor:pointer;
-
-    box-shadow:0 8px 20px rgba(237,77,0,.20);
-
-    transition:.2s;
-}
-
-.submit-btn:active{
-    transform:scale(.98);
-}
-
-.submit-btn.loading{
-    opacity:.75;
-    pointer-events:none;
-}
-
-.loading-spinner{
-    display:inline-block;
-    width:13px;
-    height:13px;
-    margin-right:6px;
-    vertical-align:-2px;
-
-    border:2px solid rgba(255,255,255,.35);
-    border-top-color:#fff;
-    border-radius:50%;
-
-    animation:spin .7s linear infinite;
-}
-
-@keyframes spin{
-    to{
-        transform:rotate(360deg);
-    }
-}
-
-/* =========================
-   MOBILE
-========================= */
-
-@media(max-width:420px){
-
-    .order-header{
-        padding:17px 13px;
-    }
-
-    .order-container{
-        padding:12px;
-    }
-
-    .order-card{
-        padding:14px;
-        border-radius:16px;
-    }
-
+@keyframes spin {
+    to { transform: rotate(360deg); }
 }
 </style>
 
-
 <div class="order-page">
-
     <!-- HEADER -->
     <header class="order-header">
-
         <div class="header-inner">
-
             <div>
-                <div class="header-title">
-                    📦 Agiza Bando
-                </div>
-
-                <div class="header-sub">
-                    Chagua kifurushi na lipa
-                </div>
+                <div class="header-title">Agiza Bando</div>
+                <div class="header-sub">Chagua kifurushi na lipa</div>
             </div>
-
-            <a
-                href="{{ url_for('home') }}"
-                class="back-btn"
-            >
-                ←
-            </a>
-
+            <a href="{{ url_for('home') }}" class="back-btn">←</a>
         </div>
-
     </header>
 
-
     <main class="order-container">
-
-        <form
-            method="POST"
-            action="{{ url_for('order') }}"
-            id="orderForm"
-        >
+        <form method="POST" action="{{ url_for('order') }}" id="orderForm">
 
             <!-- BUNDLE -->
             <section class="order-card">
+                <div class="section-title">Kifurushi</div>
 
-                <div class="section-title">
-                    Kifurushi
-                </div>
-
-                <div
-                    class="bundle-selector"
-                    id="bundleSelector"
-                >
-
-                    <button
-                        type="button"
-                        class="bundle-selected"
-                        id="bundleSelected"
-                    >
-
+                <div class="bundle-selector" id="bundleSelector">
+                    <button type="button" class="bundle-selected" id="bundleSelected">
                         <div class="selected-left">
-
-                            <div class="selected-icon">
-                                📶
-                            </div>
-
+                            <div class="selected-icon">GB</div>
                             <div>
-
-                                <div
-                                    class="selected-name"
-                                    id="selectedName"
-                                >
-                                    Chagua kifurushi
-                                </div>
-
-                                <div
-                                    class="selected-small"
-                                    id="selectedSmall"
-                                >
-                                    Gusa hapa kuchagua
-                                </div>
-
+                                <div class="selected-name" id="selectedName">Chagua kifurushi</div>
+                                <div class="selected-small" id="selectedSmall">Gusa hapa kuchagua</div>
                             </div>
-
                         </div>
-
-                        <div class="dropdown-arrow">
-                            ⌄
-                        </div>
-
+                        <div class="dropdown-arrow">⌄</div>
                     </button>
 
-
-                    <div
-                        class="bundle-options"
-                        id="bundleOptions"
-                    >
-
+                    <div class="bundle-options" id="bundleOptions">
                         {% if offer_title %}
-
                         <button
                             type="button"
                             class="bundle-option special"
-
                             data-amount="{{ offer_title }} - {{ offer_amount }}"
                             data-price="{{ offer_price }}"
                             data-name="{{ offer_title }}"
                             data-amount-display="{{ offer_amount }}"
                         >
-
-                            <span class="hot-badge">
-                                🔥 OFFER
-                            </span>
-
+                            <span class="hot-badge">OFFER</span>
                             <div class="option-main">
-
-                                <div class="option-icon">
-                                    🔥
-                                </div>
-
+                                <div class="option-icon">OF</div>
                                 <div class="option-info">
-
-                                    <strong>
-                                        {{ offer_title }}
-                                    </strong>
-
-                                    <span>
-                                        {{ offer_amount }}
-                                    </span>
-
+                                    <strong>{{ offer_title }}</strong>
+                                    <span>{{ offer_amount }}</span>
                                 </div>
-
                                 <div class="option-price">
                                     TSh {{ "{:,}".format(offer_price|int) }}
                                 </div>
-
                             </div>
-
                         </button>
-
                         {% endif %}
 
-
                         {% for b in bundles %}
-
                         <button
                             type="button"
                             class="bundle-option"
-
                             data-amount="{{ b.name }} - {{ b.amount }}"
                             data-price="{{ b.price }}"
                             data-name="{{ b.name }}"
                             data-amount-display="{{ b.amount }}"
                         >
-
                             <div class="option-main">
-
-                                <div class="option-icon">
-                                    📶
-                                </div>
-
+                                <div class="option-icon">GB</div>
                                 <div class="option-info">
-
-                                    <strong>
-                                        {{ b.name }}
-                                    </strong>
-
-                                    <span>
-                                        {{ b.amount }} · {{ b.validity }}
-                                    </span>
-
+                                    <strong>{{ b.name }}</strong>
+                                    <span>{{ b.amount }} · {{ b.validity }}</span>
                                 </div>
-
                                 <div class="option-price">
                                     TSh {{ "{:,}".format(b.price) }}
                                 </div>
-
                             </div>
-
                         </button>
-
                         {% endfor %}
-
                     </div>
-
                 </div>
 
-
-                <input
-                    type="hidden"
-                    name="amount"
-                    id="amountInput"
-                    value="{% if offer_title %}{{ offer_title }} - {{ offer_amount }}{% elif selected_bundle %}{{ selected_bundle.name }} - {{ selected_bundle.amount }}{% endif %}"
-                >
-
-                <input
-                    type="hidden"
-                    name="price"
-                    id="priceInput"
-                    value="{% if offer_price %}{{ offer_price }}{% elif selected_bundle %}{{ selected_bundle.price }}{% else %}0{% endif %}"
-                >
-
+                <input type="hidden" name="amount" id="amountInput"
+                       value="{% if offer_title %}{{ offer_title }} - {{ offer_amount }}{% elif selected_bundle %}{{ selected_bundle.name }} - {{ selected_bundle.amount }}{% endif %}">
+                <input type="hidden" name="price" id="priceInput"
+                       value="{% if offer_price %}{{ offer_price }}{% elif selected_bundle %}{{ selected_bundle.price }}{% else %}0{% endif %}">
 
                 <div class="price-box">
-
                     <div>
-                        <div class="price-label">
-                            Bei
-                        </div>
-
+                        <div class="price-label">Bei</div>
                         <div class="price-value">
                             <span class="price-currency">TSh</span>
                             <span id="displayPrice">
@@ -658,26 +431,15 @@ textarea.input{
                             </span>
                         </div>
                     </div>
-
                 </div>
-
             </section>
-
 
             <!-- PAYMENT -->
             <section class="order-card">
-
-                <div class="section-title">
-                    Malipo
-                </div>
-
+                <div class="section-title">Malipo</div>
 
                 <div class="input-group">
-
-                    <label class="input-label">
-                        Namba ya kulipia
-                    </label>
-
+                    <label class="input-label">Namba ya kulipia</label>
                     <input
                         class="input"
                         type="tel"
@@ -686,16 +448,10 @@ textarea.input{
                         value="{{ current_user.phone if current_user else '' }}"
                         required
                     >
-
                 </div>
 
-
                 <div class="input-group">
-
-                    <label class="input-label">
-                        Namba ya kuweka bando
-                    </label>
-
+                    <label class="input-label">Namba ya kuweka bando</label>
                     <input
                         class="input"
                         type="tel"
@@ -703,204 +459,81 @@ textarea.input{
                         placeholder="07XXXXXXXX"
                         required
                     >
-
                 </div>
-
 
                 <div class="input-group">
-
-                    <label class="input-label">
-                        Maelezo
-                    </label>
-
-                    <textarea
-                        class="input"
-                        name="note"
-                        placeholder="Hiari..."
-                    ></textarea>
-
+                    <label class="input-label">Maelezo (Hiari)</label>
+                    <textarea class="input" name="note" placeholder="Andika maelezo..."></textarea>
                 </div>
 
-
-                <button
-                    class="submit-btn"
-                    type="submit"
-                    id="submitBtn"
-                >
-
-                    <span id="submitText">
-                        💳 Lipa na Tuma Ombi
-                    </span>
-
+                <button class="submit-btn" type="submit" id="submitBtn">
+                    <span id="submitText">Lipa na Tuma Ombi</span>
                 </button>
-
             </section>
-
         </form>
-
     </main>
-
 </div>
 
-
 <script>
+const bundleSelector = document.getElementById("bundleSelector");
+const bundleSelected = document.getElementById("bundleSelected");
+const bundleOptions = document.getElementById("bundleOptions");
+const selectedName = document.getElementById("selectedName");
+const selectedSmall = document.getElementById("selectedSmall");
+const amountInput = document.getElementById("amountInput");
+const priceInput = document.getElementById("priceInput");
+const displayPrice = document.getElementById("displayPrice");
 
-const bundleSelector =
-    document.getElementById("bundleSelector");
-
-const bundleSelected =
-    document.getElementById("bundleSelected");
-
-const bundleOptions =
-    document.getElementById("bundleOptions");
-
-const selectedName =
-    document.getElementById("selectedName");
-
-const selectedSmall =
-    document.getElementById("selectedSmall");
-
-const amountInput =
-    document.getElementById("amountInput");
-
-const priceInput =
-    document.getElementById("priceInput");
-
-const displayPrice =
-    document.getElementById("displayPrice");
-
-
-/* OPEN / CLOSE */
-
-bundleSelected.addEventListener("click", function(e){
-
+bundleSelected.addEventListener("click", function(e) {
     e.stopPropagation();
-
     bundleOptions.classList.toggle("show");
-
     bundleSelected.classList.toggle("active");
-
 });
 
-
-/* SELECT */
-
-document
-.querySelectorAll(".bundle-option")
-.forEach(function(option){
-
-    option.addEventListener("click", function(){
-
-        const amount =
-            this.dataset.amount || "";
-
-        const price =
-            this.dataset.price || "0";
-
-        const name =
-            this.dataset.name || "";
-
-        const amountDisplay =
-            this.dataset.amountDisplay || "";
-
+document.querySelectorAll(".bundle-option").forEach(function(option) {
+    option.addEventListener("click", function() {
+        const amount = this.dataset.amount || "";
+        const price = this.dataset.price || "0";
+        const name = this.dataset.name || "";
+        const amountDisplay = this.dataset.amountDisplay || "";
 
         amountInput.value = amount;
-
         priceInput.value = price;
-
-        selectedName.innerText =
-            name + " • " + amountDisplay;
-
-        selectedSmall.innerText =
-            "Kifurushi kimechaguliwa";
-
-        displayPrice.innerText =
-            Number(price).toLocaleString();
-
+        selectedName.innerText = name + " • " + amountDisplay;
+        selectedSmall.innerText = "Kifurushi kimechaguliwa";
+        displayPrice.innerText = Number(price).toLocaleString();
 
         bundleOptions.classList.remove("show");
-
         bundleSelected.classList.remove("active");
-
     });
-
 });
 
-
-/* OUTSIDE CLICK */
-
-document.addEventListener("click", function(e){
-
-    if(
-        bundleSelector &&
-        !bundleSelector.contains(e.target)
-    ){
-
+document.addEventListener("click", function(e) {
+    if (bundleSelector && !bundleSelector.contains(e.target)) {
         bundleOptions.classList.remove("show");
-
         bundleSelected.classList.remove("active");
-
     }
-
 });
 
+document.addEventListener("DOMContentLoaded", function() {
+    const currentAmount = amountInput.value;
+    if (!currentAmount) return;
 
-/* INITIAL VALUE */
-
-document.addEventListener("DOMContentLoaded", function(){
-
-    const currentAmount =
-        amountInput.value;
-
-    if(!currentAmount) return;
-
-    document
-    .querySelectorAll(".bundle-option")
-    .forEach(function(option){
-
-        if(
-            option.dataset.amount ===
-            currentAmount
-        ){
-
-            selectedName.innerText =
-                option.dataset.name +
-                " • " +
-                option.dataset.amountDisplay;
-
-            selectedSmall.innerText =
-                "Kifurushi kimechaguliwa";
-
+    document.querySelectorAll(".bundle-option").forEach(function(option) {
+        if (option.dataset.amount === currentAmount) {
+            selectedName.innerText = option.dataset.name + " • " + option.dataset.amountDisplay;
+            selectedSmall.innerText = "Kifurushi kimechaguliwa";
         }
-
     });
-
 });
 
+const orderForm = document.getElementById("orderForm");
+const submitBtn = document.getElementById("submitBtn");
+const submitText = document.getElementById("submitText");
 
-/* SUBMIT */
-
-const orderForm =
-    document.getElementById("orderForm");
-
-const submitBtn =
-    document.getElementById("submitBtn");
-
-const submitText =
-    document.getElementById("submitText");
-
-
-orderForm.addEventListener("submit", function(){
-
+orderForm.addEventListener("submit", function() {
     submitBtn.classList.add("loading");
-
-    submitText.innerHTML =
-        '<span class="loading-spinner"></span>' +
-        'Inatuma...';
-
+    submitText.innerHTML = '<span class="loading-spinner"></span>Inatuma...';
 });
-
 </script>
-
 {% endblock %}
-

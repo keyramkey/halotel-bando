@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}MR. SULE DIGITAL SERVICES{% endblock %}</title>
-    <!-- Font Awesome CDN kwa ajili ya Icons za kisasa kabisa -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             box-sizing: border-box;
@@ -63,6 +61,7 @@
             display: grid;
             place-items: center;
             cursor: pointer;
+            color: #333;
         }
         .page {
             padding: 16px;
@@ -149,69 +148,51 @@
             color: #78350f;
         }
 
-        /* ==================== BOTTOM NAVIGATION (KIMODERN) ==================== */
+        /* BOTTOM NAVIGATION (System Clean Icons) */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 50%;
             transform: translateX(-50%);
             width: min(520px, 100%);
-            height: 70px;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            height: 65px;
+            background: #ffffff;
+            border-top: 1px solid #e5e5e5;
             display: flex;
             justify-content: space-around;
             align-items: center;
             z-index: 1000;
-            box-shadow: 0 -5px 25px rgba(0, 0, 0, 0.05);
-            padding: 0 6px;
+            box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
         }
         .nav-item {
             text-align: center;
-            color: #8e8e93;
+            color: #777;
             font-size: 11px;
             font-weight: 600;
             flex: 1;
-            padding: 8px 0;
-            transition: all 0.25s ease;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            gap: 4px;
-            border-radius: 12px;
-            position: relative;
+            gap: 3px;
         }
-        .nav-item i {
-            font-size: 20px;
-            transition: transform 0.2s ease, color 0.2s ease;
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            fill: none;
+            stroke: #777;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
-        
-        /* Active State Enhancements */
         .nav-item.active {
             color: #f56b00;
             font-weight: 700;
         }
-        .nav-item.active i {
-            transform: translateY(-2px) scale(1.1);
-            color: #f56b00;
-        }
-        .nav-item.active::after {
-            content: '';
-            position: absolute;
-            top: 2px;
-            width: 16px;
-            height: 3px;
-            background: #f56b00;
-            border-radius: 10px;
-        }
-        .nav-item:active {
-            transform: scale(0.92);
+        .nav-item.active svg {
+            stroke: #f56b00;
         }
 
-        /* Common Layouts */
+        /* Essential Page Layout Classes */
         .network-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -394,49 +375,45 @@
     {% block content %}
     {% endblock %}
 
-    <!-- ==================== BOTTOM NAVIGATION ==================== -->
+    <!-- NAVIGATION -->
     <nav class="bottom-nav">
-
-        {% if not current_user or not current_user.is_authenticated %}
+        {% if current_user and current_user.is_authenticated %}
             <a href="{{ url_for('home') }}" class="nav-item {% if request.endpoint == 'home' %}active{% endif %}">
-                <i class="fa-solid fa-house"></i>
-                <span>Home</span>
-            </a>
-            <a href="{{ url_for('login') }}" class="nav-item {% if request.endpoint in ['login', 'register'] %}active{% endif %}">
-                <i class="fa-solid fa-right-to-bracket"></i>
-                <span>Ingia</span>
-            </a>
-
-        {% else %}
-            <a href="{{ url_for('home') }}" class="nav-item {% if request.endpoint == 'home' %}active{% endif %}">
-                <i class="fa-solid fa-house"></i>
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
                 <span>Home</span>
             </a>
             <a href="{{ url_for('order') }}" class="nav-item {% if request.endpoint == 'order' %}active{% endif %}">
-                <i class="fa-solid fa-wifi"></i>
+                <svg viewBox="0 0 24 24"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
                 <span>Bando</span>
             </a>
             <a href="{{ url_for('agency') }}" class="nav-item {% if request.endpoint and 'agency' in request.endpoint %}active{% endif %}">
-                <i class="fa-solid fa-store"></i>
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
                 <span>Uwakala</span>
             </a>
             <a href="{{ url_for('chat') }}" class="nav-item {% if request.endpoint == 'chat' %}active{% endif %}">
-                <i class="fa-solid fa-comments"></i>
+                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
                 <span>Chat</span>
             </a>
             <a href="{{ url_for('profile') }}" class="nav-item {% if request.endpoint in ['profile', 'settings', 'my_applications'] %}active{% endif %}">
-                <i class="fa-solid fa-user"></i>
+                <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
                 <span>Profile</span>
             </a>
-
             {% if current_user.is_admin %}
                 <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
-                    <i class="fa-solid fa-user-shield"></i>
+                    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
                     <span>Admin</span>
                 </a>
             {% endif %}
+        {% else %}
+            <a href="{{ url_for('home') }}" class="nav-item {% if request.endpoint == 'home' %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                <span>Home</span>
+            </a>
+            <a href="{{ url_for('login') }}" class="nav-item {% if request.endpoint in ['login', 'register'] %}active{% endif %}">
+                <svg viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg>
+                <span>Ingia</span>
+            </a>
         {% endif %}
-
     </nav>
 </div>
 </body>

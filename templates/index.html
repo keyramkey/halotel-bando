@@ -3,27 +3,24 @@
 {% block title %}MR. SULE DIGITAL SERVICES BUSINESS{% endblock %}
 
 {% block content %}
-
 <style>
     .home-hero {
         margin: 14px;
         padding: 24px;
-        border-radius: 23px;
+        border-radius: 22px;
         color: white;
         background: linear-gradient(135deg, #ff7a00, #ed4800);
     }
-
-    .home-hero-icon { font-size: 45px; }
-
     .home-hero h1 {
-        font-size: 28px;
-        margin: 8px 0;
+        font-size: 24px;
+        margin: 0 0 8px;
+        font-weight: 800;
+        line-height: 1.25;
     }
-
     .home-hero p {
         font-size: 13px;
         line-height: 1.5;
-        opacity: .92;
+        opacity: 0.92;
     }
 
     .main-services {
@@ -31,94 +28,96 @@
         display: grid;
         gap: 12px;
     }
-
     .main-service {
         background: #fff;
-        border-radius: 19px;
-        padding: 18px;
+        border-radius: 18px;
+        padding: 16px 18px;
         border: 1px solid #eee;
         display: flex;
         align-items: center;
         gap: 14px;
     }
-
     .main-service-icon {
-        width: 54px;
-        height: 54px;
-        border-radius: 17px;
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
         display: grid;
         place-items: center;
-        font-size: 27px;
+        font-size: 15px;
+        font-weight: 800;
         background: #fff1e7;
+        color: #f56b00;
+        flex-shrink: 0;
     }
-
-    .main-service-content { flex: 1; }
-
+    .main-service-content {
+        flex: 1;
+    }
     .main-service-content h3 {
-        font-size: 17px;
-        margin-bottom: 5px;
+        font-size: 16px;
+        margin-bottom: 4px;
+        font-weight: 800;
     }
-
     .main-service-content p {
-        font-size: 11px;
+        font-size: 12px;
         color: #777;
         line-height: 1.4;
     }
-
     .main-arrow {
         color: #f56b00;
-        font-size: 22px;
+        font-size: 18px;
+        font-weight: 700;
     }
 
-    .section-title { padding: 18px 16px 11px; }
-
-    .section-title h2 { font-size: 19px; }
+    .section-title {
+        padding: 20px 16px 10px;
+    }
+    .section-title h2 {
+        font-size: 17px;
+        font-weight: 800;
+    }
 
     .bundle-grid {
-        padding: 0 14px;
+        padding: 0 14px 20px;
         display: grid;
         gap: 12px;
     }
-
     .bundle {
         background: white;
         border-radius: 18px;
-        padding: 17px;
+        padding: 16px 17px;
         border: 1px solid #eee;
     }
-
     .bundle-top {
         display: flex;
         justify-content: space-between;
+        align-items: flex-start;
     }
-
     .bundle h3 {
-        font-size: 27px;
-        margin-top: 4px;
+        font-size: 22px;
+        margin-top: 3px;
+        font-weight: 800;
     }
-
     .bundle-icon {
-        width: 45px;
-        height: 45px;
-        border-radius: 14px;
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
         background: #fff0e5;
         display: grid;
         place-items: center;
-        font-size: 21px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #f56b00;
     }
-
     .bundle-bottom {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-top: 15px;
+        margin-top: 14px;
     }
-
     .price {
-        font-size: 17px;
+        font-size: 16px;
         font-weight: 900;
     }
-
     .validity {
         color: #777;
         font-size: 12px;
@@ -128,25 +127,25 @@
         margin: 0 14px 12px;
         background: #151515;
         color: white;
-        padding: 17px;
+        padding: 16px 17px;
         border-radius: 18px;
         display: block;
     }
-
     .offer-title {
         color: #ff8a29;
-        font-weight: bold;
-        font-size: 13px;
+        font-weight: 700;
+        font-size: 12px;
+        margin-bottom: 4px;
     }
-
     .offer h3 {
-        margin: 5px 0;
-        font-size: 22px;
+        margin: 0 0 6px;
+        font-size: 18px;
+        font-weight: 800;
     }
-
     .offer p {
         color: #bbb;
         font-size: 12px;
+        line-height: 1.4;
     }
 </style>
 
@@ -155,27 +154,30 @@
         <div class="brand">MR. SULE <span>DIGITAL</span></div>
         <div class="muted">Huduma za simu na mawasiliano</div>
     </div>
-
     {% if current_user %}
-        <a href="{{ url_for('profile') }}" class="icon-btn">👤</a>
+        <a href="{{ url_for('profile') }}" class="icon-btn">P</a>
     {% else %}
-        <a href="{{ url_for('login') }}" class="icon-btn">🔐</a>
+        <a href="{{ url_for('login') }}" class="icon-btn">L</a>
     {% endif %}
 </header>
 
+<!-- Hero -->
 <section class="home-hero">
-    <div class="home-hero-icon">🇹🇿</div>
-    <h1>Karibu MR. SULE DIGITAL SERVICES BUSINESS</h1>
-    <p>Pata huduma za bando, usajili wa laini, uwakala na huduma za malipo sehemu moja.</p>
+    <h1>Karibu MR. SULE DIGITAL SERVICES</h1>
+    <p>
+        Pata huduma za bando, usajili wa laini, uwakala
+        na huduma za malipo sehemu moja.
+    </p>
 </section>
 
+<!-- Huduma Kuu -->
 <div class="section-title">
     <h2>Huduma Kuu</h2>
 </div>
 
 <div class="main-services">
     <a href="{{ url_for('order') }}" class="main-service">
-        <div class="main-service-icon">📦</div>
+        <div class="main-service-icon">B</div>
         <div class="main-service-content">
             <h3>Bando</h3>
             <p>Nunua na request bundles zako kwa urahisi.</p>
@@ -184,22 +186,24 @@
     </a>
 
     <a href="{{ url_for('agency') }}" class="main-service">
-        <div class="main-service-icon">🏪</div>
+        <div class="main-service-icon">U</div>
         <div class="main-service-content">
             <h3>Uwakala & Usajili</h3>
-            <p>Sajili laini, huduma za wakala, merchant na huduma za fedha.</p>
+            <p>Sajili laini, huduma za wakala, merchant na fedha.</p>
         </div>
         <div class="main-arrow">→</div>
     </a>
 </div>
 
+<!-- Offers -->
 {% if offers %}
 <div class="section-title">
-    <h2>🔥 Offers</h2>
+    <h2>Offers</h2>
 </div>
 
 {% for offer in offers %}
-<a href="{{ url_for('order', offer_title=offer.title, offer_price=offer.price, offer_amount=offer.amount) }}" class="offer">
+<a href="{{ url_for('order', offer_title=offer.title, offer_price=offer.price, offer_amount=offer.amount) }}"
+   class="offer">
     <div class="offer-title">{{ offer.title }}</div>
     <h3>{{ offer.amount }} — TSh {{ "{:,}".format(offer.price) }}</h3>
     <p>{{ offer.description }}</p>
@@ -207,31 +211,32 @@
 {% endfor %}
 {% endif %}
 
+<!-- Bundles -->
 <div class="section-title">
     <h2>Bundles</h2>
 </div>
 
 <div class="bundle-grid">
 {% for bundle in bundles %}
-<a href="{{ url_for('order', bundle_id=bundle.id) }}">
-    <div class="bundle">
-        <div class="bundle-top">
-            <div>
-                <div class="muted">{{ bundle.name }}</div>
-                <h3>{{ bundle.amount }}</h3>
+    <a href="{{ url_for('order', bundle_id=bundle.id) }}">
+        <div class="bundle">
+            <div class="bundle-top">
+                <div>
+                    <div class="muted">{{ bundle.name }}</div>
+                    <h3>{{ bundle.amount }}</h3>
+                </div>
+                <div class="bundle-icon">GB</div>
             </div>
-            <div class="bundle-icon">📡</div>
+            <div class="bundle-bottom">
+                <div class="validity">{{ bundle.validity }}</div>
+                <div class="price">TSh {{ "{:,}".format(bundle.price) }}</div>
+            </div>
         </div>
-        <div class="bundle-bottom">
-            <div class="validity">{{ bundle.validity }}</div>
-            <div class="price">TSh {{ "{:,}".format(bundle.price) }}</div>
-        </div>
-    </div>
-</a>
+    </a>
 {% else %}
-<div class="card">
-    <p>Hakuna bundle kwa sasa.</p>
-</div>
+    <div class="card">
+        <p class="muted">Hakuna bundle kwa sasa.</p>
+    </div>
 {% endfor %}
 </div>
 

@@ -10,9 +10,10 @@
         border-radius: 22px;
         color: white;
         background: linear-gradient(135deg, #ff7a00, #ed4800);
+        box-shadow: 0 10px 20px rgba(237, 72, 0, 0.15);
     }
     .home-hero h1 {
-        font-size: 24px;
+        font-size: 22px;
         margin: 0 0 8px;
         font-weight: 800;
         line-height: 1.25;
@@ -36,6 +37,10 @@
         display: flex;
         align-items: center;
         gap: 14px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .main-service:active {
+        transform: scale(0.98);
     }
     .main-service-icon {
         width: 50px;
@@ -43,8 +48,7 @@
         border-radius: 14px;
         display: grid;
         place-items: center;
-        font-size: 15px;
-        font-weight: 800;
+        font-size: 20px;
         background: #fff1e7;
         color: #f56b00;
         flex-shrink: 0;
@@ -56,6 +60,7 @@
         font-size: 16px;
         margin-bottom: 4px;
         font-weight: 800;
+        color: #161616;
     }
     .main-service-content p {
         font-size: 12px;
@@ -64,8 +69,11 @@
     }
     .main-arrow {
         color: #f56b00;
-        font-size: 18px;
-        font-weight: 700;
+        font-size: 16px;
+        transition: transform 0.2s ease;
+    }
+    .main-service:hover .main-arrow {
+        transform: translateX(3px);
     }
 
     .section-title {
@@ -74,6 +82,7 @@
     .section-title h2 {
         font-size: 17px;
         font-weight: 800;
+        color: #161616;
     }
 
     .bundle-grid {
@@ -86,6 +95,10 @@
         border-radius: 18px;
         padding: 16px 17px;
         border: 1px solid #eee;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .bundle:active {
+        transform: scale(0.98);
     }
     .bundle-top {
         display: flex;
@@ -96,6 +109,7 @@
         font-size: 22px;
         margin-top: 3px;
         font-weight: 800;
+        color: #161616;
     }
     .bundle-icon {
         width: 42px;
@@ -104,8 +118,7 @@
         background: #fff0e5;
         display: grid;
         place-items: center;
-        font-size: 13px;
-        font-weight: 800;
+        font-size: 18px;
         color: #f56b00;
     }
     .bundle-bottom {
@@ -117,10 +130,14 @@
     .price {
         font-size: 16px;
         font-weight: 900;
+        color: #f56b00;
     }
     .validity {
         color: #777;
         font-size: 12px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
     }
 
     .offer {
@@ -130,12 +147,21 @@
         padding: 16px 17px;
         border-radius: 18px;
         display: block;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s ease;
+    }
+    .offer:active {
+        transform: scale(0.98);
     }
     .offer-title {
         color: #ff8a29;
         font-weight: 700;
         font-size: 12px;
         margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
     }
     .offer h3 {
         margin: 0 0 6px;
@@ -154,10 +180,14 @@
         <div class="brand">MR. SULE <span>DIGITAL</span></div>
         <div class="muted">Huduma za simu na mawasiliano</div>
     </div>
-    {% if current_user %}
-        <a href="{{ url_for('profile') }}" class="icon-btn">P</a>
+    {% if current_user and current_user.is_authenticated %}
+        <a href="{{ url_for('profile') }}" class="icon-btn" title="Profile">
+            <i class="fa-solid fa-user"></i>
+        </a>
     {% else %}
-        <a href="{{ url_for('login') }}" class="icon-btn">L</a>
+        <a href="{{ url_for('login') }}" class="icon-btn" title="Ingia">
+            <i class="fa-solid fa-right-to-bracket"></i>
+        </a>
     {% endif %}
 </header>
 
@@ -177,21 +207,29 @@
 
 <div class="main-services">
     <a href="{{ url_for('order') }}" class="main-service">
-        <div class="main-service-icon">B</div>
+        <div class="main-service-icon">
+            <i class="fa-solid fa-wifi"></i>
+        </div>
         <div class="main-service-content">
             <h3>Bando</h3>
             <p>Nunua na request bundles zako kwa urahisi.</p>
         </div>
-        <div class="main-arrow">→</div>
+        <div class="main-arrow">
+            <i class="fa-solid fa-chevron-right"></i>
+        </div>
     </a>
 
     <a href="{{ url_for('agency') }}" class="main-service">
-        <div class="main-service-icon">U</div>
+        <div class="main-service-icon">
+            <i class="fa-solid fa-store"></i>
+        </div>
         <div class="main-service-content">
             <h3>Uwakala & Usajili</h3>
             <p>Sajili laini, huduma za wakala, merchant na fedha.</p>
         </div>
-        <div class="main-arrow">→</div>
+        <div class="main-arrow">
+            <i class="fa-solid fa-chevron-right"></i>
+        </div>
     </a>
 </div>
 
@@ -204,7 +242,9 @@
 {% for offer in offers %}
 <a href="{{ url_for('order', offer_title=offer.title, offer_price=offer.price, offer_amount=offer.amount) }}"
    class="offer">
-    <div class="offer-title">{{ offer.title }}</div>
+    <div class="offer-title">
+        <i class="fa-solid fa-fire"></i> {{ offer.title }}
+    </div>
     <h3>{{ offer.amount }} — TSh {{ "{:,}".format(offer.price) }}</h3>
     <p>{{ offer.description }}</p>
 </a>
@@ -225,17 +265,21 @@
                     <div class="muted">{{ bundle.name }}</div>
                     <h3>{{ bundle.amount }}</h3>
                 </div>
-                <div class="bundle-icon">GB</div>
+                <div class="bundle-icon">
+                    <i class="fa-solid fa-box"></i>
+                </div>
             </div>
             <div class="bundle-bottom">
-                <div class="validity">{{ bundle.validity }}</div>
+                <div class="validity">
+                    <i class="fa-regular fa-clock"></i> {{ bundle.validity }}
+                </div>
                 <div class="price">TSh {{ "{:,}".format(bundle.price) }}</div>
             </div>
         </div>
     </a>
 {% else %}
     <div class="card">
-        <p class="muted">Hakuna bundle kwa sasa.</p>
+        <p class="muted text-center">Hakuna bundle kwa sasa.</p>
     </div>
 {% endfor %}
 </div>

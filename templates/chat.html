@@ -3,198 +3,240 @@
 {% block title %}Chat{% endblock %}
 
 {% block content %}
-
 <style>
+    .chat-page {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 70px);
+        background: #f4f5f7;
+    }
+
     .chat-head {
         background: #151515;
         color: white;
-        padding: 18px;
+        padding: 16px 18px;
+        flex-shrink: 0;
     }
-
     .chat-head h1 {
-        font-size: 21px;
+        font-size: 18px;
+        font-weight: 800;
+        margin-bottom: 3px;
     }
-
     .chat-head p {
         color: #aaa;
-        font-size: 12px;
-        margin-top: 4px;
+        font-size: 13px;
     }
 
     .chat-body {
-        padding: 15px;
-        min-height: calc(100vh - 230px);
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
     }
 
     .message {
-        max-width: 82%;
-        padding: 11px 13px;
+        max-width: 80%;
+        padding: 12px 14px;
         border-radius: 16px;
-        margin-bottom: 9px;
         font-size: 14px;
+        line-height: 1.45;
+        word-wrap: break-word;
     }
-
     .message.customer {
-        margin-left: auto;
+        align-self: flex-end;
         background: #f56b00;
         color: white;
-        border-bottom-right-radius: 5px;
+        border-bottom-right-radius: 4px;
     }
-
     .message.admin {
-        background: white;
-        border-bottom-left-radius: 5px;
+        align-self: flex-start;
+        background: #ffffff;
+        border: 1px solid #eee;
+        border-bottom-left-radius: 4px;
     }
-
     .message img {
         width: 100%;
+        max-width: 240px;
         border-radius: 10px;
-        margin-top: 7px;
+        margin-top: 8px;
+        display: block;
+    }
+    .message-time {
+        display: block;
+        margin-top: 5px;
+        font-size: 10px;
+        opacity: 0.7;
     }
 
-    .chat-form {
-        position: fixed;
-        bottom: 70px;
-        left: 50%;
-        transform: translateX(-50%);
-        width: min(520px, 100%);
-        padding: 10px;
+    .chat-form-wrapper {
         background: white;
         border-top: 1px solid #eee;
+        padding: 12px 14px;
+        flex-shrink: 0;
     }
-
     .chat-row {
         display: flex;
-        gap: 7px;
+        gap: 8px;
         align-items: center;
     }
-
+    .attach-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #f1f1f1;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #555;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
     .chat-input {
         flex: 1;
-        height: 45px;
+        height: 44px;
         border: 1px solid #ddd;
-        border-radius: 25px;
-        padding: 0 15px;
+        border-radius: 22px;
+        padding: 0 16px;
         outline: none;
+        font-size: 14px;
+        background: #fafafa;
     }
-
-    .send {
-        width: 48px;
-        height: 45px;
+    .chat-input:focus {
+        border-color: #f56b00;
+        background: white;
+    }
+    .send-btn {
+        height: 44px;
+        padding: 0 20px;
         border: 0;
-        border-radius: 50%;
+        border-radius: 22px;
         background: #f56b00;
         color: white;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .send-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
     }
 
-    .attach {
-        width: 40px;
+    .empty-chat {
         text-align: center;
-        cursor: pointer;
+        color: #999;
+        margin-top: 60px;
+        font-size: 14px;
+        line-height: 1.5;
     }
 </style>
 
-
-<div class="chat-head">
-
-    <h1>💬 Chat na Muuzaji</h1>
-
-    <p>
-        Uliza kuhusu bundle, bei au order yako.
-    </p>
-
-</div>
-
-
-<div class="chat-body" id="chatBody">
-
-{% for msg in messages %}
-
-<div class="message {{ msg.sender }}">
-
-    {% if msg.message %}
-        <div>{{ msg.message }}</div>
-    {% endif %}
-
-    {% if msg.image %}
-
-        <img
-            src="{{ url_for('static', filename='uploads/' + msg.image) }}"
-        >
-
-    {% endif %}
-
-</div>
-
-{% endfor %}
-
-</div>
-
-
-<form
-    class="chat-form"
-    id="chatForm"
-    enctype="multipart/form-data"
->
-
-    <div class="chat-row">
-
-        <label class="attach">
-            📎
-            <input
-                type="file"
-                name="image"
-                accept="image/*"
-                hidden
-            >
-        </label>
-
-        <input
-            class="chat-input"
-            name="message"
-            placeholder="Andika ujumbe..."
-        >
-
-        <button class="send">
-            ➤
-        </button>
-
+<div class="chat-page">
+    <!-- Header -->
+    <div class="chat-head">
+        <h1>Chat na Muuzaji</h1>
+        <p>Uliza kuhusu bundle, bei au order yako</p>
     </div>
 
-</form>
+    <!-- Messages -->
+    <div class="chat-body" id="chatBody">
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="message {{ msg.sender }}">
+                    {% if msg.message %}
+                        <div>{{ msg.message }}</div>
+                    {% endif %}
+                    {% if msg.image %}
+                        <img src="{{ url_for('static', filename='uploads/' + msg.image) }}" alt="Image">
+                    {% endif %}
+                    {% if msg.created_at %}
+                        <span class="message-time">
+                            {{ msg.created_at.strftime('%d/%m/%Y %H:%M') }}
+                        </span>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-chat">
+                Hakuna ujumbe bado.<br>
+                Andika ujumbe wako hapa chini.
+            </div>
+        {% endif %}
+    </div>
 
+    <!-- Form -->
+    <div class="chat-form-wrapper">
+        <form id="chatForm" enctype="multipart/form-data">
+            <div class="chat-row">
+                <label class="attach-btn">
+                    File
+                    <input type="file" name="image" accept="image/*" hidden id="imageInput">
+                </label>
+                <input
+                    class="chat-input"
+                    name="message"
+                    id="messageInput"
+                    placeholder="Andika ujumbe..."
+                    autocomplete="off"
+                >
+                <button class="send-btn" type="submit" id="sendBtn">
+                    Tuma
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <script>
+    // Auto scroll to bottom
+    const chatBody = document.getElementById("chatBody");
+    chatBody.scrollTop = chatBody.scrollHeight;
 
-const form = document.getElementById("chatForm");
+    const form = document.getElementById("chatForm");
+    const sendBtn = document.getElementById("sendBtn");
+    const messageInput = document.getElementById("messageInput");
+    const imageInput = document.getElementById("imageInput");
 
-form.addEventListener("submit", async (e) => {
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    e.preventDefault();
+        const message = messageInput.value.trim();
+        const hasImage = imageInput.files.length > 0;
 
-    const data = new FormData(form);
-
-    const response = await fetch(
-        "{{ url_for('send_message') }}",
-        {
-            method: "POST",
-            body: data
+        if (!message && !hasImage) {
+            return;
         }
-    );
 
-    const result = await response.json();
+        sendBtn.disabled = true;
+        sendBtn.textContent = "Inatuma...";
 
-    if (result.success) {
-        location.reload();
-    }
+        const data = new FormData(form);
 
-});
+        try {
+            const response = await fetch(
+                "{{ url_for('send_message') }}",
+                {
+                    method: "POST",
+                    body: data
+                }
+            );
+            const result = await response.json();
 
-
-const body = document.getElementById("chatBody");
-
-body.scrollTop = body.scrollHeight;
-
+            if (result.success) {
+                location.reload();
+            } else {
+                alert("Imeshindwa kutuma ujumbe.");
+                sendBtn.disabled = false;
+                sendBtn.textContent = "Tuma";
+            }
+        } catch (err) {
+            alert("Hitilafu ya mtandao.");
+            sendBtn.disabled = false;
+            sendBtn.textContent = "Tuma";
+        }
+    });
 </script>
-
 {% endblock %}

@@ -34,12 +34,12 @@ PAYMENT_NUMBER = os.environ.get("PAYMENT_NUMBER", "37912416")
 PAYMENT_NAME = os.environ.get("PAYMENT_NAME", "Matondo Maduhu")
 PAYMENT_NETWORK = os.environ.get("PAYMENT_NETWORK", "Vodacom")
 
-# ClickPesa credentials (weka kwenye Railway Variables)
+# ClickPesa credentials
 CLICKPESA_CLIENT_ID = os.environ.get("CLICKPESA_CLIENT_ID")
 CLICKPESA_API_KEY = os.environ.get("CLICKPESA_API_KEY")
 
 # ---------------------------------------------------------------------------
-# Models (zinaendelea sawa)
+# Models
 # ---------------------------------------------------------------------------
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -199,7 +199,6 @@ def allowed_file(filename):
 
 
 def get_clickpesa_token():
-    """Generate JWT token from ClickPesa"""
     url = "https://api.clickpesa.com/third-parties/generate-token"
     headers = {
         "client-id": CLICKPESA_CLIENT_ID,
@@ -225,7 +224,7 @@ def normalize_phone(phone):
 
 
 # ---------------------------------------------------------------------------
-# Auth routes (zinaendelea sawa)
+# Auth routes
 # ---------------------------------------------------------------------------
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -242,9 +241,7 @@ def register():
             flash("Jaza taarifa zote muhimu.", "error")
             return redirect(url_for("register"))
 
-        if User.query.filter(
-            (User.username == username) | (User.phone == phone)
-        ).first():
+        if User.query.filter((User.username == username) | (User.phone == phone)).first():
             flash("Username au namba ya simu tayari inatumika.", "error")
             return redirect(url_for("register"))
 
@@ -344,7 +341,7 @@ def settings():
 
 
 # ---------------------------------------------------------------------------
-# Bundle / Order  +  ONLINE PAYMENT (ClickPesa)
+# Bundle / Order + ONLINE PAYMENT (ClickPesa)
 # ---------------------------------------------------------------------------
 @app.route("/order", methods=["GET", "POST"])
 @login_required
@@ -352,8 +349,17 @@ def order():
     user = get_current_user()
     bundles = Bundle.query.filter_by(is_active=True).all()
 
+    selected_bundle_id = request.args.get("bundle_id")
+    selected_bundle = Bundle.query.get(selected_bundle_id) if selected_bundle_id else None
+
+    # Kama offer imechaguliwa kutoka homepage
+    offer_title = request.args.get("offer_title")
+    offer_price = request.args.get("offer_price")
+    offer_amount = request.args.get("offer_amount")
+
     if request.method == "POST":
-        phone = request.form.get("phone", "").strip()
+        payment_phone = request.form.get("payment_phone", "").strip()
+        target_phone = request.form.get("target_phone", "").strip()
         amount = request.form.get("amount", "").strip()
         price_raw = request.form.get("price", "0").strip()
         note = request.form.get("note", "").strip()
@@ -363,22 +369,24 @@ def order():
         except ValueError:
             price = 0
 
-        if not phone or not amount:
-            flash("Weka namba ya simu na kiasi cha bundle.", "error")
+        if not payment_phone or not target_phone or not amount:
+            flash("Weka namba ya kulipia, namba ya kuwekewa bando na kiasi cha bundle.", "error")
             return redirect(url_for("order"))
+
+        order_note = f"Namba ya Kuwekewa: {target_phone}" + (f" | Maelezo: {note}" if note else "")
 
         new_order = Order(
             user_id=user.id,
-            phone=phone,
+            phone=target_phone,
             amount=amount,
             price=price,
-            note=note,
+            note=order_note,
             status="pending",
         )
         db.session.add(new_order)
         db.session.commit()
 
-        # ===== ONLINE PAYMENT (ClickPesa USSD Push) =====
+        # ONLINE PAYMENT (ClickPesa USSD Push)
         if CLICKPESA_CLIENT_ID and CLICKPESA_API_KEY and price > 0:
             try:
                 token = get_clickpesa_token()
@@ -391,7 +399,7 @@ def order():
                     "amount": str(price),
                     "currency": "TZS",
                     "orderReference": f"ORD{new_order.id}-{int(time.time())}",
-                    "phoneNumber": normalize_phone(phone)
+                    "phoneNumber": normalize_phone(payment_phone)
                 }
                 response = requests.post(url, json=payload, headers=headers, timeout=20)
                 data = response.json()
@@ -404,7 +412,6 @@ def order():
             except Exception as e:
                 flash(f"Hitilafu ya malipo: {str(e)}. Lipa manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}", "error")
         else:
-            # Fallback kama credentials hazipo
             flash(
                 f"Request imetumwa! Lipa kwa {PAYMENT_NETWORK} {PAYMENT_NUMBER} ({PAYMENT_NAME}). "
                 "Baada ya malipo, wasiliana na chat.",
@@ -413,7 +420,30 @@ def order():
 
         return redirect(url_for("profile"))
 
-    return render_template("order.html", bundles=bundles)
+    return render_template(
+        "order.html", 
+        bundles=bundles, 
+        selected_bundle=selected_bundle,
+        offer_title=offer_title,
+        offer_price=offer_price,
+        offer_amount=offer_amount
+    )
+
+
+@app.route("/admin/order/status/<int:order_id>", methods=["POST"])
+@admin_required
+def update_order_status(order_id):
+    order_item = Order.query.get_or_404(order_id)
+    status = request.form.get("status", "pending")
+
+    if status in ("pending", "completed", "rejected"):
+        order_item.status = status
+        db.session.commit()
+        flash(f"Status ya Oda #{order_item.id} imebadilishwa kuwa '{status}'.", "success")
+    else:
+        flash("Status si sahihi.", "error")
+
+    return redirect(url_for("dashboard"))
 
 
 @app.route("/asante")
@@ -447,7 +477,7 @@ def asante():
 
 
 # ---------------------------------------------------------------------------
-# Chat, Agency, Dashboard ... (zinaendelea sawa kama zamani)
+# Chat, Agency, Dashboard
 # ---------------------------------------------------------------------------
 @app.route("/chat")
 @login_required
@@ -648,14 +678,16 @@ def dashboard():
     users_count = User.query.count()
     pending_count = Order.query.filter_by(status="pending").count()
     agency_pending = Application.query.filter_by(status="pending").count()
-    applications = (
-        Application.query.order_by(Application.created_at.desc()).limit(50).all()
-    )
+    
+    orders = Order.query.order_by(Order.created_at.desc()).limit(50).all()
+    applications = Application.query.order_by(Application.created_at.desc()).limit(50).all()
+    
     return render_template(
         "dashboard.html",
         users_count=users_count,
         pending_count=pending_count,
         agency_pending=agency_pending,
+        orders=orders,
         applications=applications,
     )
 

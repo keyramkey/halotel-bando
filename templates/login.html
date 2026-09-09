@@ -3,101 +3,92 @@
 {% block title %}Login{% endblock %}
 
 {% block content %}
-
 <style>
     .auth {
         min-height: calc(100vh - 70px);
-        padding: 25px 18px;
+        padding: 30px 18px;
         display: flex;
         align-items: center;
+        justify-content: center;
     }
-
     .auth-card {
         width: 100%;
         background: white;
-        border-radius: 22px;
-        padding: 22px;
+        border-radius: 20px;
+        padding: 24px 22px;
+        border: 1px solid #eee;
     }
-
     .auth-card h1 {
-        font-size: 28px;
+        font-size: 24px;
+        font-weight: 800;
         margin-bottom: 6px;
     }
-
+    .auth-card .muted {
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
     .field {
         margin-top: 16px;
     }
-
     .field label {
         display: block;
         font-size: 13px;
-        font-weight: bold;
+        font-weight: 700;
         margin-bottom: 7px;
+        color: #333;
     }
-
     .auth-link {
         text-align: center;
-        margin-top: 15px;
+        margin-top: 18px;
         color: #777;
         font-size: 13px;
     }
-
     .auth-link a {
         color: #f56b00;
-        font-weight: bold;
+        font-weight: 700;
     }
 </style>
 
 <div class="auth">
-
     <div class="auth-card">
-
-        <h1>Karibu tena 👋</h1>
-
-        <p class="muted">
-            Ingia kwenye akaunti yako.
-        </p>
+        <h1>Karibu tena</h1>
+        <p class="muted">Ingia kwenye akaunti yako</p>
 
         <form method="POST">
-
             <div class="field">
                 <label>Username / Namba / Email</label>
-
                 <input
                     class="input"
                     name="identity"
                     required
                     placeholder="Weka taarifa yako"
+                    autocomplete="username"
                 >
             </div>
 
             <div class="field">
                 <label>Password</label>
-
                 <input
                     class="input"
                     type="password"
                     name="password"
                     required
                     placeholder="Password"
+                    autocomplete="current-password"
                 >
             </div>
 
-            <div style="margin-top:20px;">
-                <button class="btn orange">
+            <div style="margin-top:22px;">
+                <button class="btn orange" type="submit">
                     Ingia
                 </button>
             </div>
-
         </form>
 
         <div class="auth-link">
             Huna akaunti?
             <a href="{{ url_for('register') }}">Jisajili</a>
         </div>
-
     </div>
-
 </div>
-
 {% endblock %}

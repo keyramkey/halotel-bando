@@ -1,57 +1,50 @@
 {% extends "base.html" %}
 
-{% block title %}Chat Customer{% endblock %}
+{% block title %}Chat - {{ user.username }}{% endblock %}
 
 {% block content %}
-
 <style>
     .chat-head {
         background: #151515;
         color: white;
         padding: 18px;
     }
-
     .chat-head h1 {
-        font-size: 21px;
+        font-size: 20px;
+        font-weight: 800;
     }
-
     .chat-head p {
         color: #aaa;
-        font-size: 12px;
+        font-size: 13px;
         margin-top: 4px;
     }
-
     .chat-body {
         padding: 15px;
         min-height: calc(100vh - 230px);
     }
-
     .message {
         max-width: 82%;
         padding: 11px 13px;
         border-radius: 16px;
         margin-bottom: 9px;
         font-size: 14px;
+        line-height: 1.4;
     }
-
     .message.customer {
         background: white;
         border-bottom-left-radius: 5px;
     }
-
     .message.admin {
         margin-left: auto;
         background: #f56b00;
         color: white;
         border-bottom-right-radius: 5px;
     }
-
     .message img {
         width: 100%;
         border-radius: 10px;
         margin-top: 7px;
     }
-
     .chat-form {
         position: fixed;
         bottom: 70px;
@@ -62,13 +55,11 @@
         background: white;
         border-top: 1px solid #eee;
     }
-
     .chat-row {
         display: flex;
-        gap: 7px;
+        gap: 8px;
         align-items: center;
     }
-
     .chat-input {
         flex: 1;
         height: 45px;
@@ -77,106 +68,72 @@
         padding: 0 15px;
         outline: none;
     }
-
     .send {
-        width: 48px;
         height: 45px;
+        padding: 0 18px;
         border: 0;
-        border-radius: 50%;
+        border-radius: 25px;
         background: #f56b00;
         color: white;
-    }
-
-    .attach {
-        width: 40px;
-        text-align: center;
+        font-weight: 700;
+        font-size: 14px;
         cursor: pointer;
+    }
+    .attach {
+        width: 42px;
+        height: 42px;
+        display: grid;
+        place-items: center;
+        background: #f1f1f1;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+        color: #555;
     }
 </style>
 
-
 <div class="chat-head">
-
-    <h1>💬 {{ user.username }}</h1>
-
-    <p>
-        {{ user.phone }}
-    </p>
-
+    <h1>{{ user.username }}</h1>
+    <p>{{ user.phone }}</p>
 </div>
-
 
 <div class="chat-body">
-
-{% for msg in messages %}
-
-<div class="message {{ msg.sender }}">
-
-    {% if msg.message %}
-        <div>{{ msg.message }}</div>
-    {% endif %}
-
-    {% if msg.image %}
-
-        <img
-            src="{{ url_for('static', filename='uploads/' + msg.image) }}"
-        >
-
-    {% endif %}
-
+    {% for msg in messages %}
+        <div class="message {{ msg.sender }}">
+            {% if msg.message %}
+                <div>{{ msg.message }}</div>
+            {% endif %}
+            {% if msg.image %}
+                <img src="{{ url_for('static', filename='uploads/' + msg.image) }}">
+            {% endif %}
+        </div>
+    {% endfor %}
 </div>
 
-{% endfor %}
-
-</div>
-
-
-<form
-    class="chat-form"
-    id="adminChatForm"
-    enctype="multipart/form-data"
->
-
+<form class="chat-form" id="adminChatForm" enctype="multipart/form-data">
     <div class="chat-row">
-
         <label class="attach">
-            📎
-
-            <input
-                type="file"
-                name="image"
-                accept="image/*"
-                hidden
-            >
-
+            File
+            <input type="file" name="image" accept="image/*" hidden>
         </label>
-
         <input
             class="chat-input"
             name="message"
             placeholder="Andika ujumbe..."
+            autocomplete="off"
         >
-
-        <button class="send">
-            ➤
+        <button class="send" type="submit">
+            Tuma
         </button>
-
     </div>
-
 </form>
 
-
 <script>
-
-const form =
-    document.getElementById("adminChatForm");
-
+const form = document.getElementById("adminChatForm");
 form.addEventListener("submit", async (e) => {
-
     e.preventDefault();
-
     const data = new FormData(form);
-
     const response = await fetch(
         "{{ url_for('admin_send_message', user_id=user.id) }}",
         {
@@ -184,15 +141,10 @@ form.addEventListener("submit", async (e) => {
             body: data
         }
     );
-
     const result = await response.json();
-
     if (result.success) {
         location.reload();
     }
-
 });
-
 </script>
-
 {% endblock %}

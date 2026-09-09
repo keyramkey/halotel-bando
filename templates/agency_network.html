@@ -5,85 +5,40 @@
 {% block content %}
 
 <header class="topbar">
-
     <div>
-
-        <div class="brand">
-            {{ network }}
-        </div>
-
-        <div class="muted">
-            Uwakala & Usajili
-        </div>
-
+        <div class="brand">{{ network }}</div>
+        <div class="muted">Uwakala & Usajili</div>
     </div>
-
-    <a
-        href="{{ url_for('agency') }}"
-        class="icon-btn"
-    >
-        ←
-    </a>
-
+    <a href="{{ url_for('agency') }}" class="icon-btn">←</a>
 </header>
 
-
-<div class="section-title">
-
-    <h2>
-        Huduma za {{ network }}
-    </h2>
-
-</div>
-
-
-<div class="service-grid">
-
-{% for service in services %}
-
-<a
-    href="{{ url_for(
-        'agency_apply',
-        service_id=service.id
-    ) }}"
-    class="service-card"
->
-
-    <div class="service-icon">
-        {{ service.icon }}
+<div class="page">
+    <div style="margin-bottom:16px;">
+        <h2 style="font-size:18px; font-weight:800;">Huduma za {{ network }}</h2>
+        <p class="muted" style="margin-top:4px;">Chagua huduma unayohitaji</p>
     </div>
 
-    <div class="service-info">
-
-        <h3>
-            {{ service.title }}
-        </h3>
-
-        <p>
-            {{ service.description }}
-        </p>
-
+    <div class="service-grid" style="padding:0;">
+        {% for service in services %}
+        <a href="{{ url_for('agency_apply', service_id=service.id) }}" class="service-card">
+            <div class="service-icon">
+                {{ service.icon if service.icon else service.title[0] }}
+            </div>
+            <div class="service-info">
+                <h3>{{ service.title }}</h3>
+                <p>{{ service.description }}</p>
+            </div>
+            <div class="arrow">→</div>
+        </a>
+        {% endfor %}
     </div>
 
-    <div class="arrow">
-        →
+    <div class="info-box" style="margin-top:20px;">
+        <strong>Usalama:</strong>
+        Huduma za usajili zinahitaji uthibitisho unaotakiwa na mtoa huduma.
+        MR. SULE DIGITAL SERVICES BUSINESS inapokea ombi lako na kukuwezesha
+        kuwasiliana na mhudumu/wakala.
     </div>
-
-</a>
-
-{% endfor %}
-
-</div>
-
-
-<div class="info-box" style="margin:16px;">
-
-    <strong>Usalama:</strong>
-    Huduma za usajili zinahitaji uthibitisho
-    unaotakiwa na mtoa huduma. MR. SULE DIGITAL SERVICES BUSINESS
-    inapokea ombi lako na kukuwezesha
-    kuwasiliana na mhudumu/wakala.
-
 </div>
 
 {% endblock %}

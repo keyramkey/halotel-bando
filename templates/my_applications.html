@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}Maombi Yangu{% endblock %}
+
+{% block content %}
+
+<header class="topbar">
+
+    <div>
+
+        <div class="brand">
+            Maombi Yangu
+        </div>
+
+        <div class="muted">
+            Uwakala & Usajili
+        </div>
+
+    </div>
+
+    <a
+        href="{{ url_for('agency') }}"
+        class="icon-btn"
+    >
+        🏪
+    </a>
+
+</header>
+
+
+<div class="page">
+
+{% if applications %}
+
+{% for application in applications %}
+
+<a
+    href="{{ url_for(
+        'application_detail',
+        application_id=application.id
+    ) }}"
+>
+
+    <div class="application-card">
+
+        <div class="application-top">
+
+            <div>
+
+                <div class="application-code">
+                    {{ application.application_code }}
+                </div>
+
+                <div class="application-network">
+                    {{ application.network }}
+                </div>
+
+            </div>
+
+
+            {% if application.status == "pending" %}
+
+                <span class="status pending">
+                    Inasubiri
+                </span>
+
+            {% elif application.status == "processing" %}
+
+                <span class="status processing">
+                    Inachakatwa
+                </span>
+
+            {% elif application.status == "completed" %}
+
+                <span class="status completed">
+                    Imekamilika
+                </span>
+
+            {% else %}
+
+                <span class="status rejected">
+                    Imekataliwa
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <div style="margin-top:12px;">
+
+            <strong style="font-size:14px;">
+                {{ application.service_type }}
+            </strong>
+
+            {% if application.line_type %}
+
+                <div class="muted"
+                     style="margin-top:5px;">
+                    Aina:
+                    {{ application.line_type }}
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        {% if application.admin_note %}
+
+        <div class="info-box"
+             style="margin-top:12px;margin-bottom:0;">
+
+            <strong>Ujumbe wa mhudumu:</strong><br>
+
+            {{ application.admin_note }}
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</a>
+
+{% endfor %}
+
+{% else %}
+
+<div class="card">
+
+    <div style="font-size:40px;">
+        📋
+    </div>
+
+    <div class="title">
+        Hakuna maombi bado
+    </div>
+
+    <p class="muted">
+        Ukichagua huduma ya uwakala,
+        maombi yako yataonekana hapa.
+    </p>
+
+    <a
+        href="{{ url_for('agency') }}"
+        class="btn orange"
+        style="
+            display:block;
+            text-align:center;
+            padding-top:16px;
+            margin-top:15px;
+        "
+    >
+        Angalia Huduma
+    </a>
+
+</div>
+
+{% endif %}
+
+</div>
+
+{% endblock %}

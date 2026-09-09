@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+
+<style>
+    .profile-head {
+        background: linear-gradient(135deg, #ff7800, #f04d00);
+        color: white;
+        padding: 25px 18px;
+    }
+
+    .avatar {
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        background: white;
+        color: #f56b00;
+        display: grid;
+        place-items: center;
+        font-size: 28px;
+        margin-bottom: 12px;
+    }
+
+    .profile-head h1 {
+        font-size: 24px;
+    }
+
+    .profile-head p {
+        font-size: 13px;
+        opacity: .9;
+        margin-top: 4px;
+    }
+
+    .profile-menu {
+        padding: 15px;
+    }
+
+    .menu {
+        background: white;
+        border-radius: 18px;
+        overflow: hidden;
+    }
+
+    .menu a {
+        display: flex;
+        justify-content: space-between;
+        padding: 18px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .menu a:last-child {
+        border-bottom: 0;
+    }
+
+    .menu-left {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .menu-icon {
+        width: 38px;
+        height: 38px;
+        display: grid;
+        place-items: center;
+        border-radius: 11px;
+        background: #fff0e5;
+    }
+
+    .orders {
+        padding: 0 15px;
+    }
+
+    .order {
+        background: white;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 10px;
+    }
+
+    .order-top {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .status {
+        font-size: 11px;
+        padding: 5px 9px;
+        border-radius: 20px;
+        background: #eee;
+    }
+</style>
+
+
+<div class="profile-head">
+
+    <div class="avatar">👤</div>
+
+    <h1>
+        {{ current_user.username }}
+    </h1>
+
+    <p>
+        {{ current_user.phone }}
+    </p>
+
+</div>
+
+
+<div class="profile-menu">
+
+    <div class="menu">
+
+        <a href="{{ url_for('order') }}">
+
+            <div class="menu-left">
+
+                <div class="menu-icon">📦</div>
+
+                <div>
+                    <strong>Request Bundle</strong>
+                    <div class="muted">
+                        Omba MB au GB
+                    </div>
+                </div>
+
+            </div>
+
+            <span>›</span>
+
+        </a>
+
+
+        <a href="{{ url_for('chat') }}">
+
+            <div class="menu-left">
+
+                <div class="menu-icon">💬</div>
+
+                <div>
+                    <strong>Chat na Muuzaji</strong>
+                    <div class="muted">
+                        Wasiliana nasi
+                    </div>
+                </div>
+
+            </div>
+
+            <span>›</span>
+
+        </a>
+
+
+        {% if current_user.is_admin %}
+
+        <a href="{{ url_for('dashboard') }}">
+
+            <div class="menu-left">
+
+                <div class="menu-icon">📊</div>
+
+                <div>
+                    <strong>Dashboard</strong>
+                    <div class="muted">
+                        Simamia mfumo
+                    </div>
+                </div>
+
+            </div>
+
+            <span>›</span>
+
+        </a>
+
+        {% endif %}
+
+
+        <a href="{{ url_for('settings') }}">
+
+            <div class="menu-left">
+
+                <div class="menu-icon">⚙️</div>
+
+                <div>
+                    <strong>Settings</strong>
+                    <div class="muted">
+                        Badilisha taarifa
+                    </div>
+                </div>
+
+            </div>
+
+            <span>›</span>
+
+        </a>
+
+
+        <a href="{{ url_for('logout') }}">
+
+            <div class="menu-left">
+
+                <div class="menu-icon">🚪</div>
+
+                <div>
+                    <strong>Logout</strong>
+                </div>
+
+            </div>
+
+            <span>›</span>
+
+        </a>
+
+    </div>
+
+</div>
+
+
+<div class="section-title">
+    <h2>Orders zako</h2>
+</div>
+
+
+<div class="orders">
+
+{% for order in orders %}
+
+<div class="order">
+
+    <div class="order-top">
+
+        <strong>
+            {{ order.amount }}
+        </strong>
+
+        <span class="status">
+            {{ order.status }}
+        </span>
+
+    </div>
+
+    <div class="muted" style="margin-top:7px;">
+        {{ order.phone }}
+    </div>
+
+    {% if order.price %}
+    <div style="margin-top:8px;font-weight:bold;">
+        TSh {{ "{:,}".format(order.price) }}
+    </div>
+    {% endif %}
+
+</div>
+
+{% else %}
+
+<div class="card">
+    <p class="muted">
+        Bado huja-request bundle.
+    </p>
+</div>
+
+{% endfor %}
+
+</div>
+
+{% endblock %}

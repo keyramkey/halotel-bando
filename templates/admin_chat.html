@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block title %}Chat Customer{% endblock %}
+
+{% block content %}
+
+<style>
+    .chat-head {
+        background: #151515;
+        color: white;
+        padding: 18px;
+    }
+
+    .chat-head h1 {
+        font-size: 21px;
+    }
+
+    .chat-head p {
+        color: #aaa;
+        font-size: 12px;
+        margin-top: 4px;
+    }
+
+    .chat-body {
+        padding: 15px;
+        min-height: calc(100vh - 230px);
+    }
+
+    .message {
+        max-width: 82%;
+        padding: 11px 13px;
+        border-radius: 16px;
+        margin-bottom: 9px;
+        font-size: 14px;
+    }
+
+    .message.customer {
+        background: white;
+        border-bottom-left-radius: 5px;
+    }
+
+    .message.admin {
+        margin-left: auto;
+        background: #f56b00;
+        color: white;
+        border-bottom-right-radius: 5px;
+    }
+
+    .message img {
+        width: 100%;
+        border-radius: 10px;
+        margin-top: 7px;
+    }
+
+    .chat-form {
+        position: fixed;
+        bottom: 70px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(520px, 100%);
+        padding: 10px;
+        background: white;
+        border-top: 1px solid #eee;
+    }
+
+    .chat-row {
+        display: flex;
+        gap: 7px;
+        align-items: center;
+    }
+
+    .chat-input {
+        flex: 1;
+        height: 45px;
+        border: 1px solid #ddd;
+        border-radius: 25px;
+        padding: 0 15px;
+        outline: none;
+    }
+
+    .send {
+        width: 48px;
+        height: 45px;
+        border: 0;
+        border-radius: 50%;
+        background: #f56b00;
+        color: white;
+    }
+
+    .attach {
+        width: 40px;
+        text-align: center;
+        cursor: pointer;
+    }
+</style>
+
+
+<div class="chat-head">
+
+    <h1>💬 {{ user.username }}</h1>
+
+    <p>
+        {{ user.phone }}
+    </p>
+
+</div>
+
+
+<div class="chat-body">
+
+{% for msg in messages %}
+
+<div class="message {{ msg.sender }}">
+
+    {% if msg.message %}
+        <div>{{ msg.message }}</div>
+    {% endif %}
+
+    {% if msg.image %}
+
+        <img
+            src="{{ url_for('static', filename='uploads/' + msg.image) }}"
+        >
+
+    {% endif %}
+
+</div>
+
+{% endfor %}
+
+</div>
+
+
+<form
+    class="chat-form"
+    id="adminChatForm"
+    enctype="multipart/form-data"
+>
+
+    <div class="chat-row">
+
+        <label class="attach">
+            📎
+
+            <input
+                type="file"
+                name="image"
+                accept="image/*"
+                hidden
+            >
+
+        </label>
+
+        <input
+            class="chat-input"
+            name="message"
+            placeholder="Andika ujumbe..."
+        >
+
+        <button class="send">
+            ➤
+        </button>
+
+    </div>
+
+</form>
+
+
+<script>
+
+const form =
+    document.getElementById("adminChatForm");
+
+form.addEventListener("submit", async (e) => {
+
+    e.preventDefault();
+
+    const data = new FormData(form);
+
+    const response = await fetch(
+        "{{ url_for('admin_send_message', user_id=user.id) }}",
+        {
+            method: "POST",
+            body: data
+        }
+    );
+
+    const result = await response.json();
+
+    if (result.success) {
+        location.reload();
+    }
+
+});
+
+</script>
+
+{% endblock %}

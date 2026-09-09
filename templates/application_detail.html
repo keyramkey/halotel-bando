@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}{{ application.application_code }}{% endblock %}
+
+{% block content %}
+
+<header class="topbar">
+
+    <div>
+
+        <div class="brand">
+            {{ application.application_code }}
+        </div>
+
+        <div class="muted">
+            {{ application.network }}
+        </div>
+
+    </div>
+
+    <a
+        href="{{ url_for('my_applications') }}"
+        class="icon-btn"
+    >
+        ←
+    </a>
+
+</header>
+
+
+<div class="page">
+
+    <div class="card">
+
+        <div style="
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:10px;
+        ">
+
+            <div>
+
+                <div class="muted">
+                    Huduma
+                </div>
+
+                <strong>
+                    {{ application.service_type }}
+                </strong>
+
+            </div>
+
+
+            {% if application.status == "pending" %}
+
+                <span class="status pending">
+                    Inasubiri
+                </span>
+
+            {% elif application.status == "processing" %}
+
+                <span class="status processing">
+                    Inachakatwa
+                </span>
+
+            {% elif application.status == "completed" %}
+
+                <span class="status completed">
+                    Imekamilika
+                </span>
+
+            {% else %}
+
+                <span class="status rejected">
+                    Imekataliwa
+                </span>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+
+    <div class="chat-box">
+
+        {% for message in messages %}
+
+            <div
+                class="
+                    chat-message
+                    {{ message.sender }}
+                "
+            >
+
+                {{ message.message }}
+
+                <span class="chat-time">
+                    {{ message.created_at }}
+                </span>
+
+            </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    {% if application.admin_note %}
+
+    <div class="info-box">
+
+        <strong>
+            Maelezo kutoka kwa mhudumu:
+        </strong>
+
+        <br>
+
+        {{ application.admin_note }}
+
+    </div>
+
+    {% endif %}
+
+
+    {% if application.status != "completed" and
+          application.status != "rejected" %}
+
+    <form
+        method="POST"
+        class="chat-form"
+    >
+
+        <input
+            type="text"
+            name="message"
+            placeholder="Andika ujumbe..."
+            autocomplete="off"
+            required
+        >
+
+        <button type="submit">
+            ➤
+        </button>
+
+    </form>
+
+    {% else %}
+
+    <div class="card">
+
+        <p class="muted">
+            Ombi hili limefungwa. Unaweza kuwasiliana
+            na huduma kwa ombi jipya.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

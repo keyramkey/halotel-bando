@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+<style>
+    .auth {
+        min-height: calc(100vh - 70px);
+        padding: 25px 18px;
+        display: flex;
+        align-items: center;
+    }
+
+    .auth-card {
+        width: 100%;
+        background: white;
+        border-radius: 22px;
+        padding: 22px;
+    }
+
+    .auth-card h1 {
+        font-size: 28px;
+        margin-bottom: 6px;
+    }
+
+    .field {
+        margin-top: 16px;
+    }
+
+    .field label {
+        display: block;
+        font-size: 13px;
+        font-weight: bold;
+        margin-bottom: 7px;
+    }
+
+    .auth-link {
+        text-align: center;
+        margin-top: 15px;
+        color: #777;
+        font-size: 13px;
+    }
+
+    .auth-link a {
+        color: #f56b00;
+        font-weight: bold;
+    }
+</style>
+
+<div class="auth">
+
+    <div class="auth-card">
+
+        <h1>Karibu tena 👋</h1>
+
+        <p class="muted">
+            Ingia kwenye akaunti yako.
+        </p>
+
+        <form method="POST">
+
+            <div class="field">
+                <label>Username / Namba / Email</label>
+
+                <input
+                    class="input"
+                    name="identity"
+                    required
+                    placeholder="Weka taarifa yako"
+                >
+            </div>
+
+            <div class="field">
+                <label>Password</label>
+
+                <input
+                    class="input"
+                    type="password"
+                    name="password"
+                    required
+                    placeholder="Password"
+                >
+            </div>
+
+            <div style="margin-top:20px;">
+                <button class="btn orange">
+                    Ingia
+                </button>
+            </div>
+
+        </form>
+
+        <div class="auth-link">
+            Huna akaunti?
+            <a href="{{ url_for('register') }}">Jisajili</a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

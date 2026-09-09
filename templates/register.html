@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Jisajili{% endblock %}
+
+{% block content %}
+
+<style>
+    .auth {
+        min-height: calc(100vh - 70px);
+        padding: 25px 18px;
+        display: flex;
+        align-items: center;
+    }
+
+    .auth-card {
+        width: 100%;
+        background: white;
+        border-radius: 22px;
+        padding: 22px;
+    }
+
+    .auth-card h1 {
+        font-size: 27px;
+        margin-bottom: 6px;
+    }
+
+    .field {
+        margin-top: 15px;
+    }
+
+    .field label {
+        display: block;
+        font-size: 13px;
+        font-weight: bold;
+        margin-bottom: 7px;
+    }
+
+    .auth-link {
+        text-align: center;
+        margin-top: 15px;
+        font-size: 13px;
+        color: #777;
+    }
+
+    .auth-link a {
+        color: #f56b00;
+        font-weight: bold;
+    }
+</style>
+
+<div class="auth">
+
+    <div class="auth-card">
+
+        <h1>Jisajili</h1>
+
+        <p class="muted">
+            Tengeneza akaunti yako ya Halotel Bando.
+        </p>
+
+        <form method="POST">
+
+            <div class="field">
+                <label>Username</label>
+                <input
+                    class="input"
+                    name="username"
+                    required
+                    placeholder="Jina lako"
+                >
+            </div>
+
+            <div class="field">
+                <label>Namba ya simu</label>
+                <input
+                    class="input"
+                    name="phone"
+                    required
+                    placeholder="07XXXXXXXX"
+                >
+            </div>
+
+            <div class="field">
+                <label>Email</label>
+                <input
+                    class="input"
+                    type="email"
+                    name="email"
+                    placeholder="Email yako"
+                >
+            </div>
+
+            <div class="field">
+                <label>Password</label>
+                <input
+                    class="input"
+                    type="password"
+                    name="password"
+                    required
+                    placeholder="Password"
+                >
+            </div>
+
+            <div style="margin-top:20px;">
+                <button class="btn orange">
+                    Fungua Akaunti
+                </button>
+            </div>
+
+        </form>
+
+        <div class="auth-link">
+            Una akaunti?
+            <a href="{{ url_for('login') }}">Ingia</a>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Uwakala & Usajili{% endblock %}
+
+{% block content %}
+
+<div class="agency-hero">
+
+    <div class="agency-hero-icon">
+        🏪
+    </div>
+
+    <h1>
+        Uwakala & Usajili
+    </h1>
+
+    <p>
+        Chagua mtandao unaotaka kupata huduma.
+        Unaweza kuomba usajili wa laini,
+        huduma za wakala, merchant na huduma
+        za fedha kwa simu.
+    </p>
+
+</div>
+
+
+<div class="section-title">
+    <h2>Chagua Mtandao</h2>
+</div>
+
+
+<div class="network-grid">
+
+{% for network in networks %}
+
+<a
+    href="{{ url_for(
+        'agency_network',
+        network=network.network
+    ) }}"
+    class="network-card"
+>
+
+    <div class="network-icon">
+        📡
+    </div>
+
+    <h3>
+        {{ network.network }}
+    </h3>
+
+    <p>
+        Angalia huduma zinazopatikana
+    </p>
+
+</a>
+
+{% endfor %}
+
+</div>
+
+
+<div class="section-title">
+    <h2>Haraka</h2>
+</div>
+
+
+<div style="padding:0 14px;">
+
+    <a
+        href="{{ url_for('my_applications') }}"
+        class="main-service"
+    >
+
+        <div class="main-service-icon">
+            📋
+        </div>
+
+        <div class="main-service-content">
+
+            <h3>
+                Maombi Yangu
+            </h3>
+
+            <p>
+                Angalia maombi na status zake.
+            </p>
+
+        </div>
+
+        <div class="main-arrow">
+            →
+        </div>
+
+    </a>
+
+</div>
+
+{% endblock %}

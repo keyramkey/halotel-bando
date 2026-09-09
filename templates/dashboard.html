@@ -1,0 +1,282 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<header class="topbar">
+
+    <div>
+
+        <div class="brand">
+            Admin <span>Dashboard</span>
+        </div>
+
+        <div class="muted">
+            MR. SULE DIGITAL SERVICES BUSINESS
+        </div>
+
+    </div>
+
+    <a
+        href="{{ url_for('home') }}"
+        class="icon-btn"
+    >
+        🏠
+    </a>
+
+</header>
+
+
+<div class="page">
+
+    <div class="network-grid">
+
+        <div class="card"
+             style="margin:0;">
+
+            <div style="font-size:28px;">
+                👥
+            </div>
+
+            <div class="muted">
+                Users
+            </div>
+
+            <strong style="font-size:24px;">
+                {{ users_count }}
+            </strong>
+
+        </div>
+
+
+        <div class="card"
+             style="margin:0;">
+
+            <div style="font-size:28px;">
+                📦
+            </div>
+
+            <div class="muted">
+                Bando Pending
+            </div>
+
+            <strong style="font-size:24px;">
+                {{ pending_count }}
+            </strong>
+
+        </div>
+
+
+        <div class="card"
+             style="margin:0;">
+
+            <div style="font-size:28px;">
+                🏪
+            </div>
+
+            <div class="muted">
+                Agency Pending
+            </div>
+
+            <strong style="font-size:24px;">
+                {{ agency_pending }}
+            </strong>
+
+        </div>
+
+    </div>
+
+
+    <div class="section-title"
+         style="padding-left:0;padding-right:0;">
+
+        <h2>
+            🏪 Maombi ya Uwakala
+        </h2>
+
+    </div>
+
+
+    {% for application in applications %}
+
+    <div class="application-card">
+
+        <div class="application-top">
+
+            <div>
+
+                <div class="application-code">
+                    {{ application.application_code }}
+                </div>
+
+                <div class="application-network">
+                    {{ application.network }}
+                    ·
+                    {{ application.service_type }}
+                </div>
+
+            </div>
+
+
+            {% if application.status == "pending" %}
+
+                <span class="status pending">
+                    Inasubiri
+                </span>
+
+            {% elif application.status == "processing" %}
+
+                <span class="status processing">
+                    Inachakatwa
+                </span>
+
+            {% elif application.status == "completed" %}
+
+                <span class="status completed">
+                    Imekamilika
+                </span>
+
+            {% else %}
+
+                <span class="status rejected">
+                    Imekataliwa
+                </span>
+
+            {% endif %}
+
+        </div>
+
+
+        <div style="
+            margin-top:12px;
+            font-size:13px;
+        ">
+
+            <strong>
+                {{ application.full_name }}
+            </strong>
+
+            <div class="muted"
+                 style="margin-top:4px;">
+
+                {{ application.phone }}
+
+            </div>
+
+        </div>
+
+
+        <form
+            method="POST"
+            action="{{ url_for(
+                'update_agency_status',
+                application_id=application.id
+            ) }}"
+            style="margin-top:13px;"
+        >
+
+            <select
+                class="input"
+                name="status"
+            >
+
+                <option
+                    value="pending"
+                    {% if application.status == "pending" %}
+                    selected
+                    {% endif %}
+                >
+                    Inasubiri
+                </option>
+
+                <option
+                    value="processing"
+                    {% if application.status == "processing" %}
+                    selected
+                    {% endif %}
+                >
+                    Inachakatwa
+                </option>
+
+                <option
+                    value="completed"
+                    {% if application.status == "completed" %}
+                    selected
+                    {% endif %}
+                >
+                    Imekamilika
+                </option>
+
+                <option
+                    value="rejected"
+                    {% if application.status == "rejected" %}
+                    selected
+                    {% endif %}
+                >
+                    Imekataliwa
+                </option>
+
+            </select>
+
+
+            <textarea
+                class="input"
+                name="note"
+                placeholder="Ujumbe/maelezo kwa mteja..."
+            >{{ application.admin_note }}</textarea>
+
+
+            <button
+                class="btn orange"
+                type="submit"
+                style="margin-top:9px;"
+            >
+                Hifadhi Status
+            </button>
+
+        </form>
+
+
+        <a
+            href="{{ url_for(
+                'admin_agency_chat',
+                application_id=application.id
+            ) }}"
+            class="btn"
+            style="
+                display:block;
+                text-align:center;
+                padding-top:16px;
+                margin-top:8px;
+            "
+        >
+            💬 Fungua Chat na Mteja
+        </a>
+
+    </div>
+
+    {% else %}
+
+    <div class="card">
+
+        <div style="font-size:40px;">
+            📭
+        </div>
+
+        <div class="title">
+            Hakuna maombi mapya
+        </div>
+
+        <p class="muted">
+            Maombi ya usajili na uwakala
+            yataonekana hapa.
+        </p>
+
+    </div>
+
+    {% endfor %}
+
+</div>
+
+{% endblock %}

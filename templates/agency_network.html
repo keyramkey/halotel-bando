@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}{{ network }} | Uwakala{% endblock %}
+
+{% block content %}
+
+<header class="topbar">
+
+    <div>
+
+        <div class="brand">
+            {{ network }}
+        </div>
+
+        <div class="muted">
+            Uwakala & Usajili
+        </div>
+
+    </div>
+
+    <a
+        href="{{ url_for('agency') }}"
+        class="icon-btn"
+    >
+        ←
+    </a>
+
+</header>
+
+
+<div class="section-title">
+
+    <h2>
+        Huduma za {{ network }}
+    </h2>
+
+</div>
+
+
+<div class="service-grid">
+
+{% for service in services %}
+
+<a
+    href="{{ url_for(
+        'agency_apply',
+        service_id=service.id
+    ) }}"
+    class="service-card"
+>
+
+    <div class="service-icon">
+        {{ service.icon }}
+    </div>
+
+    <div class="service-info">
+
+        <h3>
+            {{ service.title }}
+        </h3>
+
+        <p>
+            {{ service.description }}
+        </p>
+
+    </div>
+
+    <div class="arrow">
+        →
+    </div>
+
+</a>
+
+{% endfor %}
+
+</div>
+
+
+<div class="info-box" style="margin:16px;">
+
+    <strong>Usalama:</strong>
+    Huduma za usajili zinahitaji uthibitisho
+    unaotakiwa na mtoa huduma. MR. SULE DIGITAL SERVICES BUSINESS
+    inapokea ombi lako na kukuwezesha
+    kuwasiliana na mhudumu/wakala.
+
+</div>
+
+{% endblock %}

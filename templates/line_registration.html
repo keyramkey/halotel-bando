@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Omba {{ service.title }}{% endblock %}
+
+{% block content %}
+
+<header class="topbar">
+
+    <div>
+
+        <div class="brand">
+            {{ service.network }}
+        </div>
+
+        <div class="muted">
+            {{ service.title }}
+        </div>
+
+    </div>
+
+    <a
+        href="{{ url_for(
+            'agency_network',
+            network=service.network
+        ) }}"
+        class="icon-btn"
+    >
+        ←
+    </a>
+
+</header>
+
+
+<div class="page">
+
+    <div class="card">
+
+        <div style="font-size:36px;">
+            {{ service.icon }}
+        </div>
+
+        <div class="title">
+            {{ service.title }}
+        </div>
+
+        <p class="muted">
+            {{ service.description }}
+        </p>
+
+    </div>
+
+
+    <div class="info-box">
+
+        <strong>Jambo muhimu:</strong><br>
+
+        Taarifa zako zitumike kwa ombi hili
+        tu. Usitume PIN, password, OTP au
+        taarifa za siri za akaunti zako.
+
+    </div>
+
+
+    <form
+        method="POST"
+        action="{{ url_for(
+            'agency_apply',
+            service_id=service.id
+        ) }}"
+    >
+
+
+        <div class="card">
+
+            <div class="title"
+                 style="font-size:18px;">
+                Taarifa zako
+            </div>
+
+
+            <label class="form-label">
+                Jina kamili
+            </label>
+
+            <input
+                class="input"
+                type="text"
+                name="full_name"
+                placeholder="Mfano: Juma Mohamed"
+                required
+            >
+
+
+            <label class="form-label">
+                Namba ya simu
+            </label>
+
+            <input
+                class="input"
+                type="tel"
+                name="phone"
+                placeholder="07XXXXXXXX"
+                required
+            >
+
+
+            <label class="form-label">
+                Aina ya Kitambulisho
+            </label>
+
+            <select
+                class="input"
+                name="id_type"
+                required
+            >
+
+                <option value="">
+                    Chagua kitambulisho
+                </option>
+
+                <option value="NIDA">
+                    NIDA / NIN
+                </option>
+
+                <option value="Passport">
+                    Passport
+                </option>
+
+                <option value="Driving Licence">
+                    Driving Licence
+                </option>
+
+                <option value="Voter ID">
+                    Voter ID
+                </option>
+
+            </select>
+
+
+            <label class="form-label">
+                Namba ya Kitambulisho
+            </label>
+
+            <input
+                class="input"
+                type="text"
+                name="id_number"
+                placeholder="Weka namba ya kitambulisho"
+                required
+            >
+
+
+            <label class="form-label">
+                Aina ya huduma/laini
+            </label>
+
+            <select
+                class="input"
+                name="line_type"
+            >
+
+                <option value="">
+                    Chagua aina
+                </option>
+
+                <option value="Kawaida">
+                    Laini ya Kawaida
+                </option>
+
+                <option value="Uwakala">
+                    Laini ya Uwakala
+                </option>
+
+                <option value="Merchant">
+                    Lipa kwa Simu / Merchant
+                </option>
+
+                <option value="Biashara">
+                    Laini ya Biashara
+                </option>
+
+                <option value="Replacement">
+                    Replacement
+                </option>
+
+            </select>
+
+
+            <label class="form-label">
+                Mkoa
+            </label>
+
+            <input
+                class="input"
+                type="text"
+                name="region"
+                placeholder="Mfano: Mbeya"
+            >
+
+
+            <label class="form-label">
+                Wilaya
+            </label>
+
+            <input
+                class="input"
+                type="text"
+                name="district"
+                placeholder="Weka wilaya"
+            >
+
+
+            <label class="form-label">
+                Kata / Eneo
+            </label>
+
+            <input
+                class="input"
+                type="text"
+                name="ward"
+                placeholder="Weka kata au eneo"
+            >
+
+
+            <label class="form-label">
+                Maelezo ya ziada
+            </label>
+
+            <textarea
+                class="input"
+                name="description"
+                placeholder="Eleza huduma unayohitaji..."
+            ></textarea>
+
+
+            <button
+                class="btn orange"
+                type="submit"
+                style="margin-top:16px;"
+            >
+                🚀 Tuma Ombi
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

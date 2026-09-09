@@ -4,79 +4,1334 @@
 
 {% block content %}
 
-<header class="topbar">
-    <div>
-        <div class="brand">Nunua <span>Bundle</span></div>
-        <div class="muted">Chagua kifurushi & Lipa kwa Simu</div>
+<style>
+
+/* =========================================================
+   CINEMATIC BUNDLE ORDER PAGE
+   ========================================================= */
+
+:root {
+    --orange: #ff7800;
+    --orange-dark: #e94e00;
+    --orange-soft: #fff2e7;
+
+    --bg: #f5f6f8;
+    --card: rgba(255,255,255,.96);
+
+    --text: #151515;
+    --muted: #8a8e96;
+
+    --border: rgba(0,0,0,.07);
+
+    --shadow:
+        0 12px 35px rgba(0,0,0,.07);
+
+    --radius-xl: 27px;
+    --radius-lg: 21px;
+    --radius-md: 16px;
+}
+
+
+/* =========================================================
+   PAGE
+   ========================================================= */
+
+.order-page {
+
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            circle at 90% 5%,
+            rgba(255,120,0,.10),
+            transparent 28%
+        ),
+        linear-gradient(
+            180deg,
+            #fafafa,
+            var(--bg)
+        );
+
+    padding-bottom: 45px;
+}
+
+
+/* =========================================================
+   CINEMATIC HERO
+   ========================================================= */
+
+.order-hero {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 24px 18px 30px;
+
+    color: white;
+
+    background:
+        radial-gradient(
+            circle at 90% 10%,
+            rgba(255,255,255,.18),
+            transparent 27%
+        ),
+        radial-gradient(
+            circle at 5% 100%,
+            rgba(255,255,255,.10),
+            transparent 32%
+        ),
+        linear-gradient(
+            135deg,
+            #ff8500,
+            #f05200 55%,
+            #d93c00
+        );
+
+    border-radius:
+        0 0 34px 34px;
+
+    box-shadow:
+        0 18px 45px rgba(240,77,0,.20);
+}
+
+
+/* background grid */
+
+.order-hero::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 0;
+
+    opacity: .06;
+
+    background-image:
+        linear-gradient(
+            rgba(255,255,255,.8) 1px,
+            transparent 1px
+        ),
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,.8) 1px,
+            transparent 1px
+        );
+
+    background-size: 30px 30px;
+
+    mask-image:
+        linear-gradient(
+            to bottom,
+            black,
+            transparent
+        );
+
+    pointer-events: none;
+}
+
+
+.hero-content {
+
+    position: relative;
+
+    z-index: 2;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+}
+
+
+.hero-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+
+.hero-icon {
+
+    width: 44px;
+    height: 44px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 15px;
+
+    background:
+        rgba(255,255,255,.15);
+
+    border:
+        1px solid rgba(255,255,255,.20);
+
+    backdrop-filter: blur(12px);
+
+    font-size: 20px;
+}
+
+
+.brand {
+
+    font-size: 20px;
+
+    font-weight: 850;
+
+    letter-spacing: -.5px;
+}
+
+
+.brand span {
+
+    opacity: .75;
+}
+
+
+.hero-subtitle {
+
+    margin: 5px 0 0;
+
+    font-size: 11px;
+
+    opacity: .78;
+}
+
+
+.back-btn {
+
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 14px;
+
+    color: white;
+
+    text-decoration: none;
+
+    background:
+        rgba(255,255,255,.14);
+
+    border:
+        1px solid rgba(255,255,255,.20);
+
+    backdrop-filter: blur(12px);
+
+    font-size: 22px;
+
+    transition:
+        transform .2s ease,
+        background .2s ease;
+}
+
+
+.back-btn:active {
+
+    transform: scale(.92);
+
+}
+
+
+/* =========================================================
+   MAIN CONTAINER
+   ========================================================= */
+
+.order-container {
+
+    width: 100%;
+
+    max-width: 650px;
+
+    margin: auto;
+
+    padding: 18px 16px 0;
+}
+
+
+/* =========================================================
+   CARD
+   ========================================================= */
+
+.order-card {
+
+    background: var(--card);
+
+    border:
+        1px solid var(--border);
+
+    border-radius: var(--radius-xl);
+
+    padding: 19px;
+
+    margin-bottom: 15px;
+
+    box-shadow: var(--shadow);
+
+    animation:
+        cardEnter .55s ease both;
+}
+
+
+.order-card:nth-child(2) {
+
+    animation-delay: .08s;
+
+}
+
+
+@keyframes cardEnter {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(14px);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0);
+
+    }
+
+}
+
+
+/* =========================================================
+   CARD HEADING
+   ========================================================= */
+
+.card-heading {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-bottom: 19px;
+}
+
+
+.heading-icon {
+
+    width: 41px;
+    height: 41px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 13px;
+
+    background: var(--orange-soft);
+
+    font-size: 18px;
+}
+
+
+.heading-title {
+
+    margin: 0;
+
+    font-size: 16px;
+
+    font-weight: 800;
+
+    letter-spacing: -.3px;
+}
+
+
+.heading-subtitle {
+
+    margin-top: 3px;
+
+    font-size: 10px;
+
+    color: var(--muted);
+}
+
+
+/* =========================================================
+   FORM
+   ========================================================= */
+
+.form-label {
+
+    display: block;
+
+    margin:
+        15px 0 7px;
+
+    font-size: 11px;
+
+    font-weight: 750;
+
+    color: #454545;
+}
+
+
+.input {
+
+    width: 100%;
+
+    min-height: 49px;
+
+    box-sizing: border-box;
+
+    padding: 13px 14px;
+
+    border:
+        1px solid #e8e8e8;
+
+    border-radius: 15px;
+
+    outline: none;
+
+    background: #fafafa;
+
+    color: var(--text);
+
+    font-size: 13px;
+
+    font-family: inherit;
+
+    transition:
+        border .2s ease,
+        box-shadow .2s ease,
+        background .2s ease;
+}
+
+
+.input:focus {
+
+    background: white;
+
+    border-color:
+        rgba(255,120,0,.55);
+
+    box-shadow:
+        0 0 0 4px
+        rgba(255,120,0,.09);
+
+}
+
+
+textarea.input {
+
+    min-height: 100px;
+
+    resize: vertical;
+}
+
+
+select.input {
+
+    cursor: pointer;
+
+}
+
+
+/* =========================================================
+   BUNDLE SELECT
+   ========================================================= */
+
+.bundle-select-wrapper {
+
+    position: relative;
+}
+
+
+.bundle-select-wrapper::after {
+
+    content: "⌄";
+
+    position: absolute;
+
+    right: 15px;
+
+    top: 50%;
+
+    transform:
+        translateY(-50%);
+
+    pointer-events: none;
+
+    color: var(--muted);
+
+    font-size: 17px;
+}
+
+
+/* =========================================================
+   PRICE DISPLAY
+   ========================================================= */
+
+.price-box {
+
+    position: relative;
+
+    overflow: hidden;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-top: 16px;
+
+    padding: 17px;
+
+    border-radius: 19px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #fff6ef,
+            #fff0e5
+        );
+
+    border:
+        1px solid rgba(255,120,0,.10);
+}
+
+
+.price-box::after {
+
+    content: "TSh";
+
+    position: absolute;
+
+    right: -5px;
+
+    bottom: -20px;
+
+    font-size: 70px;
+
+    font-weight: 900;
+
+    color: rgba(255,120,0,.055);
+
+    pointer-events: none;
+}
+
+
+.price-label {
+
+    position: relative;
+
+    z-index: 2;
+
+    color: #8b6d59;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+    text-transform: uppercase;
+
+    letter-spacing: 1px;
+}
+
+
+.price-value {
+
+    position: relative;
+
+    z-index: 2;
+
+    margin-top: 3px;
+
+    color: var(--orange-dark);
+
+    font-size: 24px;
+
+    font-weight: 900;
+
+    letter-spacing: -.7px;
+}
+
+
+/* =========================================================
+   HOT OFFER
+   ========================================================= */
+
+.offer-note {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    margin-top: 8px;
+
+    padding: 5px 9px;
+
+    border-radius: 50px;
+
+    background:
+        rgba(255,120,0,.10);
+
+    color:
+        var(--orange-dark);
+
+    font-size: 9px;
+
+    font-weight: 800;
+}
+
+
+/* =========================================================
+   PAYMENT STEPS
+   ========================================================= */
+
+.payment-step {
+
+    display: flex;
+
+    gap: 12px;
+
+    margin-bottom: 17px;
+}
+
+
+.step-number {
+
+    width: 29px;
+    height: 29px;
+
+    flex-shrink: 0;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 10px;
+
+    background: var(--orange-soft);
+
+    color: var(--orange-dark);
+
+    font-size: 10px;
+
+    font-weight: 900;
+}
+
+
+.step-content {
+
+    flex: 1;
+}
+
+
+.step-title {
+
+    font-size: 12px;
+
+    font-weight: 750;
+
+    margin-bottom: 7px;
+}
+
+
+.step-help {
+
+    display: block;
+
+    margin-top: 6px;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    line-height: 1.5;
+}
+
+
+/* =========================================================
+   SECURITY NOTE
+   ========================================================= */
+
+.security-note {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 9px;
+
+    margin-top: 4px;
+
+    padding: 12px;
+
+    border-radius: 14px;
+
+    background: #f8f8f8;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    line-height: 1.5;
+}
+
+
+.security-icon {
+
+    font-size: 15px;
+
+}
+
+
+/* =========================================================
+   SUBMIT BUTTON
+   ========================================================= */
+
+.submit-btn {
+
+    position: relative;
+
+    overflow: hidden;
+
+    width: 100%;
+
+    min-height: 53px;
+
+    margin-top: 17px;
+
+    border: 0;
+
+    border-radius: 17px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #ff8500,
+            #ed4f00
+        );
+
+    color: white;
+
+    font-size: 13px;
+
+    font-weight: 800;
+
+    font-family: inherit;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 10px 25px
+        rgba(240,77,0,.25);
+
+    transition:
+        transform .2s ease,
+        box-shadow .2s ease;
+}
+
+
+.submit-btn::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+    left: -100%;
+
+    width: 70%;
+    height: 100%;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.18),
+            transparent
+        );
+
+    transform: skewX(-20deg);
+
+    transition:
+        left .6s ease;
+}
+
+
+.submit-btn:hover::before {
+
+    left: 130%;
+
+}
+
+
+.submit-btn:active {
+
+    transform: scale(.985);
+
+    box-shadow:
+        0 5px 15px
+        rgba(240,77,0,.18);
+
+}
+
+
+/* =========================================================
+   PROCESSING STATE
+   ========================================================= */
+
+.submit-btn.loading {
+
+    pointer-events: none;
+
+    opacity: .82;
+}
+
+
+.loading-spinner {
+
+    display: inline-block;
+
+    width: 14px;
+    height: 14px;
+
+    margin-right: 7px;
+
+    vertical-align: -2px;
+
+    border:
+        2px solid rgba(255,255,255,.35);
+
+    border-top-color: white;
+
+    border-radius: 50%;
+
+    animation:
+        spin .7s linear infinite;
+}
+
+
+@keyframes spin {
+
+    to {
+        transform: rotate(360deg);
+    }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (min-width: 700px) {
+
+    .order-page {
+
+        max-width: 700px;
+
+        margin: auto;
+
+    }
+
+    .order-hero {
+
+        border-radius:
+            0 0 38px 38px;
+
+    }
+
+    .order-container {
+
+        padding-top: 22px;
+
+    }
+
+}
+
+</style>
+
+<div class="order-page">
+
+```
+<!-- =====================================================
+     HERO
+====================================================== -->
+
+<header class="order-hero">
+
+    <div class="hero-content">
+
+        <div class="hero-title">
+
+            <div class="hero-icon">
+                📦
+            </div>
+
+            <div>
+
+                <div class="brand">
+                    Nunua <span>Bundle</span>
+                </div>
+
+                <div class="hero-subtitle">
+                    Chagua kifurushi & lipa kwa simu
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <a
+            href="{{ url_for('home') }}"
+            class="back-btn"
+            aria-label="Back"
+        >
+            ←
+        </a>
+
     </div>
-    <a href="{{ url_for('home') }}" class="icon-btn">←</a>
+
 </header>
 
-<div class="page">
-    <form method="POST" action="{{ url_for('order') }}">
-        <div class="card">
-            <div class="title" style="font-size:18px; margin-bottom:12px;">Chagua Kifurushi</div>
 
-            <label class="form-label">Kifurushi / Offer</label>
-            <select class="input" id="bundleSelect" onchange="updateBundleDetails()" required>
-                <option value="" data-amount="" data-price="0">-- Chagua Kifurushi --</option>
-                
-                {% if offer_title %}
-                    <option value="offer" data-amount="{{ offer_title }} - {{ offer_amount }}" data-price="{{ offer_price }}" selected>
-                        🔥 {{ offer_title }} | {{ offer_amount }} — TSh {{ "{:,}".format(offer_price|int) }}
+<!-- =====================================================
+     MAIN
+====================================================== -->
+
+<main class="order-container">
+
+
+    <form
+        method="POST"
+        action="{{ url_for('order') }}"
+        id="orderForm"
+    >
+
+
+        <!-- =================================================
+             BUNDLE
+        ================================================== -->
+
+        <section class="order-card">
+
+            <div class="card-heading">
+
+                <div class="heading-icon">
+                    📶
+                </div>
+
+                <div>
+
+                    <h2 class="heading-title">
+                        Chagua Kifurushi
+                    </h2>
+
+                    <div class="heading-subtitle">
+                        Chagua bundle inayokufaa
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <label class="form-label">
+                Kifurushi / Offer
+            </label>
+
+
+            <div class="bundle-select-wrapper">
+
+                <select
+                    class="input"
+                    id="bundleSelect"
+                    onchange="updateBundleDetails()"
+                    required
+                >
+
+                    <option
+                        value=""
+                        data-amount=""
+                        data-price="0"
+                    >
+                        -- Chagua Kifurushi --
                     </option>
+
+
+                    {% if offer_title %}
+
+                    <option
+                        value="offer"
+                        data-amount="{{ offer_title }} - {{ offer_amount }}"
+                        data-price="{{ offer_price }}"
+                        selected
+                    >
+                        🔥 {{ offer_title }} |
+                        {{ offer_amount }}
+                        — TSh
+                        {{ "{:,}".format(offer_price|int) }}
+                    </option>
+
+                    {% endif %}
+
+
+                    {% for b in bundles %}
+
+                    <option
+                        value="{{ b.id }}"
+                        data-amount="{{ b.name }} - {{ b.amount }}"
+                        data-price="{{ b.price }}"
+                        {% if selected_bundle and selected_bundle.id == b.id and not offer_title %}
+                        selected
+                        {% endif %}
+                    >
+
+                        {{ b.name }} |
+                        {{ b.amount }}
+                        — TSh
+                        {{ "{:,}".format(b.price) }}
+                        ({{ b.validity }})
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- Hidden values -->
+
+            <input
+                type="hidden"
+                name="amount"
+                id="amountInput"
+                value="{% if offer_title %}{{ offer_title }} - {{ offer_amount }}{% elif selected_bundle %}{{ selected_bundle.name }} - {{ selected_bundle.amount }}{% endif %}"
+            >
+
+
+            <input
+                type="hidden"
+                name="price"
+                id="priceInput"
+                value="{% if offer_price %}{{ offer_price }}{% elif selected_bundle %}{{ selected_bundle.price }}{% else %}0{% endif %}"
+            >
+
+
+            <!-- PRICE -->
+
+            <div class="price-box">
+
+                <div>
+
+                    <div class="price-label">
+                        Gharama ya bundle
+                    </div>
+
+                    <div
+                        class="price-value"
+                        id="displayPrice"
+                    >
+
+                        {% if offer_price %}
+
+                            {{ "{:,}".format(offer_price|int) }}
+
+                        {% elif selected_bundle %}
+
+                            {{ "{:,}".format(selected_bundle.price) }}
+
+                        {% else %}
+
+                            0
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                {% if offer_title %}
+
+                <div class="offer-note">
+                    🔥 SPECIAL OFFER
+                </div>
+
                 {% endif %}
 
-                {% for b in bundles %}
-                    <option value="{{ b.id }}" 
-                            data-amount="{{ b.name }} - {{ b.amount }}" 
-                            data-price="{{ b.price }}"
-                            {% if selected_bundle and selected_bundle.id == b.id and not offer_title %}selected{% endif %}>
-                        {{ b.name }} | {{ b.amount }} — TSh {{ "{:,}".format(b.price) }} ({{ b.validity }})
-                    </option>
-                {% endfor %}
-            </select>
-
-            <input type="hidden" name="amount" id="amountInput" value="{% if offer_title %}{{ offer_title }} - {{ offer_amount }}{% elif selected_bundle %}{{ selected_bundle.name }} - {{ selected_bundle.amount }}{% endif %}">
-            <input type="hidden" name="price" id="priceInput" value="{% if offer_price %}{{ offer_price }}{% elif selected_bundle %}{{ selected_bundle.price }}{% else %}0{% endif %}">
-
-            <div style="margin-top:15px;" class="info-box">
-                <strong>Gharama:</strong> TSh <span id="displayPrice">{% if offer_price %}{{ "{:,}".format(offer_price|int) }}{% elif selected_bundle %}{{ "{:,}".format(selected_bundle.price) }}{% else %}0{% endif %}</span>
             </div>
-        </div>
 
-        <div class="card" style="margin-top:15px;">
-            <div class="title" style="font-size:18px; margin-bottom:12px;">Taarifa za Malipo</div>
+        </section>
 
-            <label class="form-label">1. Namba ya Kulipia (M-Pesa / Tigo / Airtel n.k)</label>
-            <input class="input" type="tel" name="payment_phone" placeholder="07XXXXXXXX" value="{{ current_user.phone if current_user else '' }}" required>
-            <span class="muted" style="display:block; margin-top:4px;">Ujumbe wa PIN ya ClickPesa utatumwa kwenye namba hii.</span>
 
-            <label class="form-label">2. Namba ya Kuwekewa Bando (Halotel, Vodacom n.k)</label>
-            <input class="input" type="tel" name="target_phone" placeholder="062XXXXXXX" required>
 
-            <label class="form-label">Maelezo ya ziada (Hiari)</label>
-            <textarea class="input" name="note" placeholder="Weka maelezo ziada kama yapo..."></textarea>
+        <!-- =================================================
+             PAYMENT
+        ================================================== -->
 
-            <button class="btn orange" type="submit" style="margin-top:16px;">
-                💳 Lipa na Tuma Ombi
+        <section class="order-card">
+
+            <div class="card-heading">
+
+                <div class="heading-icon">
+                    💳
+                </div>
+
+                <div>
+
+                    <h2 class="heading-title">
+                        Taarifa za Malipo
+                    </h2>
+
+                    <div class="heading-subtitle">
+                        Jaza taarifa kwa usahihi
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- STEP 01 -->
+
+            <div class="payment-step">
+
+                <div class="step-number">
+                    01
+                </div>
+
+                <div class="step-content">
+
+                    <div class="step-title">
+                        Namba ya Kulipia
+                    </div>
+
+                    <input
+                        class="input"
+                        type="tel"
+                        name="payment_phone"
+                        placeholder="07XXXXXXXX"
+                        value="{{ current_user.phone if current_user else '' }}"
+                        required
+                    >
+
+                    <span class="step-help">
+                        M-Pesa, Tigo Pesa, Airtel Money
+                        au mtandao mwingine unaokubaliwa.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- STEP 02 -->
+
+            <div class="payment-step">
+
+                <div class="step-number">
+                    02
+                </div>
+
+                <div class="step-content">
+
+                    <div class="step-title">
+                        Namba ya Kuwekewa Bando
+                    </div>
+
+                    <input
+                        class="input"
+                        type="tel"
+                        name="target_phone"
+                        placeholder="062XXXXXXX"
+                        required
+                    >
+
+                    <span class="step-help">
+                        Hii ndiyo namba ambayo bundle
+                        itawekewa.
+                    </span>
+
+                </div>
+
+            </div>
+
+
+            <!-- STEP 03 -->
+
+            <div class="payment-step">
+
+                <div class="step-number">
+                    03
+                </div>
+
+                <div class="step-content">
+
+                    <div class="step-title">
+                        Maelezo ya Ziada
+                        <span style="color:#aaa;">
+                            (Hiari)
+                        </span>
+                    </div>
+
+                    <textarea
+                        class="input"
+                        name="note"
+                        placeholder="Weka maelezo ya ziada kama yapo..."
+                    ></textarea>
+
+                </div>
+
+            </div>
+
+
+            <!-- SECURITY -->
+
+            <div class="security-note">
+
+                <div class="security-icon">
+                    🔒
+                </div>
+
+                <div>
+                    Hakikisha namba zote ulizoingiza
+                    ni sahihi kabla ya kutuma ombi.
+                </div>
+
+            </div>
+
+
+            <!-- SUBMIT -->
+
+            <button
+                class="submit-btn"
+                type="submit"
+                id="submitBtn"
+            >
+                💳
+                <span id="submitText">
+                    Lipa na Tuma Ombi
+                </span>
             </button>
-        </div>
+
+        </section>
+
+
     </form>
+
+</main>
+```
+
 </div>
 
 <script>
-function updateBundleDetails() {
-    const select = document.getElementById("bundleSelect");
-    const selectedOption = select.options[select.selectedIndex];
-    
-    const amount = selectedOption.getAttribute("data-amount") || "";
-    const price = selectedOption.getAttribute("data-price") || "0";
 
-    document.getElementById("amountInput").value = amount;
-    document.getElementById("priceInput").value = price;
-    document.getElementById("displayPrice").innerText = Number(price).toLocaleString();
+/* =========================================================
+   BUNDLE PRICE UPDATE
+   ========================================================= */
+
+function updateBundleDetails() {
+
+    const select =
+        document.getElementById("bundleSelect");
+
+    const selectedOption =
+        select.options[select.selectedIndex];
+
+
+    const amount =
+        selectedOption.getAttribute(
+            "data-amount"
+        ) || "";
+
+
+    const price =
+        selectedOption.getAttribute(
+            "data-price"
+        ) || "0";
+
+
+    document
+        .getElementById("amountInput")
+        .value = amount;
+
+
+    document
+        .getElementById("priceInput")
+        .value = price;
+
+
+    document
+        .getElementById("displayPrice")
+        .innerText =
+            Number(price).toLocaleString();
 }
+
+
+/* =========================================================
+   FORM PROCESSING STATE
+   ========================================================= */
+
+document
+    .getElementById("orderForm")
+    .addEventListener("submit", function() {
+
+        const button =
+            document.getElementById("submitBtn");
+
+        const text =
+            document.getElementById("submitText");
+
+
+        button.classList.add("loading");
+
+        text.innerHTML =
+            '<span class="loading-spinner"></span>' +
+            'Inatuma ombi...';
+
+    });
+
+
+/* =========================================================
+   INITIAL PRICE REFRESH
+   ========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function() {
+
+        updateBundleDetails();
+
+    }
+);
+
 </script>
 
 {% endblock %}

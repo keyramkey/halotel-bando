@@ -19,7 +19,19 @@ from werkzeug.utils import secure_filename
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "kijiji-tanzania-secret-key-change-me")
 basedir = os.path.abspath(os.path.dirname(__file__))
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "kijiji.db")
+
+# 1. Mfumo utachukua DATABASE_URL ya PostgreSQL mtandaoni (k.m. Render/Railway)
+# 2. Kama upo kwenye kompyuta yako (Local), itatumia SQLite
+database_url = os.environ.get("DATABASE_URL")
+
+if database_url:
+    # Render hutoa URL inayoanza na 'postgres://', inabidi ibadilishwe kuwa 'postgresql://'
+    if database_url.startswith("postgres://"):
+        database_url = database_url.replace("postgres://", "postgresql://", 1)
+    app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+else:
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "instance", "kijiji.db")
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["UPLOAD_FOLDER"] = os.path.join(basedir, "static", "uploads")
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB

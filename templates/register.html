@@ -3,63 +3,58 @@
 {% block title %}Jisajili{% endblock %}
 
 {% block content %}
-
 <style>
     .auth {
         min-height: calc(100vh - 70px);
-        padding: 25px 18px;
+        padding: 30px 18px;
         display: flex;
         align-items: center;
+        justify-content: center;
     }
-
     .auth-card {
         width: 100%;
         background: white;
-        border-radius: 22px;
-        padding: 22px;
+        border-radius: 20px;
+        padding: 24px 22px;
+        border: 1px solid #eee;
     }
-
     .auth-card h1 {
-        font-size: 27px;
+        font-size: 24px;
+        font-weight: 800;
         margin-bottom: 6px;
     }
-
+    .auth-card .muted {
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
     .field {
         margin-top: 15px;
     }
-
     .field label {
         display: block;
         font-size: 13px;
-        font-weight: bold;
+        font-weight: 700;
         margin-bottom: 7px;
+        color: #333;
     }
-
     .auth-link {
         text-align: center;
-        margin-top: 15px;
+        margin-top: 18px;
         font-size: 13px;
         color: #777;
     }
-
     .auth-link a {
         color: #f56b00;
-        font-weight: bold;
+        font-weight: 700;
     }
 </style>
 
 <div class="auth">
-
     <div class="auth-card">
-
         <h1>Jisajili</h1>
-
-        <p class="muted">
-            Tengeneza akaunti yako ya Halotel Bando.
-        </p>
+        <p class="muted">Tengeneza akaunti yako sasa</p>
 
         <form method="POST">
-
             <div class="field">
                 <label>Username</label>
                 <input
@@ -67,6 +62,7 @@
                     name="username"
                     required
                     placeholder="Jina lako"
+                    autocomplete="username"
                 >
             </div>
 
@@ -74,19 +70,22 @@
                 <label>Namba ya simu</label>
                 <input
                     class="input"
+                    type="tel"
                     name="phone"
                     required
                     placeholder="07XXXXXXXX"
+                    autocomplete="tel"
                 >
             </div>
 
             <div class="field">
-                <label>Email</label>
+                <label>Email (Hiari)</label>
                 <input
                     class="input"
                     type="email"
                     name="email"
                     placeholder="Email yako"
+                    autocomplete="email"
                 >
             </div>
 
@@ -98,24 +97,21 @@
                     name="password"
                     required
                     placeholder="Password"
+                    autocomplete="new-password"
                 >
             </div>
 
-            <div style="margin-top:20px;">
-                <button class="btn orange">
+            <div style="margin-top:22px;">
+                <button class="btn orange" type="submit">
                     Fungua Akaunti
                 </button>
             </div>
-
         </form>
 
         <div class="auth-link">
             Una akaunti?
             <a href="{{ url_for('login') }}">Ingia</a>
         </div>
-
     </div>
-
 </div>
-
 {% endblock %}

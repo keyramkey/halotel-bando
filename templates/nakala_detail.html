@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Ombi {{ req.request_code }}{% endblock %}
+{% block content %}
+<style>
+    .review-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 9px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+    }
+    .review-row .label { color: #777; }
+    .review-row .value { font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
+    .result-box {
+        background: #e4f8eb;
+        border: 1px solid #b8e6c8;
+        border-radius: 14px;
+        padding: 16px;
+        margin-top: 16px;
+    }
+</style>
+
+<header class="topbar">
+    <div>
+        <div class="brand">{{ req.request_code }}</div>
+        <div class="muted">
+            {% if req.service_type == 'tin' %}TIN Number
+            {% elif req.service_type == 'license' %}Leseni ya Biashara
+            {% else %}Online Copy NIDA{% endif %}
+        </div>
+    </div>
+    <a href="{{ url_for('my_nakala') }}" class="icon-btn">←</a>
+</header>
+
+<div class="page">
+    <div style="margin-bottom:12px;">
+        {% if req.status == "pending" %}
+            <span class="status pending">Inasubiri</span>
+        {% elif req.status == "paid" %}
+            <span class="status processing">Imelipwa</span>
+        {% elif req.status == "processing" %}
+            <span class="status processing">Inachakatwa</span>
+        {% elif req.status == "completed" %}
+            <span class="status completed">Imekamilika</span>
+        {% else %}
+            <span class="status rejected">Imekataliwa</span>
+        {% endif %}
+        <span class="muted" style="margin-left:8px; font-size:12px;">
+            TSh {{ "{:,}".format(req.price) }}
+        </span>
+    </div>
+
+    <div class="card">
+        <div class="review-row"><span class="label">Jina Kamili</span><span class="value">{{ req.full_name }}</span></div>
+        <div class="review-row"><span class="label">Jina la Mama</span><span class="value">{{ req.mother_name }}</span></div>
+        <div class="review-row"><span class="label">NIDA / NIN</span><span class="value">{{ req.nida_number }}</span></div>
+        <div class="review-row"><span class="label">Simu 1</span><span class="value">{{ req.phone1 }}</span></div>
+        {% if req.phone2 %}
+        <div class="review-row"><span class="label">Simu 2</span><span class="value">{{ req.phone2 }}</span></div>
+        {% endif %}
+        <div class="review-row"><span class="label">Shule ya Msingi</span><span class="value">{{ req.primary_school }}</span></div>
+        <div class="review-row"><span class="label">Mwaka</span><span class="value">{{ req.year_completed }}</span></div>
+        <div class="review-row"><span class="label">Wilaya (Shule)</span><span class="value">{{ req.school_district }}</span></div>
+        <div class="review-row"><span class="label">Mkoa (Shule)</span><span class="value">{{ req.school_region }}</span></div>
+        <div class="review-row"><span class="label">Wilaya (NIDA)</span><span class="value">{{ req.nida_reg_district }}</span></div>
+        <div class="review-row"><span class="label">Mkoa (NIDA)</span><span class="value">{{ req.nida_reg_region }}</span></div>
+        <div class="review-row"><span class="label">Mtaa/Kijiji</span><span class="value">{{ req.nida_reg_street }}</span></div>
+        {% if req.nida_reg_phone %}
+        <div class="review-row"><span class="label">Simu ya Usajili NIDA</span><span class="value">{{ req.nida_reg_phone }}</span></div>
+        {% endif %}
+        {% if req.license_type %}
+        <div class="review-row"><span class="label">Aina ya Leseni</span><span class="value">{{ 'Uwakala' if req.license_type == 'uwakala' else 'Duka' }}</span></div>
+        {% endif %}
+    </div>
+
+    {% if req.status == "completed" and req.result_message %}
+    <div class="result-box">
+        <strong style="display:block; margin-bottom:8px;">✅ Matokeo Yako</strong>
+        <div style="font-size:13px; line-height:1.5; white-space:pre-wrap;">{{ req.result_message }}</div>
+        {% if req.result_file %}
+        <a href="{{ url_for('media_file', filename=req.result_file) }}" target="_blank" class="btn green" style="margin-top:12px; display:block; text-align:center;">
+            Pakua Faili
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if req.admin_note %}
+    <div class="card" style="margin-top:12px;">
+        <div class="muted" style="font-size:12px;">Ujumbe kutoka Admin</div>
+        <div style="margin-top:6px; font-size:13px;">{{ req.admin_note }}</div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

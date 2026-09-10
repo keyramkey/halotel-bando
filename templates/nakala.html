@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Nakala | MR. SULE DIGITAL{% endblock %}
+{% block content %}
+<style>
+    .nakala-hero {
+        margin: 12px;
+        padding: 20px;
+        border-radius: 18px;
+        color: white;
+        background: linear-gradient(135deg, #1a1a2e, #16213e);
+        text-align: center;
+    }
+    .nakala-hero h1 {
+        font-size: 22px;
+        margin: 6px 0 4px;
+    }
+    .nakala-hero p {
+        font-size: 12px;
+        color: #ccc;
+        margin: 0;
+    }
+    .nakala-list {
+        padding: 0 12px;
+        display: grid;
+        gap: 10px;
+    }
+    .nakala-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 16px;
+        border: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+    .nakala-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: #fff1e7;
+        display: grid;
+        place-items: center;
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+    .nakala-info {
+        flex: 1;
+    }
+    .nakala-info h3 {
+        font-size: 15px;
+        margin: 0 0 3px;
+    }
+    .nakala-info p {
+        font-size: 11px;
+        color: #777;
+        margin: 0;
+        line-height: 1.35;
+    }
+    .nakala-price {
+        font-size: 12px;
+        font-weight: 700;
+        color: #f56b00;
+        margin-top: 4px;
+    }
+    .arrow {
+        color: #f56b00;
+        font-size: 20px;
+    }
+</style>
+
+<header class="topbar">
+    <div>
+        <div class="brand">Nakala</div>
+        <div class="muted">TIN • Leseni • NIDA</div>
+    </div>
+    <a href="{{ url_for('home') }}" class="icon-btn">←</a>
+</header>
+
+<div class="nakala-hero">
+    <div style="font-size:36px;">📄</div>
+    <h1>Huduma za Nakala</h1>
+    <p>Chagua huduma unayotaka. Jaza taarifa kwa usahihi kisha lipia.</p>
+</div>
+
+<div class="nakala-list">
+    <a href="{{ url_for('nakala_tin') }}" class="nakala-card">
+        <div class="nakala-icon">🔢</div>
+        <div class="nakala-info">
+            <h3>Tengeneza TIN Number</h3>
+            <p>Omba TIN number mpya kwa urahisi.</p>
+            <div class="nakala-price">TSh 3,000</div>
+        </div>
+        <div class="arrow">→</div>
+    </a>
+
+    <a href="{{ url_for('nakala_license') }}" class="nakala-card">
+        <div class="nakala-icon">🏪</div>
+        <div class="nakala-info">
+            <h3>Tengeneza Leseni ya Biashara</h3>
+            <p>Leseni ya Uwakala au Leseni ya Duka.</p>
+            <div class="nakala-price">TSh 10,000</div>
+        </div>
+        <div class="arrow">→</div>
+    </a>
+
+    <a href="{{ url_for('nakala_nida') }}" class="nakala-card">
+        <div class="nakala-icon">🪪</div>
+        <div class="nakala-info">
+            <h3>Online Copy NIDA / NIN</h3>
+            <p>Pata nakala ya kitambulisho cha NIDA.</p>
+            <div class="nakala-price">TSh 3,000</div>
+        </div>
+        <div class="arrow">→</div>
+    </a>
+</div>
+{% endblock %}

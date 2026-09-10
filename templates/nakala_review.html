@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Hakiki Taarifa{% endblock %}
+{% block content %}
+<style>
+    .review-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 13px;
+    }
+    .review-row .label { color: #777; }
+    .review-row .value { font-weight: 600; text-align: right; max-width: 60%; }
+    .price-box {
+        background: #fff8f0;
+        border: 1px solid #ffe0c2;
+        border-radius: 14px;
+        padding: 14px;
+        text-align: center;
+        margin: 16px 0;
+    }
+    .price-box .amount {
+        font-size: 28px;
+        font-weight: 900;
+        color: #f56b00;
+    }
+</style>
+
+<header class="topbar">
+    <div>
+        <div class="brand">Hakiki Taarifa</div>
+        <div class="muted">Hakikisha kila kitu ni sahihi</div>
+    </div>
+    <a href="{{ url_for('nakala') }}" class="icon-btn">←</a>
+</header>
+
+<div class="page">
+    <div class="info-box">
+        <strong>Hakiki vizuri!</strong> Hakikisha taarifa zote ni sahihi kabla ya kulipa na kutuma kwa admin.
+    </div>
+
+    <div class="card">
+        <div class="review-row">
+            <span class="label">Huduma</span>
+            <span class="value">
+                {% if draft.service_type == 'tin' %}TIN Number
+                {% elif draft.service_type == 'license' %}Leseni ya Biashara
+                {% else %}Online Copy NIDA{% endif %}
+            </span>
+        </div>
+        {% if draft.license_type %}
+        <div class="review-row">
+            <span class="label">Aina ya Leseni</span>
+            <span class="value">{{ 'Uwakala' if draft.license_type == 'uwakala' else 'Duka' }}</span>
+        </div>
+        {% endif %}
+        <div class="review-row">
+            <span class="label">Jina Kamili</span>
+            <span class="value">{{ draft.full_name }}</span>
+        </div>
+        <div class="review-row">
+            <span class="label">Jina la Mama</span>
+            <span class="value">{{ draft.mother_name }}</span>
+        </div>
+        <div class="review-row">
+            <span class="label">NIDA / NIN</span>
+            <span class="value">{{ draft.nida_number }}</span>
+        </div>
+        <div class="review-row">
+            <span class="label">Simu 1</span>
+            <span class="value">{{ draft.phone1 }}</span>
+        </div>
+        {% if draft.phone2 %}
+        <div class="review-row">
+            <span class="label">Simu 2</span>
+            <span class="value">{{ draft.phone2 }}</span>
+        </div>
+        {% endif %}
+        <div class="review-row">
+            <span class="label">Shule ya Msingi</span>
+            <span class="value">{{ draft.primary_school }}</span>
+        </div>
+        <div class="review-row">
+            <span class="label">Mwaka wa Kuhitimu</span>
+            <span class="value">{{ draft.year_completed }}</span>
+        </div>
+        <div class="review-row">
+            <span class="label">Wilaya (Shule)</span>
+            <span class="value">{{ draft.school_district }}</span>
+        </div>
+        <div class="review-row">
+            <span class="label">Mkoa (Shule)</span>
+            <span class="value">{{ draft.school_region }}</span>
+        </div>
+        <div class="review-row">
+            <span class="label">Wilaya (NIDA)</span>
+            <span class="value">{{ draft.nida_reg_district }}</span>
+        </div>
+        <div class="review-row">
+            <span class="label">Mkoa (NIDA)</span>
+            <span class="value">{{ draft.nida_reg_region }}</span>
+        </div>
+        <div class="review-row">
+            <span class="label">Mtaa/Kijiji (NIDA)</span>
+            <span class="value">{{ draft.nida_reg_street }}</span>
+        </div>
+        {% if draft.nida_reg_phone %}
+        <div class="review-row">
+            <span class="label">Simu ya Usajili NIDA</span>
+            <span class="value">{{ draft.nida_reg_phone }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="price-box">
+        <div class="muted" style="font-size:12px;">Kiasi cha kulipa</div>
+        <div class="amount">TSh {{ "{:,}".format(draft.price) }}</div>
+    </div>
+
+    <form method="POST" action="{{ url_for('nakala_pay') }}">
+        <div class="card">
+            <label class="form-label">Namba ya Simu yenye Pesa (ClickPesa) <span style="color:#e74c3c;">*</span></label>
+            <input type="tel" name="payment_phone" class="input" placeholder="07XXXXXXXX" required>
+            <p class="muted" style="margin-top:8px; font-size:11px;">
+                Utapokea popup ya kuweka PIN ili kukamilisha malipo.
+            </p>
+            <button type="submit" class="btn orange" style="margin-top:14px;">
+                Lipia & Tuma kwa Admin
+            </button>
+        </div>
+    </form>
+
+    <a href="{{ url_for('nakala') }}" class="btn" style="background:#eee; color:#333; margin-top:10px; display:block; text-align:center;">
+        Rudi Nyuma
+    </a>
+</div>
+{% endblock %}

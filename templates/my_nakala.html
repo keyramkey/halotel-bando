@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Maombi Yangu ya Nakala{% endblock %}
+{% block content %}
+<header class="topbar">
+    <div>
+        <div class="brand">Nakala Zangu</div>
+        <div class="muted">Fuatilia maombi yako</div>
+    </div>
+    <a href="{{ url_for('nakala') }}" class="icon-btn">←</a>
+</header>
+
+<div class="page">
+    {% if requests %}
+        {% for req in requests %}
+        <a href="{{ url_for('nakala_detail', req_id=req.id) }}" class="application-card" style="display:block;">
+            <div class="application-top">
+                <div>
+                    <div class="application-code">{{ req.request_code }}</div>
+                    <div class="application-network">
+                        {% if req.service_type == 'tin' %}TIN Number
+                        {% elif req.service_type == 'license' %}Leseni ({{ 'Uwakala' if req.license_type == 'uwakala' else 'Duka' }})
+                        {% else %}Online Copy NIDA{% endif %}
+                        · TSh {{ "{:,}".format(req.price) }}
+                    </div>
+                </div>
+                {% if req.status == "pending" %}
+                    <span class="status pending">Inasubiri</span>
+                {% elif req.status == "paid" %}
+                    <span class="status processing">Imelipwa</span>
+                {% elif req.status == "processing" %}
+                    <span class="status processing">Inachakatwa</span>
+                {% elif req.status == "completed" %}
+                    <span class="status completed">Imekamilika</span>
+                {% else %}
+                    <span class="status rejected">Imekataliwa</span>
+                {% endif %}
+            </div>
+            <div style="margin-top:8px; font-size:12px; color:#555;">
+                {{ req.full_name }} · {{ req.created_at.strftime('%d/%m/%Y %H:%M') if req.created_at else '' }}
+            </div>
+            {% if req.status == "completed" and req.result_message %}
+            <div style="margin-top:8px; padding:8px; background:#e4f8eb; border-radius:8px; font-size:12px;">
+                ✅ Matokeo yako yapo — bofya kuona
+            </div>
+            {% endif %}
+        </a>
+        {% endfor %}
+    {% else %}
+    <div class="card">
+        <div class="title" style="font-size:18px;">Hakuna maombi bado</div>
+        <p class="muted">Maombi yako ya TIN, Leseni au NIDA yataonekana hapa.</p>
+        <a href="{{ url_for('nakala') }}" class="btn orange" style="margin-top:12px; display:block; text-align:center;">
+            Anza Ombi Jipya
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

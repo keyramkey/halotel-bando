@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Online Copy NIDA{% endblock %}
+{% block content %}
+<style>
+    .form-section { margin-bottom: 18px; }
+    .req { color: #e74c3c; }
+</style>
+
+<header class="topbar">
+    <div>
+        <div class="brand">Online Copy NIDA</div>
+        <div class="muted">Jaza taarifa kwa usahihi</div>
+    </div>
+    <a href="{{ url_for('nakala') }}" class="icon-btn">←</a>
+</header>
+
+<div class="page">
+    <div class="info-box">
+        <strong>Bei:</strong> TSh 3,000. Jaza taarifa zako kwa usahihi kabisa kama zilivyo kwenye NIDA.
+    </div>
+
+    <form method="POST" action="{{ url_for('nakala_nida') }}">
+        <div class="card">
+            <div class="form-section">
+                <label class="form-label">Jina Kamili (Kwanza + Kati + Mwisho) <span class="req">*</span></label>
+                <input type="text" name="full_name" class="input" placeholder="Mfano: Juma Ally Hassan" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Jina Kamili la Mama <span class="req">*</span></label>
+                <input type="text" name="mother_name" class="input" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Namba ya NIDA / NIN (namba 20 tu) <span class="req">*</span></label>
+                <input type="text" name="nida_number" class="input" maxlength="20" pattern="[0-9]{1,20}"
+                       placeholder="Namba za NIDA tu" required
+                       oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Namba ya Simu 1 <span class="req">*</span></label>
+                <input type="tel" name="phone1" class="input" placeholder="07XXXXXXXX" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Namba ya Simu 2 (si lazima)</label>
+                <input type="tel" name="phone2" class="input" placeholder="07XXXXXXXX">
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Jina la Shule ya Msingi <span class="req">*</span></label>
+                <input type="text" name="primary_school" class="input" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Mwaka wa Kuhitimu Darasa la Saba <span class="req">*</span></label>
+                <input type="text" name="year_completed" class="input" placeholder="Mfano: 2010" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Wilaya uliyosomea Shule ya Msingi <span class="req">*</span></label>
+                <input type="text" name="school_district" class="input" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Mkoa uliyosomea Shule ya Msingi <span class="req">*</span></label>
+                <input type="text" name="school_region" class="input" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Wilaya uliyojiandikishia NIDA <span class="req">*</span></label>
+                <input type="text" name="nida_reg_district" class="input" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Mkoa uliyojiandikishia NIDA <span class="req">*</span></label>
+                <input type="text" name="nida_reg_region" class="input" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Mtaa / Kijiji ulipojiandikishia NIDA <span class="req">*</span></label>
+                <input type="text" name="nida_reg_street" class="input" required>
+            </div>
+
+            <div class="form-section">
+                <label class="form-label">Namba ya Simu uliyoweka wakati wa kujiandikisha NIDA <span class="req">*</span></label>
+                <input type="tel" name="nida_reg_phone" class="input" placeholder="07XXXXXXXX" required>
+            </div>
+
+            <button type="submit" class="btn orange" style="margin-top:16px;">
+                Endelea → Hakiki Taarifa
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

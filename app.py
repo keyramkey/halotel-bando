@@ -6,20 +6,17 @@ from datetime import datetime
 from functools import wraps
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    flash, session, jsonify
+    flash, session, jsonify, send_from_directory
 )
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
-
-from flask import current_app
 
 # ---------------------------------------------------------------------------
 # App setup
 # ---------------------------------------------------------------------------
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "kijiji-tanzania-secret-key-change-me")
-
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # Database - Railway PostgreSQL
@@ -33,8 +30,8 @@ else:
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.path.join(basedir, "instance", "kijiji.db")
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-# Railway Volume: weka env UPLOAD_ROOT=/data/uploads na mount volume kwenye /data/uploads
-# Bila hiyo inatumia static/uploads (local)
+
+# Railway Volume
 _upload_root = os.environ.get("UPLOAD_ROOT") or os.path.join(basedir, "static", "uploads")
 app.config["UPLOAD_FOLDER"] = _upload_root
 app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB
@@ -42,7 +39,7 @@ app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"], "slide"), exist_ok=True)
 os.makedirs(os.path.join(basedir, "instance"), exist_ok=True)
-# Nakala pia kwenye static ili url_for('static') ifanye kazi local
+
 _static_uploads = os.path.join(basedir, "static", "uploads")
 os.makedirs(_static_uploads, exist_ok=True)
 os.makedirs(os.path.join(_static_uploads, "slide"), exist_ok=True)
@@ -105,7 +102,9 @@ class Order(db.Model):
     amount = db.Column(db.String(80), nullable=False)
     price = db.Column(db.Integer, default=0)
     note = db.Column(db.Text, default="")
-    status = db.Column(db.String(30), default="pending")
+    status = db.Column(db.String(30), default="awaiting_payment")  # awaiting_payment | pending | completed | rejected | failed
+    order_reference = db.Column(db.String(30), unique=True, nullable=True)
+    fail_reason = db.Column(db.String(255), default="")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
@@ -222,7 +221,6 @@ def generate_application_code():
 
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
-# Slideshow: ruhusu extension za picha nyingi (yoyote ya kawaida)
 ALLOWED_SLIDE_EXTENSIONS = {
     "png", "jpg", "jpeg", "gif", "webp", "bmp", "svg", "ico",
     "tiff", "tif", "heic", "heif", "avif"
@@ -328,15 +326,11 @@ def logout():
 def home():
     bundles = Bundle.query.filter_by(is_active=True).all()
     offers = Offer.query.filter_by(is_active=True).all()
-
-    # Slideshow kutoka database tu (admin managed).
-    # Ikiwa tupu / zimezimwa — homepage haitaonyesha sehemu ya slideshow.
     slides = (
         Slide.query.filter_by(is_active=True)
         .order_by(Slide.sort_order.asc(), Slide.id.asc())
         .all()
     )
-
     return render_template(
         "index.html",
         bundles=bundles,
@@ -397,6 +391,7 @@ def order():
         amount = request.form.get("amount", "").strip()
         price_raw = request.form.get("price", "0").strip()
         note = request.form.get("note", "").strip()
+
         try:
             price = int(price_raw) if price_raw else 0
         except ValueError:
@@ -406,16 +401,30 @@ def order():
             flash("Weka namba ya kulipia, namba ya kuwekewa bando na kiasi cha bundle.", "error")
             return redirect(url_for("order"))
 
+        # Validate Halotel number (061 / 062 / 063)
+        clean_target = target_phone.replace(" ", "").replace("+255", "0")
+        if clean_target.startswith("255"):
+            clean_target = "0" + clean_target[3:]
+        if not clean_target.startswith(("061", "062", "063")):
+            flash("Namba ya kuweka bando lazima iwe ya Halotel (061, 062 au 063).", "error")
+            return redirect(url_for("order"))
+
         order_note = f"Namba ya Kuwekewa: {target_phone}" + (f" | Maelezo: {note}" if note else "")
+
         new_order = Order(
             user_id=user.id,
             phone=target_phone,
             amount=amount,
             price=price,
             note=order_note,
-            status="pending",
+            status="awaiting_payment",   # NOT pending yet
         )
         db.session.add(new_order)
+        db.session.flush()
+
+        # Short unique reference (max 20 chars for ClickPesa)
+        order_ref = f"ORD{new_order.id}{secrets.token_hex(3)}"[:20]
+        new_order.order_reference = order_ref
         db.session.commit()
 
         if CLICKPESA_CLIENT_ID and CLICKPESA_API_KEY and price > 0:
@@ -429,19 +438,30 @@ def order():
                 payload = {
                     "amount": str(price),
                     "currency": "TZS",
-                    "orderReference": f"ORD{new_order.id}{int(time.time())}",
+                    "orderReference": order_ref,
                     "phoneNumber": normalize_phone(payment_phone)
                 }
                 response = requests.post(url, json=payload, headers=headers, timeout=20)
                 data = response.json()
+
                 if response.status_code in [200, 201]:
                     flash("Ombi la malipo limeshushwa! Angalia simu yako na uingize PIN.", "success")
                     return redirect(url_for("asante"))
                 else:
-                    flash(f"ClickPesa imeshindwa: {data}. Lipa manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}", "error")
+                    reason = data.get("message") or str(data)[:120]
+                    new_order.status = "failed"
+                    new_order.fail_reason = reason
+                    db.session.commit()
+                    flash(f"Malipo yameshindwa kuanzishwa: {reason}", "error")
             except Exception as e:
-                flash(f"Hitilafu ya malipo: {str(e)}. Lipa manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}", "error")
+                new_order.status = "failed"
+                new_order.fail_reason = str(e)[:120]
+                db.session.commit()
+                flash(f"Hitilafu ya malipo: {str(e)}", "error")
         else:
+            # Manual payment mode
+            new_order.status = "pending"
+            db.session.commit()
             flash(
                 f"Request imetumwa! Lipa kwa {PAYMENT_NETWORK} {PAYMENT_NUMBER} ({PAYMENT_NAME}). "
                 "Baada ya malipo, wasiliana na chat.",
@@ -464,7 +484,7 @@ def order():
 def update_order_status(order_id):
     order_item = Order.query.get_or_404(order_id)
     status = request.form.get("status", "pending")
-    if status in ("pending", "completed", "rejected"):
+    if status in ("pending", "completed", "rejected", "failed", "awaiting_payment"):
         order_item.status = status
         db.session.commit()
         flash(f"Status ya Oda #{order_item.id} imebadilishwa kuwa '{status}'.", "success")
@@ -501,6 +521,49 @@ def asante():
     </body>
     </html>
     """
+
+
+# ---------------------------------------------------------------------------
+# ClickPesa Webhook
+# ---------------------------------------------------------------------------
+@app.route("/webhook/clickpesa", methods=["POST"])
+def clickpesa_webhook():
+    """
+    Configure this URL in ClickPesa Dashboard → Application Webhooks:
+    https://your-domain.com/webhook/clickpesa
+    Events: PAYMENT RECEIVED + PAYMENT FAILED
+    """
+    try:
+        data = request.get_json(force=True, silent=True) or {}
+    except Exception:
+        data = {}
+
+    event = (data.get("event") or "").upper()
+    payload = data.get("data") or data
+
+    order_ref = payload.get("orderReference") or payload.get("order_reference")
+    status = (payload.get("status") or "").upper()
+    message = payload.get("message") or ""
+
+    if not order_ref:
+        return jsonify({"ok": False, "error": "No orderReference"}), 400
+
+    order = Order.query.filter_by(order_reference=order_ref).first()
+    if not order:
+        return jsonify({"ok": False, "error": "Order not found"}), 200
+
+    if event == "PAYMENT RECEIVED" or status in ("SUCCESS", "SETTLED"):
+        if order.status in ("awaiting_payment", "failed"):
+            order.status = "pending"
+            order.fail_reason = ""
+            db.session.commit()
+
+    elif event == "PAYMENT FAILED" or status == "FAILED":
+        order.status = "failed"
+        order.fail_reason = (message or "Malipo yameshindwa")[:200]
+        db.session.commit()
+
+    return jsonify({"ok": True}), 200
 
 
 # ---------------------------------------------------------------------------
@@ -754,7 +817,7 @@ def admin_agency_chat(application_id):
 
 
 # ---------------------------------------------------------------------------
-# Admin Slideshow / Matangazo (picha + link)
+# Admin Slideshow / Matangazo
 # ---------------------------------------------------------------------------
 @app.route("/admin/slides/add", methods=["POST"])
 @admin_required
@@ -763,35 +826,28 @@ def admin_slide_add():
     link = request.form.get("link", "").strip()
     title = request.form.get("title", "").strip()
     sort_order_raw = request.form.get("sort_order", "0").strip()
-
     if not image_file or not image_file.filename:
         flash("Picha ni lazima. Chagua picha ya banner.", "error")
         return redirect(url_for("dashboard"))
-
     if not link:
         flash("Link ni lazima. Weka URL au path (mfano /order).", "error")
         return redirect(url_for("dashboard"))
-
     if not allowed_slide_file(image_file.filename):
         flash(
             "Aina ya faili hairuhusiwi. Ruhusu: png, jpg, jpeg, gif, webp, bmp, svg, ico, tiff, heic, avif.",
             "error",
         )
         return redirect(url_for("dashboard"))
-
     try:
         sort_order = int(sort_order_raw) if sort_order_raw else 0
     except ValueError:
         sort_order = 0
-
     slide_folder = os.path.join(app.config["UPLOAD_FOLDER"], "slide")
     os.makedirs(slide_folder, exist_ok=True)
-
     ext = image_file.filename.rsplit(".", 1)[1].lower()
     filename = secure_filename(f"slide_{secrets.token_hex(6)}.{ext}")
     filepath = os.path.join(slide_folder, filename)
     image_file.save(filepath)
-
     slide = Slide(
         image=filename,
         link=link,
@@ -813,12 +869,10 @@ def admin_slide_update(slide_id):
     title = request.form.get("title", "").strip()
     sort_order_raw = request.form.get("sort_order", "0").strip()
     is_active = request.form.get("is_active") == "1"
-
     try:
         sort_order = int(sort_order_raw) if sort_order_raw else 0
     except ValueError:
         sort_order = 0
-
     image_file = request.files.get("image")
     if image_file and image_file.filename and allowed_slide_file(image_file.filename):
         slide_folder = os.path.join(app.config["UPLOAD_FOLDER"], "slide")
@@ -833,7 +887,6 @@ def admin_slide_update(slide_id):
         filename = secure_filename(f"slide_{secrets.token_hex(6)}.{ext}")
         image_file.save(os.path.join(slide_folder, filename))
         slide.image = filename
-
     slide.link = link
     slide.title = title
     slide.sort_order = sort_order
@@ -866,7 +919,6 @@ def admin_slide_delete(slide_id):
 def seed_data():
     if User.query.filter_by(username="admin").first():
         return
-
     admin = User(
         username="admin",
         phone="0700000000",
@@ -875,11 +927,9 @@ def seed_data():
     )
     admin.set_password("admin123")
     db.session.add(admin)
-
     demo = User(username="demo", phone="0712345678", email="demo@kijiji.tz")
     demo.set_password("demo123")
     db.session.add(demo)
-
     bundles = [
         Bundle(name="Daily", amount="1 GB", price=1000, validity="Siku 1"),
         Bundle(name="Weekly", amount="5 GB", price=5000, validity="Siku 7"),
@@ -889,7 +939,6 @@ def seed_data():
     ]
     for b in bundles:
         db.session.add(b)
-
     offers = [
         Offer(
             title="Offer ya Leo",
@@ -900,7 +949,6 @@ def seed_data():
     ]
     for o in offers:
         db.session.add(o)
-
     networks_data = {
         "Vodacom": [
             ("📱", "Usajili wa Laini", "Sajili laini mpya ya Vodacom"),
@@ -941,7 +989,6 @@ def seed_data():
                 icon=icon,
             )
             db.session.add(svc)
-
     db.session.commit()
     print("✓ Seed data created (admin/admin123, demo/demo123)")
 
@@ -957,8 +1004,6 @@ def init_db():
     seed_data()
     print("Database ready.")
 
-
-from flask import send_from_directory
 
 @app.route('/sw.js')
 def service_worker():

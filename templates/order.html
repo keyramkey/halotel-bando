@@ -274,32 +274,6 @@
     color: #999;
 }
 
-/* Instructions box */
-.instructions {
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 14px;
-    padding: 14px 16px;
-    margin-bottom: 14px;
-    font-size: 12.5px;
-    line-height: 1.55;
-    color: #444;
-}
-.instructions strong {
-    color: #171717;
-}
-.instructions ul {
-    margin: 8px 0 0 0;
-    padding-left: 18px;
-}
-.instructions li {
-    margin-bottom: 5px;
-}
-.instructions .highlight {
-    color: var(--orange-dark);
-    font-weight: 700;
-}
-
 .input-group {
     margin-bottom: 12px;
 }
@@ -377,7 +351,25 @@ textarea.input {
     to { transform: rotate(360deg); }
 }
 
-/* ===== CUSTOM MODAL ===== */
+/* Help link */
+.help-link-wrap {
+    text-align: center;
+    margin-top: 14px;
+}
+.help-link {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--orange-dark);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+.help-link:hover {
+    text-decoration: underline;
+}
+
+/* ===== CUSTOM MODAL (Error + Help) ===== */
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -399,12 +391,14 @@ textarea.input {
     background: #fff;
     border-radius: 20px;
     width: 100%;
-    max-width: 360px;
+    max-width: 380px;
     padding: 28px 24px 22px;
     text-align: center;
     box-shadow: 0 25px 50px rgba(0,0,0,0.25);
     transform: scale(0.9);
     transition: 0.25s ease;
+    max-height: 85vh;
+    overflow-y: auto;
 }
 .modal-overlay.show .modal-card {
     transform: scale(1);
@@ -430,6 +424,7 @@ textarea.input {
     line-height: 1.55;
     color: #555;
     margin-bottom: 22px;
+    text-align: left;
 }
 .modal-message strong {
     color: var(--orange-dark);
@@ -448,6 +443,35 @@ textarea.input {
 }
 .modal-btn:active {
     transform: scale(0.97);
+}
+
+/* Help content styles */
+.help-content h4 {
+    font-size: 14px;
+    font-weight: 800;
+    color: #171717;
+    margin: 16px 0 8px;
+}
+.help-content h4:first-child {
+    margin-top: 0;
+}
+.help-content ol, .help-content ul {
+    padding-left: 18px;
+    margin: 0 0 12px;
+}
+.help-content li {
+    margin-bottom: 6px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #444;
+}
+.help-content .note {
+    background: #fff5ef;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-size: 12.5px;
+    color: #c2410c;
+    margin-top: 12px;
 }
 </style>
 
@@ -653,16 +677,6 @@ textarea.input {
                 </div>
             </section>
 
-            <!-- INSTRUCTIONS -->
-            <div class="instructions">
-                <strong>Maelekezo muhimu:</strong>
-                <ul>
-                    <li><span class="highlight">Namba ya kulipia</span> — Unaweza kutumia namba yoyote (mtandao wowote).</li>
-                    <li><span class="highlight">Namba ya kuweka bando</span> — Lazima iwe namba ya <strong>Halotel</strong> tu (inayoanza na <strong>061, 062 au 063</strong>).</li>
-                    <li>Hakikisha namba ya Halotel unaweka bando ni sahihi ili usipoteze fedha.</li>
-                </ul>
-            </div>
-
             <!-- PAYMENT -->
             <section class="order-card">
                 <div class="section-title">Malipo</div>
@@ -701,21 +715,67 @@ textarea.input {
                 <button class="submit-btn" type="submit" id="submitBtn">
                     <span id="submitText">Lipa na Tuma Ombi</span>
                 </button>
+
+                <!-- HELP LINK -->
+                <div class="help-link-wrap">
+                    <a href="javascript:void(0)" class="help-link" id="helpLink">
+                        Help → Jinsi ya kulipa na kutuma ombi
+                    </a>
+                </div>
             </section>
         </form>
     </main>
 </div>
 
-<!-- CUSTOM ERROR MODAL -->
+<!-- ERROR MODAL -->
 <div class="modal-overlay" id="errorModal">
     <div class="modal-card">
         <div class="modal-icon">⚠️</div>
         <div class="modal-title" id="modalTitle">Namba Siyo Sahihi</div>
         <div class="modal-message" id="modalMessage">
-            Namba ya kuweka bando <strong>lazima iwe ya Halotel</strong>.<br>
-            Inabidi ianze na <strong>061, 062 au 063</strong>.
+            Namba ya kuweka bando <strong>lazima iwe ya Halotel</strong>.
         </div>
         <button type="button" class="modal-btn" id="modalCloseBtn">Jaribu Tena</button>
+    </div>
+</div>
+
+<!-- HELP MODAL -->
+<div class="modal-overlay" id="helpModal">
+    <div class="modal-card">
+        <div class="modal-icon">❓</div>
+        <div class="modal-title">Jinsi ya Kulipa na Kutuma Ombi</div>
+        <div class="modal-message help-content">
+            <h4>1. Chagua Kifurushi</h4>
+            <ol>
+                <li>Bonyeza sehemu ya <strong>Chagua kifurushi</strong>.</li>
+                <li>Chagua <strong>Wiki Mbili</strong> au <strong>Mwezi</strong>.</li>
+                <li>Chagua kiasi cha GB unachotaka.</li>
+            </ol>
+
+            <h4>2. Jaza Namba</h4>
+            <ul>
+                <li><strong>Namba ya kulipia</strong> — Unaweza kutumia namba yoyote (Vodacom, Airtel, Tigo, Halotel, n.k.).</li>
+                <li><strong>Namba ya kuweka bando</strong> — Lazima iwe namba ya <strong>Halotel</strong> tu (061, 062 au 063).</li>
+            </ul>
+
+            <h4>3. Lipa na Tuma Ombi</h4>
+            <ol>
+                <li>Bonyeza button <strong>Lipa na Tuma Ombi</strong>.</li>
+                <li>Utapata ujumbe wa malipo kwenye simu yako.</li>
+                <li>Thibitisha malipo kwa kuweka PIN yako.</li>
+            </ol>
+
+            <h4>4. Baada ya Malipo</h4>
+            <ul>
+                <li>Malipo yakienda vizuri → Ombi litaenda kwenye <strong>Pending</strong> na bando litatumwa.</li>
+                <li>Malipo yashindwe kabisa → Ombi litaandikwa <strong>Failed</strong> pamoja na sababu fupi.</li>
+            </ul>
+
+            <div class="note">
+                <strong>Muhimu:</strong> Hakikisha namba ya Halotel ni sahihi. Ukikosea namba, fedha hazitarejeshwa.
+            </div>
+        </div>
+        <button type="button" class="modal-btn" id="helpCloseBtn">Nimeelewa</button>
     </div>
 </div>
 
@@ -728,7 +788,6 @@ const selectedSmall = document.getElementById("selectedSmall");
 const amountInput = document.getElementById("amountInput");
 const priceInput = document.getElementById("priceInput");
 const displayPrice = document.getElementById("displayPrice");
-const periodButtons = document.getElementById("periodButtons");
 const wikiList = document.getElementById("wikiList");
 const mweziList = document.getElementById("mweziList");
 
@@ -741,6 +800,10 @@ const orderForm = document.getElementById("orderForm");
 const submitBtn = document.getElementById("submitBtn");
 const submitText = document.getElementById("submitText");
 
+const helpLink = document.getElementById("helpLink");
+const helpModal = document.getElementById("helpModal");
+const helpCloseBtn = document.getElementById("helpCloseBtn");
+
 // Toggle dropdown
 bundleSelected.addEventListener("click", function(e) {
     e.stopPropagation();
@@ -752,13 +815,10 @@ bundleSelected.addEventListener("click", function(e) {
 document.querySelectorAll(".period-btn").forEach(function(btn) {
     btn.addEventListener("click", function(e) {
         e.stopPropagation();
-
         document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
         this.classList.add("active");
-
         wikiList.classList.remove("show");
         mweziList.classList.remove("show");
-
         const period = this.dataset.period;
         if (period === "wiki") {
             wikiList.classList.add("show");
@@ -795,23 +855,34 @@ document.addEventListener("click", function(e) {
     }
 });
 
-// Show custom modal
+// Show error modal
 function showError(title, message) {
     modalTitle.innerText = title;
     modalMessage.innerHTML = message;
     errorModal.classList.add("show");
 }
 
-// Close modal
+// Close error modal
 modalCloseBtn.addEventListener("click", function() {
     errorModal.classList.remove("show");
     targetPhone.focus();
 });
-
-// Close when clicking outside the card
 errorModal.addEventListener("click", function(e) {
     if (e.target === errorModal) {
         errorModal.classList.remove("show");
+    }
+});
+
+// Help modal
+helpLink.addEventListener("click", function() {
+    helpModal.classList.add("show");
+});
+helpCloseBtn.addEventListener("click", function() {
+    helpModal.classList.remove("show");
+});
+helpModal.addEventListener("click", function(e) {
+    if (e.target === helpModal) {
+        helpModal.classList.remove("show");
     }
 });
 
@@ -819,7 +890,6 @@ errorModal.addEventListener("click", function(e) {
 orderForm.addEventListener("submit", function(e) {
     const phone = targetPhone.value.replace(/\s+/g, "").replace(/^\+255/, "0");
 
-    // Check if package is selected
     if (!amountInput.value || amountInput.value === "") {
         e.preventDefault();
         showError(
@@ -829,21 +899,17 @@ orderForm.addEventListener("submit", function(e) {
         return;
     }
 
-    // Check Halotel number
     const isHalotel = /^(061|062|063)/.test(phone);
-
     if (!isHalotel) {
         e.preventDefault();
         showError(
             "Namba Siyo Sahihi",
             `Namba ya kuweka bando <strong>lazima iwe ya Halotel</strong>.<br><br>
-             Inabidi ianze na <strong>061, 062 au 063</strong> tu.<br>
-             Tafadhali andika namba sahihi.`
+             Inabidi ianze na <strong>061, 062 au 063</strong> tu.`
         );
         return;
     }
 
-    // Everything is ok → show loading
     submitBtn.classList.add("loading");
     submitText.innerHTML = '<span class="loading-spinner"></span>Inatuma...';
 });

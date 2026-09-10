@@ -329,30 +329,13 @@ def home():
     bundles = Bundle.query.filter_by(is_active=True).all()
     offers = Offer.query.filter_by(is_active=True).all()
 
-    # Slideshow kutoka database (admin managed) - picha + link
+    # Slideshow kutoka database tu (admin managed).
+    # Ikiwa tupu / zimezimwa — homepage haitaonyesha sehemu ya slideshow.
     slides = (
         Slide.query.filter_by(is_active=True)
         .order_by(Slide.sort_order.asc(), Slide.id.asc())
         .all()
     )
-
-    # Fallback: kama hakuna slides kwenye DB, tumia picha za folder (backward compatible)
-    if not slides:
-        slide_folder = os.path.join(current_app.static_folder, "uploads", "slide")
-        if os.path.exists(slide_folder):
-            folder_files = [
-                f for f in os.listdir(slide_folder)
-                if f.lower().endswith((".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".svg"))
-            ]
-            folder_files.sort()
-            # Fake objects so template can use slide.image / slide.link
-            class _FolderSlide:
-                def __init__(self, image):
-                    self.image = image
-                    self.link = ""
-                    self.title = ""
-                    self.id = 0
-            slides = [_FolderSlide(f) for f in folder_files]
 
     return render_template(
         "index.html",
@@ -782,7 +765,11 @@ def admin_slide_add():
     sort_order_raw = request.form.get("sort_order", "0").strip()
 
     if not image_file or not image_file.filename:
-        flash("Chagua picha ya kutuma.", "error")
+        flash("Picha ni lazima. Chagua picha ya banner.", "error")
+        return redirect(url_for("dashboard"))
+
+    if not link:
+        flash("Link ni lazima. Weka URL au path (mfano /order).", "error")
         return redirect(url_for("dashboard"))
 
     if not allowed_slide_file(image_file.filename):
@@ -797,7 +784,6 @@ def admin_slide_add():
     except ValueError:
         sort_order = 0
 
-    # Hakikisha folder ipo
     slide_folder = os.path.join(app.config["UPLOAD_FOLDER"], "slide")
     os.makedirs(slide_folder, exist_ok=True)
 
@@ -833,12 +819,10 @@ def admin_slide_update(slide_id):
     except ValueError:
         sort_order = 0
 
-    # Optional: replace image
     image_file = request.files.get("image")
     if image_file and image_file.filename and allowed_slide_file(image_file.filename):
         slide_folder = os.path.join(app.config["UPLOAD_FOLDER"], "slide")
         os.makedirs(slide_folder, exist_ok=True)
-        # delete old file if exists
         old_path = os.path.join(slide_folder, slide.image)
         if os.path.isfile(old_path):
             try:

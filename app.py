@@ -12,6 +12,8 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 
+from flask import current_app
+
 # ---------------------------------------------------------------------------
 # App setup
 # ---------------------------------------------------------------------------
@@ -298,7 +300,23 @@ def logout():
 def home():
     bundles = Bundle.query.filter_by(is_active=True).all()
     offers = Offer.query.filter_by(is_active=True).all()
-    return render_template("index.html", bundles=bundles, offers=offers)
+
+    # Picha za slideshow
+    slide_folder = os.path.join(current_app.static_folder, 'uploads', 'slide')
+    slides = []
+    if os.path.exists(slide_folder):
+        slides = [
+            f for f in os.listdir(slide_folder)
+            if f.lower().endswith(('.png', '.jpg', '.jpeg', '.webp', '.gif'))
+        ]
+        slides.sort()  # optional
+
+    return render_template(
+        "index.html",
+        bundles=bundles,
+        offers=offers,
+        slides=slides
+    )
 
 
 @app.route("/profile")

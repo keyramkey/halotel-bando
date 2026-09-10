@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}Agiza Bando{% endblock %}
-
 {% block content %}
 <style>
 :root {
@@ -14,13 +12,11 @@
     --border: #e7e7e7;
     --radius: 18px;
 }
-
 .order-page {
     min-height: 100vh;
     background: var(--bg);
     padding-bottom: 40px;
 }
-
 .order-header {
     background: linear-gradient(135deg, #ff7800, #ed4d00);
     color: #fff;
@@ -55,14 +51,12 @@
     font-size: 18px;
     font-weight: 700;
 }
-
 .order-container {
     width: 100%;
     max-width: 620px;
     margin: auto;
     padding: 16px;
 }
-
 .order-card {
     background: #fff;
     border: 1px solid var(--border);
@@ -70,7 +64,6 @@
     padding: 18px;
     margin-bottom: 14px;
 }
-
 .section-title {
     margin-bottom: 14px;
     font-size: 14px;
@@ -142,19 +135,18 @@
     color: var(--orange);
     background: #fff0e8;
 }
-
 .bundle-options {
     position: absolute;
     z-index: 100;
     top: calc(100% + 8px);
     left: 0;
     right: 0;
-    padding: 6px;
+    padding: 10px;
     background: #fff;
     border: 1px solid var(--border);
     border-radius: 16px;
     box-shadow: 0 15px 35px rgba(0,0,0,0.12);
-    max-height: 300px;
+    max-height: 420px;
     overflow-y: auto;
     opacity: 0;
     visibility: hidden;
@@ -169,6 +161,41 @@
     transform: translateY(0);
 }
 
+/* Period buttons */
+.period-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+.period-btn {
+    padding: 14px 10px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    background: #fafafa;
+    font-size: 13px;
+    font-weight: 800;
+    color: #444;
+    cursor: pointer;
+    transition: 0.15s;
+}
+.period-btn:hover {
+    background: #fff5ef;
+    border-color: #ffd0b0;
+}
+.period-btn.active {
+    background: #fff1e8;
+    border-color: var(--orange);
+    color: var(--orange-dark);
+}
+
+/* Bundle options list */
+.bundle-list {
+    display: none;
+}
+.bundle-list.show {
+    display: block;
+}
 .bundle-option {
     width: 100%;
     border: 0;
@@ -200,10 +227,6 @@
     font-weight: 800;
     color: #555;
 }
-.special .option-icon {
-    background: #ffe8d8;
-    color: var(--orange);
-}
 .option-info {
     flex: 1;
     min-width: 0;
@@ -221,19 +244,9 @@
     color: #999;
 }
 .option-price {
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 800;
     color: var(--orange-dark);
-}
-.hot-badge {
-    display: inline-block;
-    margin-bottom: 6px;
-    padding: 3px 8px;
-    border-radius: 20px;
-    background: var(--orange);
-    color: #fff;
-    font-size: 10px;
-    font-weight: 800;
 }
 
 .price-box {
@@ -259,6 +272,32 @@
     font-size: 12px;
     font-weight: 700;
     color: #999;
+}
+
+/* Instructions box */
+.instructions {
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: #444;
+}
+.instructions strong {
+    color: #171717;
+}
+.instructions ul {
+    margin: 8px 0 0 0;
+    padding-left: 18px;
+}
+.instructions li {
+    margin-bottom: 5px;
+}
+.instructions .highlight {
+    color: var(--orange-dark);
+    font-weight: 700;
 }
 
 .input-group {
@@ -291,6 +330,14 @@
 textarea.input {
     min-height: 80px;
     resize: vertical;
+}
+.hint {
+    margin-top: 5px;
+    font-size: 11px;
+    color: #888;
+}
+.hint.warning {
+    color: #c2410c;
 }
 
 .submit-btn {
@@ -363,76 +410,185 @@ textarea.input {
                     </button>
 
                     <div class="bundle-options" id="bundleOptions">
-                        {% if offer_title %}
-                        <button
-                            type="button"
-                            class="bundle-option special"
-                            data-amount="{{ offer_title }} - {{ offer_amount }}"
-                            data-price="{{ offer_price }}"
-                            data-name="{{ offer_title }}"
-                            data-amount-display="{{ offer_amount }}"
-                        >
-                            <span class="hot-badge">OFFER</span>
-                            <div class="option-main">
-                                <div class="option-icon">OF</div>
-                                <div class="option-info">
-                                    <strong>{{ offer_title }}</strong>
-                                    <span>{{ offer_amount }}</span>
-                                </div>
-                                <div class="option-price">
-                                    TSh {{ "{:,}".format(offer_price|int) }}
-                                </div>
-                            </div>
-                        </button>
-                        {% endif %}
+                        <!-- Step 1: Period selection -->
+                        <div class="period-buttons" id="periodButtons">
+                            <button type="button" class="period-btn" data-period="wiki">Wiki Mbili</button>
+                            <button type="button" class="period-btn" data-period="mwezi">Mwezi</button>
+                        </div>
 
-                        {% for b in bundles %}
-                        <button
-                            type="button"
-                            class="bundle-option"
-                            data-amount="{{ b.name }} - {{ b.amount }}"
-                            data-price="{{ b.price }}"
-                            data-name="{{ b.name }}"
-                            data-amount-display="{{ b.amount }}"
-                        >
-                            <div class="option-main">
-                                <div class="option-icon">GB</div>
-                                <div class="option-info">
-                                    <strong>{{ b.name }}</strong>
-                                    <span>{{ b.amount }} · {{ b.validity }}</span>
+                        <!-- Wiki Mbili packages -->
+                        <div class="bundle-list" id="wikiList">
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 3 - Wiki Mbili"
+                                data-price="4000"
+                                data-name="GB 3"
+                                data-amount-display="Wiki Mbili">
+                                <div class="option-main">
+                                    <div class="option-icon">3</div>
+                                    <div class="option-info">
+                                        <strong>GB 3</strong>
+                                        <span>Wiki Mbili</span>
+                                    </div>
+                                    <div class="option-price">TSh 4,000</div>
                                 </div>
-                                <div class="option-price">
-                                    TSh {{ "{:,}".format(b.price) }}
+                            </button>
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 4 - Wiki Mbili"
+                                data-price="5000"
+                                data-name="GB 4"
+                                data-amount-display="Wiki Mbili">
+                                <div class="option-main">
+                                    <div class="option-icon">4</div>
+                                    <div class="option-info">
+                                        <strong>GB 4</strong>
+                                        <span>Wiki Mbili</span>
+                                    </div>
+                                    <div class="option-price">TSh 5,000</div>
                                 </div>
-                            </div>
-                        </button>
-                        {% endfor %}
+                            </button>
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 5 - Wiki Mbili"
+                                data-price="6000"
+                                data-name="GB 5"
+                                data-amount-display="Wiki Mbili">
+                                <div class="option-main">
+                                    <div class="option-icon">5</div>
+                                    <div class="option-info">
+                                        <strong>GB 5</strong>
+                                        <span>Wiki Mbili</span>
+                                    </div>
+                                    <div class="option-price">TSh 6,000</div>
+                                </div>
+                            </button>
+                        </div>
+
+                        <!-- Mwezi packages -->
+                        <div class="bundle-list" id="mweziList">
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 10 - Mwezi"
+                                data-price="10000"
+                                data-name="GB 10"
+                                data-amount-display="Mwezi">
+                                <div class="option-main">
+                                    <div class="option-icon">10</div>
+                                    <div class="option-info">
+                                        <strong>GB 10</strong>
+                                        <span>Mwezi</span>
+                                    </div>
+                                    <div class="option-price">TSh 10,000</div>
+                                </div>
+                            </button>
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 13 - Mwezi"
+                                data-price="12500"
+                                data-name="GB 13"
+                                data-amount-display="Mwezi">
+                                <div class="option-main">
+                                    <div class="option-icon">13</div>
+                                    <div class="option-info">
+                                        <strong>GB 13</strong>
+                                        <span>Mwezi</span>
+                                    </div>
+                                    <div class="option-price">TSh 12,500</div>
+                                </div>
+                            </button>
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 15 - Mwezi"
+                                data-price="14000"
+                                data-name="GB 15"
+                                data-amount-display="Mwezi">
+                                <div class="option-main">
+                                    <div class="option-icon">15</div>
+                                    <div class="option-info">
+                                        <strong>GB 15</strong>
+                                        <span>Mwezi</span>
+                                    </div>
+                                    <div class="option-price">TSh 14,000</div>
+                                </div>
+                            </button>
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 20 - Mwezi"
+                                data-price="18500"
+                                data-name="GB 20"
+                                data-amount-display="Mwezi">
+                                <div class="option-main">
+                                    <div class="option-icon">20</div>
+                                    <div class="option-info">
+                                        <strong>GB 20</strong>
+                                        <span>Mwezi</span>
+                                    </div>
+                                    <div class="option-price">TSh 18,500</div>
+                                </div>
+                            </button>
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 30 - Mwezi"
+                                data-price="28000"
+                                data-name="GB 30"
+                                data-amount-display="Mwezi">
+                                <div class="option-main">
+                                    <div class="option-icon">30</div>
+                                    <div class="option-info">
+                                        <strong>GB 30</strong>
+                                        <span>Mwezi</span>
+                                    </div>
+                                    <div class="option-price">TSh 28,000</div>
+                                </div>
+                            </button>
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 40 - Mwezi"
+                                data-price="37000"
+                                data-name="GB 40"
+                                data-amount-display="Mwezi">
+                                <div class="option-main">
+                                    <div class="option-icon">40</div>
+                                    <div class="option-info">
+                                        <strong>GB 40</strong>
+                                        <span>Mwezi</span>
+                                    </div>
+                                    <div class="option-price">TSh 37,000</div>
+                                </div>
+                            </button>
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 50 - Mwezi"
+                                data-price="45000"
+                                data-name="GB 50"
+                                data-amount-display="Mwezi">
+                                <div class="option-main">
+                                    <div class="option-icon">50</div>
+                                    <div class="option-info">
+                                        <strong>GB 50</strong>
+                                        <span>Mwezi</span>
+                                    </div>
+                                    <div class="option-price">TSh 45,000</div>
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <input type="hidden" name="amount" id="amountInput"
-                       value="{% if offer_title %}{{ offer_title }} - {{ offer_amount }}{% elif selected_bundle %}{{ selected_bundle.name }} - {{ selected_bundle.amount }}{% endif %}">
-                <input type="hidden" name="price" id="priceInput"
-                       value="{% if offer_price %}{{ offer_price }}{% elif selected_bundle %}{{ selected_bundle.price }}{% else %}0{% endif %}">
+                <input type="hidden" name="amount" id="amountInput" value="">
+                <input type="hidden" name="price" id="priceInput" value="0">
 
                 <div class="price-box">
                     <div>
                         <div class="price-label">Bei</div>
                         <div class="price-value">
                             <span class="price-currency">TSh</span>
-                            <span id="displayPrice">
-                                {% if offer_price %}
-                                    {{ "{:,}".format(offer_price|int) }}
-                                {% elif selected_bundle %}
-                                    {{ "{:,}".format(selected_bundle.price) }}
-                                {% else %}
-                                    0
-                                {% endif %}
-                            </span>
+                            <span id="displayPrice">0</span>
                         </div>
                     </div>
                 </div>
             </section>
+
+            <!-- INSTRUCTIONS -->
+            <div class="instructions">
+                <strong>Maelekezo muhimu:</strong>
+                <ul>
+                    <li><span class="highlight">Namba ya kulipia</span> — Unaweza kutumia namba yoyote (mtandao wowote).</li>
+                    <li><span class="highlight">Namba ya kuweka bando</span> — Lazima iwe namba ya <strong>Halotel</strong> tu (inayoanza na <strong>061, 062 au 063</strong>).</li>
+                    <li>Hakikisha namba ya Halotel unaweka bando ni sahihi ili usipoteze fedha.</li>
+                </ul>
+            </div>
 
             <!-- PAYMENT -->
             <section class="order-card">
@@ -444,21 +600,24 @@ textarea.input {
                         class="input"
                         type="tel"
                         name="payment_phone"
-                        placeholder="07XXXXXXXX"
+                        placeholder="07XXXXXXXX au 06XXXXXXXX"
                         value="{{ current_user.phone if current_user else '' }}"
                         required
                     >
+                    <div class="hint">Unaweza kutumia namba yoyote (mtandao wowote)</div>
                 </div>
 
                 <div class="input-group">
-                    <label class="input-label">Namba ya kuweka bando</label>
+                    <label class="input-label">Namba ya kuweka bando (Halotel tu)</label>
                     <input
                         class="input"
                         type="tel"
                         name="target_phone"
-                        placeholder="07XXXXXXXX"
+                        id="targetPhone"
+                        placeholder="061XXXXXXX / 062XXXXXXX / 063XXXXXXX"
                         required
                     >
+                    <div class="hint warning">Lazima iwe namba ya Halotel (061, 062 au 063)</div>
                 </div>
 
                 <div class="input-group">
@@ -483,13 +642,41 @@ const selectedSmall = document.getElementById("selectedSmall");
 const amountInput = document.getElementById("amountInput");
 const priceInput = document.getElementById("priceInput");
 const displayPrice = document.getElementById("displayPrice");
+const periodButtons = document.getElementById("periodButtons");
+const wikiList = document.getElementById("wikiList");
+const mweziList = document.getElementById("mweziList");
 
+// Toggle dropdown
 bundleSelected.addEventListener("click", function(e) {
     e.stopPropagation();
     bundleOptions.classList.toggle("show");
     bundleSelected.classList.toggle("active");
 });
 
+// Period selection
+document.querySelectorAll(".period-btn").forEach(function(btn) {
+    btn.addEventListener("click", function(e) {
+        e.stopPropagation();
+
+        // Remove active from all period buttons
+        document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
+        this.classList.add("active");
+
+        // Hide both lists first
+        wikiList.classList.remove("show");
+        mweziList.classList.remove("show");
+
+        // Show the selected period list
+        const period = this.dataset.period;
+        if (period === "wiki") {
+            wikiList.classList.add("show");
+        } else {
+            mweziList.classList.add("show");
+        }
+    });
+});
+
+// Bundle option selection
 document.querySelectorAll(".bundle-option").forEach(function(option) {
     option.addEventListener("click", function() {
         const amount = this.dataset.amount || "";
@@ -503,11 +690,13 @@ document.querySelectorAll(".bundle-option").forEach(function(option) {
         selectedSmall.innerText = "Kifurushi kimechaguliwa";
         displayPrice.innerText = Number(price).toLocaleString();
 
+        // Close dropdown
         bundleOptions.classList.remove("show");
         bundleSelected.classList.remove("active");
     });
 });
 
+// Close dropdown when clicking outside
 document.addEventListener("click", function(e) {
     if (bundleSelector && !bundleSelector.contains(e.target)) {
         bundleOptions.classList.remove("show");
@@ -515,23 +704,29 @@ document.addEventListener("click", function(e) {
     }
 });
 
-document.addEventListener("DOMContentLoaded", function() {
-    const currentAmount = amountInput.value;
-    if (!currentAmount) return;
-
-    document.querySelectorAll(".bundle-option").forEach(function(option) {
-        if (option.dataset.amount === currentAmount) {
-            selectedName.innerText = option.dataset.name + " • " + option.dataset.amountDisplay;
-            selectedSmall.innerText = "Kifurushi kimechaguliwa";
-        }
-    });
-});
-
+// Simple validation for Halotel number (starts with 061, 062, 063)
+const targetPhone = document.getElementById("targetPhone");
 const orderForm = document.getElementById("orderForm");
 const submitBtn = document.getElementById("submitBtn");
 const submitText = document.getElementById("submitText");
 
-orderForm.addEventListener("submit", function() {
+orderForm.addEventListener("submit", function(e) {
+    const phone = targetPhone.value.replace(/\s+/g, "");
+    const isHalotel = /^(061|062|063)/.test(phone);
+
+    if (!isHalotel) {
+        e.preventDefault();
+        alert("Namba ya kuweka bando lazima iwe ya Halotel (061, 062 au 063)!");
+        targetPhone.focus();
+        return;
+    }
+
+    if (!amountInput.value || amountInput.value === "") {
+        e.preventDefault();
+        alert("Tafadhali chagua kifurushi kwanza!");
+        return;
+    }
+
     submitBtn.classList.add("loading");
     submitText.innerHTML = '<span class="loading-spinner"></span>Inatuma...';
 });

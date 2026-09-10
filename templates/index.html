@@ -6,7 +6,7 @@
     .home-page {
         display: flex;
         flex-direction: column;
-        min-height: calc(100vh - 60px); /* badilisha 60px kulingana na height ya topbar yako */
+        min-height: calc(100vh - 60px);
         padding-bottom: 12px;
         overflow: hidden;
     }
@@ -168,14 +168,13 @@
     <!-- HERO NDOGO -->
     <section class="home-hero">
         <img src="{{ url_for('static', filename='uploads/myphoto.png') }}" alt="Mr. Sule" class="home-hero-img">
-        <h1>Karibu MR. SULE DIGITAL</h1>
+        <h1>Karibu Kwa MR. SULE DIGITAL</h1>
         <p>Pata huduma za bando, usajili wa laini, uwakala na malipo sehemu moja.</p>
     </section>
 
     <!-- SLIDESHOW -->
     <div class="slideshow-wrapper" id="slideshowWrapper">
         <div class="slideshow" id="slideshow">
-            <!-- Picha zitakuja hapa kwa JS / Jinja -->
             {% if slides %}
                 {% for slide in slides %}
                     <img src="{{ url_for('static', filename='uploads/slide/' + slide) }}" 
@@ -183,10 +182,10 @@
                          alt="Slide {{ loop.index }}">
                 {% endfor %}
             {% else %}
-                <!-- Example fallback (ondoa baadaye) -->
+                <!-- Fallback (ondoa baada ya kuweka picha) 
                 <img src="{{ url_for('static', filename='uploads/slide/1.jpg') }}" class="slide active" alt="Slide 1">
                 <img src="{{ url_for('static', filename='uploads/slide/2.jpg') }}" class="slide" alt="Slide 2">
-                <img src="{{ url_for('static', filename='uploads/slide/3.jpg') }}" class="slide" alt="Slide 3">
+                <img src="{{ url_for('static', filename='uploads/slide/3.jpg') }}" class="slide" alt="Slide 3"> -->
             {% endif %}
         </div>
         <div class="slide-indicator" id="dots"></div>
@@ -262,7 +261,7 @@
         }
     }
 
-    // Pause wakati unashikilia (touch au mouse)
+    // Pause wakati unashikilia
     function pause() {
         isPaused = true;
         stopSlideshow();
@@ -273,17 +272,17 @@
         startSlideshow();
     }
 
-    // Touch events (simu)
+    // Touch (simu)
     wrapper.addEventListener('touchstart', pause, {passive: true});
     wrapper.addEventListener('touchend', resume, {passive: true});
     wrapper.addEventListener('touchcancel', resume, {passive: true});
 
-    // Mouse events (desktop testing)
+    // Mouse (desktop)
     wrapper.addEventListener('mousedown', pause);
     wrapper.addEventListener('mouseup', resume);
     wrapper.addEventListener('mouseleave', resume);
 
-    // Anza slideshow
+    // Anza
     startSlideshow();
 })();
 </script>

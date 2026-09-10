@@ -133,149 +133,73 @@
 }
 
 
-/* ===== PC ONLY ===== */
 @media (min-width: 768px) {
 
-    /* ========== HERO ========== */
-    .home-hero {
-        width: 100%;
-        max-width: 980px;
-        margin: 18px auto 14px;
-        padding: 16px 22px;
-        border-radius: 16px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-    }
-
-    .home-hero-img {
-        width: 56px;
-        height: 56px;
-        flex-shrink: 0;
-        border-radius: 50%;
-        object-fit: cover;
-    }
-
-    .home-hero h1 {
-        font-size: 19px;
-        font-weight: 700;
-        margin: 0 0 3px 0;
-        line-height: 1.3;
-    }
-
-    .home-hero p {
-        font-size: 13px;
-        margin: 0;
-        opacity: 0.9;
-        line-height: 1.4;
-    }
-
-    /* ========== SLIDESHOW / BANNER ========== */
     .slideshow-wrapper {
-        width: 100%;
-        max-width: 980px;
-        margin: 0 auto 20px;
-        border-radius: 16px;
-        overflow: hidden;
-        aspect-ratio: 2.5 / 1;
-        height: auto;
+        width: calc(100% - 30px);
+        max-width: 900px;
+        aspect-ratio: 350 / 220;
+        margin: 10px auto;
     }
 
     .ss-slide img {
         width: 100%;
         height: 100%;
-        object-fit: cover;
-        display: block;
-    }
-
-    /* ========== SECTION TITLE ========== */
-    .section-title {
-        width: 100%;
-        max-width: 980px;
-        margin: 0 auto 10px;
-        padding: 0 2px;
-    }
-
-    .section-title h2 {
-        font-size: 17px;
-        font-weight: 700;
-    }
-
-    /* ========== HUDUMA KUU ========== */
-    .main-services {
-        width: 100%;
-        max-width: 980px;
-        margin: 0 auto 40px;
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
-        padding: 0;
-    }
-
-    /* Skrini kubwa (laptop) */
-    @media (min-width: 1024px) {
-        .main-services {
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-        }
-    }
-
-    .main-service {
-        padding: 14px 14px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        transition: all 0.22s ease;
-    }
-
-    .main-service:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
-    }
-
-    .main-service-icon {
-        width: 42px;
-        height: 42px;
-        font-size: 19px;
-        flex-shrink: 0;
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .main-service-content h3 {
-        font-size: 14px;
-        font-weight: 600;
-        margin: 0 0 2px 0;
-    }
-
-    .main-service-content p {
-        font-size: 12px;
-        margin: 0;
-        opacity: 0.8;
-        line-height: 1.35;
-    }
-
-    .main-arrow {
-        font-size: 16px;
-        margin-left: auto;
-        opacity: 0.45;
-        transition: 0.2s ease;
-    }
-
-    .main-service:hover .main-arrow {
-        opacity: 1;
-        transform: translateX(3px);
-    }
-
-    /* ========== BOTTOM NAV ========== */
-    .bottom-nav {
-        width: 100%;
-        max-width: 100%;
+        object-fit: contain;
     }
 }
+    .section-title {
+        padding: 10px 14px 6px;
+        flex-shrink: 0;
+    }
+    .section-title h2 {
+        font-size: 15px;
+        margin: 0;
+    }
+    .main-services {
+        padding: 0 12px;
+        display: grid;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+    .main-service {
+        background: #fff;
+        border-radius: 14px;
+        padding: 11px 13px;
+        border: 1px solid #eee;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+    .main-service-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+        background: #fff1e7;
+        flex-shrink: 0;
+    }
+    .main-service-content {
+        flex: 1;
+        min-width: 0;
+    }
+    .main-service-content h3 {
+        font-size: 14px;
+        margin: 0 0 2px;
+    }
+    .main-service-content p {
+        font-size: 10.5px;
+        color: #777;
+        line-height: 1.3;
+        margin: 0;
+    }
+    .main-arrow {
+        color: #f56b00;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
 </style>
 
 <div class="home-page">

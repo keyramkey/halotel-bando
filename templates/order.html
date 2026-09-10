@@ -376,6 +376,79 @@ textarea.input {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* ===== CUSTOM MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.25s ease;
+}
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+.modal-card {
+    background: #fff;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 360px;
+    padding: 28px 24px 22px;
+    text-align: center;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+    transform: scale(0.9);
+    transition: 0.25s ease;
+}
+.modal-overlay.show .modal-card {
+    transform: scale(1);
+}
+.modal-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 16px;
+    background: #fff1e8;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 28px;
+}
+.modal-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #171717;
+    margin-bottom: 10px;
+}
+.modal-message {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #555;
+    margin-bottom: 22px;
+}
+.modal-message strong {
+    color: var(--orange-dark);
+}
+.modal-btn {
+    width: 100%;
+    min-height: 48px;
+    border: 0;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #ff7800, #ed4d00);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(237,77,0,0.2);
+}
+.modal-btn:active {
+    transform: scale(0.97);
+}
 </style>
 
 <div class="order-page">
@@ -633,6 +706,19 @@ textarea.input {
     </main>
 </div>
 
+<!-- CUSTOM ERROR MODAL -->
+<div class="modal-overlay" id="errorModal">
+    <div class="modal-card">
+        <div class="modal-icon">⚠️</div>
+        <div class="modal-title" id="modalTitle">Namba Siyo Sahihi</div>
+        <div class="modal-message" id="modalMessage">
+            Namba ya kuweka bando <strong>lazima iwe ya Halotel</strong>.<br>
+            Inabidi ianze na <strong>061, 062 au 063</strong>.
+        </div>
+        <button type="button" class="modal-btn" id="modalCloseBtn">Jaribu Tena</button>
+    </div>
+</div>
+
 <script>
 const bundleSelector = document.getElementById("bundleSelector");
 const bundleSelected = document.getElementById("bundleSelected");
@@ -646,6 +732,15 @@ const periodButtons = document.getElementById("periodButtons");
 const wikiList = document.getElementById("wikiList");
 const mweziList = document.getElementById("mweziList");
 
+const errorModal = document.getElementById("errorModal");
+const modalTitle = document.getElementById("modalTitle");
+const modalMessage = document.getElementById("modalMessage");
+const modalCloseBtn = document.getElementById("modalCloseBtn");
+const targetPhone = document.getElementById("targetPhone");
+const orderForm = document.getElementById("orderForm");
+const submitBtn = document.getElementById("submitBtn");
+const submitText = document.getElementById("submitText");
+
 // Toggle dropdown
 bundleSelected.addEventListener("click", function(e) {
     e.stopPropagation();
@@ -658,15 +753,12 @@ document.querySelectorAll(".period-btn").forEach(function(btn) {
     btn.addEventListener("click", function(e) {
         e.stopPropagation();
 
-        // Remove active from all period buttons
         document.querySelectorAll(".period-btn").forEach(b => b.classList.remove("active"));
         this.classList.add("active");
 
-        // Hide both lists first
         wikiList.classList.remove("show");
         mweziList.classList.remove("show");
 
-        // Show the selected period list
         const period = this.dataset.period;
         if (period === "wiki") {
             wikiList.classList.add("show");
@@ -690,7 +782,6 @@ document.querySelectorAll(".bundle-option").forEach(function(option) {
         selectedSmall.innerText = "Kifurushi kimechaguliwa";
         displayPrice.innerText = Number(price).toLocaleString();
 
-        // Close dropdown
         bundleOptions.classList.remove("show");
         bundleSelected.classList.remove("active");
     });
@@ -704,29 +795,55 @@ document.addEventListener("click", function(e) {
     }
 });
 
-// Simple validation for Halotel number (starts with 061, 062, 063)
-const targetPhone = document.getElementById("targetPhone");
-const orderForm = document.getElementById("orderForm");
-const submitBtn = document.getElementById("submitBtn");
-const submitText = document.getElementById("submitText");
+// Show custom modal
+function showError(title, message) {
+    modalTitle.innerText = title;
+    modalMessage.innerHTML = message;
+    errorModal.classList.add("show");
+}
 
+// Close modal
+modalCloseBtn.addEventListener("click", function() {
+    errorModal.classList.remove("show");
+    targetPhone.focus();
+});
+
+// Close when clicking outside the card
+errorModal.addEventListener("click", function(e) {
+    if (e.target === errorModal) {
+        errorModal.classList.remove("show");
+    }
+});
+
+// Form validation
 orderForm.addEventListener("submit", function(e) {
-    const phone = targetPhone.value.replace(/\s+/g, "");
+    const phone = targetPhone.value.replace(/\s+/g, "").replace(/^\+255/, "0");
+
+    // Check if package is selected
+    if (!amountInput.value || amountInput.value === "") {
+        e.preventDefault();
+        showError(
+            "Chagua Kifurushi",
+            "Tafadhali <strong>chagua kifurushi</strong> kwanza kabla ya kuendelea."
+        );
+        return;
+    }
+
+    // Check Halotel number
     const isHalotel = /^(061|062|063)/.test(phone);
 
     if (!isHalotel) {
         e.preventDefault();
-        alert("Namba ya kuweka bando lazima iwe ya Halotel (061, 062 au 063)!");
-        targetPhone.focus();
+        showError(
+            "Namba Siyo Sahihi",
+            `Namba ya kuweka bando <strong>lazima iwe ya Halotel</strong>.<br><br>
+             Inabidi ianze na <strong>061, 062 au 063</strong> tu.<br>
+             Tafadhali andika namba sahihi.`
+        );
         return;
     }
 
-    if (!amountInput.value || amountInput.value === "") {
-        e.preventDefault();
-        alert("Tafadhali chagua kifurushi kwanza!");
-        return;
-    }
-
+    // Everything is ok → show loading
     submitBtn.classList.add("loading");
     submitText.innerHTML = '<span class="loading-spinner"></span>Inatuma...';
 });

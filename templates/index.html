@@ -136,135 +136,147 @@
 /* ===== PC ONLY ===== */
 @media (min-width: 768px) {
 
-    /* ========== WELCOME / HERO ========== */
+    /* ========== HEADER ========== */
+    /* (kama una class ya header) */
+    .header,
+    .top-header {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 16px 24px;
+    }
+
+    /* ========== HERO (Karibu...) ========== */
     .home-hero {
         width: 100%;
         max-width: 1100px;
-        margin: 28px auto 20px;
-        padding: 28px 32px;
-        border-radius: 20px;
+        margin: 24px auto 20px;
+        padding: 22px 28px;
+        border-radius: 18px;
         display: flex;
         align-items: center;
-        gap: 24px;
+        gap: 22px;
     }
 
     .home-hero-img {
-        width: 72px;
-        height: 72px;
+        width: 68px;
+        height: 68px;
         flex-shrink: 0;
+        border-radius: 50%;
+        object-fit: cover;
     }
 
     .home-hero h1 {
-        font-size: 26px;
+        font-size: 24px;
         font-weight: 700;
+        margin: 0 0 4px 0;
         line-height: 1.3;
-        margin-bottom: 6px;
     }
 
     .home-hero p {
-        font-size: 15px;
-        line-height: 1.5;
-        opacity: 0.85;
+        font-size: 14.5px;
+        margin: 0;
+        opacity: 0.9;
+        line-height: 1.45;
     }
 
-    /* ========== SLIDESHOW ========== */
+    /* ========== SLIDESHOW / BANNER (GB 15) ========== */
     .slideshow-wrapper {
         width: 100%;
         max-width: 1100px;
-        aspect-ratio: 16 / 7;
-        height: auto;
-        margin: 12px auto 28px;
+        margin: 0 auto 28px;
         border-radius: 18px;
         overflow: hidden;
+        aspect-ratio: 2.4 / 1;   /* inaonekana bora kuliko ya zamani */
+        height: auto;
     }
 
     .ss-slide img {
         width: 100%;
         height: 100%;
-        object-fit: cover; /* cover inaonekana bora kuliko contain kwenye desktop */
+        object-fit: cover;
+        display: block;
     }
 
     /* ========== SECTION TITLE ========== */
     .section-title {
         width: 100%;
         max-width: 1100px;
-        margin: 0 auto 8px;
-        padding: 8px 0 12px;
+        margin: 0 auto 12px;
+        padding: 0 4px;
     }
 
     .section-title h2 {
-        font-size: 22px;
+        font-size: 20px;
         font-weight: 700;
     }
 
-    /* ========== HUDUMA KUU (Grid Layout) ========== */
+    /* ========== HUDUMA KUU ========== */
     .main-services {
         width: 100%;
         max-width: 1100px;
-        margin: 0 auto 40px;
-        padding: 0;
+        margin: 0 auto 50px;
         display: grid;
-        grid-template-columns: repeat(2, 1fr); /* 2 columns kwenye tablet/desktop */
+        grid-template-columns: repeat(2, 1fr);
         gap: 16px;
+        padding: 0;
     }
 
-    /* Kwenye skrini kubwa zaidi (laptop/desktop) iwe 3 columns */
+    /* Skrini kubwa zaidi (laptop) */
     @media (min-width: 1024px) {
         .main-services {
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 18px;
         }
     }
 
     .main-service {
-        width: 100%;
-        padding: 20px 18px;
+        padding: 18px 16px;
         border-radius: 16px;
         display: flex;
         align-items: center;
-        gap: 16px;
-        transition: all 0.25s ease;
-        cursor: pointer;
+        gap: 14px;
+        transition: all 0.22s ease;
     }
 
     .main-service:hover {
         transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
     }
 
     .main-service-icon {
-        width: 52px;
-        height: 52px;
-        font-size: 24px;
+        width: 48px;
+        height: 48px;
+        font-size: 22px;
         flex-shrink: 0;
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
-        border-radius: 14px;
     }
 
     .main-service-content h3 {
-        font-size: 16px;
+        font-size: 15.5px;
         font-weight: 600;
-        margin-bottom: 4px;
+        margin: 0 0 3px 0;
     }
 
     .main-service-content p {
-        font-size: 13.5px;
-        line-height: 1.4;
+        font-size: 13px;
+        margin: 0;
         opacity: 0.8;
+        line-height: 1.4;
     }
 
     .main-arrow {
-        font-size: 20px;
+        font-size: 18px;
         margin-left: auto;
-        opacity: 0.5;
-        transition: all 0.2s ease;
+        opacity: 0.45;
+        transition: 0.2s ease;
     }
 
     .main-service:hover .main-arrow {
         opacity: 1;
-        transform: translateX(4px);
+        transform: translateX(3px);
     }
 
     /* ========== BOTTOM NAV ========== */

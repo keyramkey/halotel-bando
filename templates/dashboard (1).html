@@ -1,0 +1,256 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+
+<header class="topbar">
+    <div>
+        <div class="brand">Admin <span>Dashboard</span></div>
+        <div class="muted">MR. SULE DIGITAL SERVICES BUSINESS</div>
+    </div>
+    <a href="{{ url_for('home') }}" class="icon-btn">←</a>
+</header>
+
+<div class="page">
+
+    <!-- Stats -->
+    <div class="network-grid" style="margin-bottom:20px;">
+        <div class="card" style="margin:0; text-align:center;">
+            <div class="muted" style="font-size:12px;">Users</div>
+            <strong style="font-size:26px; display:block; margin-top:4px;">{{ users_count }}</strong>
+        </div>
+        <div class="card" style="margin:0; text-align:center;">
+            <div class="muted" style="font-size:12px;">Bando Pending</div>
+            <strong style="font-size:26px; display:block; margin-top:4px;">{{ pending_count }}</strong>
+        </div>
+        <div class="card" style="margin:0; text-align:center;">
+            <div class="muted" style="font-size:12px;">Agency Pending</div>
+            <strong style="font-size:26px; display:block; margin-top:4px;">{{ agency_pending }}</strong>
+        </div>
+    </div>
+
+    <!-- ==================== MATANGAZO / SLIDESHOW ==================== -->
+    <div style="margin:24px 0 12px;">
+        <h2 style="font-size:17px; font-weight:800;">Matangazo / Slideshow</h2>
+        <p class="muted" style="font-size:12px; margin-top:4px;">
+            Ongeza picha + link. Mteja akibonyeza slide ataenda kwenye link moja kwa moja.
+        </p>
+    </div>
+
+    <!-- Form ya kuongeza slide mpya -->
+    <div class="card" style="margin-bottom:16px;">
+        <div class="title" style="font-size:15px; margin-bottom:10px;">➕ Ongeza Tangazo / Slide</div>
+        <form method="POST"
+              action="{{ url_for('admin_slide_add') }}"
+              enctype="multipart/form-data"
+              style="display:flex; flex-direction:column; gap:10px;">
+            <div>
+                <label class="muted" style="font-size:12px;">Picha (png, jpg, gif, webp, bmp, svg, ...)</label>
+                <input type="file" name="image" class="input" accept="image/*,.heic,.avif,.tiff,.bmp,.svg,.ico" required>
+            </div>
+            <div>
+                <label class="muted" style="font-size:12px;">Link (URL) — optional</label>
+                <input type="url" name="link" class="input" placeholder="https://example.com au /order">
+            </div>
+            <div>
+                <label class="muted" style="font-size:12px;">Kichwa / Title (optional)</label>
+                <input type="text" name="title" class="input" placeholder="Jina la tangazo">
+            </div>
+            <div>
+                <label class="muted" style="font-size:12px;">Mpangilio (namba ndogo = mbele)</label>
+                <input type="number" name="sort_order" class="input" value="0" min="0">
+            </div>
+            <button class="btn orange" type="submit">Hifadhi Slide</button>
+        </form>
+    </div>
+
+    <!-- Orodha ya slides zilizopo -->
+    {% for slide in slides %}
+    <div class="application-card">
+        <div class="application-top">
+            <div>
+                <div class="application-code">Slide #{{ slide.id }}{% if slide.title %} — {{ slide.title }}{% endif %}</div>
+                <div class="application-network" style="font-size:12px;">
+                    {% if slide.link %}
+                        Link: <a href="{{ slide.link }}" target="_blank" style="color:#f56b00;">{{ slide.link }}</a>
+                    {% else %}
+                        <span class="muted">Hakuna link</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% if slide.is_active %}
+                <span class="status completed">Active</span>
+            {% else %}
+                <span class="status rejected">Imezimwa</span>
+            {% endif %}
+        </div>
+
+        <div style="margin-top:12px;">
+            <img src="{{ url_for('static', filename='uploads/slide/' + slide.image) }}"
+                 alt="slide"
+                 style="max-width:100%; max-height:160px; border-radius:10px; object-fit:cover; background:#111;">
+        </div>
+
+        <form method="POST"
+              action="{{ url_for('admin_slide_update', slide_id=slide.id) }}"
+              enctype="multipart/form-data"
+              style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+            <div>
+                <label class="muted" style="font-size:12px;">Badilisha picha (optional)</label>
+                <input type="file" name="image" class="input" accept="image/*,.heic,.avif,.tiff,.bmp,.svg,.ico">
+            </div>
+            <div>
+                <label class="muted" style="font-size:12px;">Link</label>
+                <input type="url" name="link" class="input" value="{{ slide.link or '' }}" placeholder="https://...">
+            </div>
+            <div>
+                <label class="muted" style="font-size:12px;">Title</label>
+                <input type="text" name="title" class="input" value="{{ slide.title or '' }}">
+            </div>
+            <div>
+                <label class="muted" style="font-size:12px;">Mpangilio</label>
+                <input type="number" name="sort_order" class="input" value="{{ slide.sort_order }}" min="0">
+            </div>
+            <div>
+                <label class="muted" style="font-size:12px;">Hali</label>
+                <select class="input" name="is_active">
+                    <option value="1" {% if slide.is_active %}selected{% endif %}>Active (ionekane)</option>
+                    <option value="0" {% if not slide.is_active %}selected{% endif %}>Zima</option>
+                </select>
+            </div>
+            <button class="btn orange" type="submit">Hifadhi Mabadiliko</button>
+        </form>
+
+        <form method="POST"
+              action="{{ url_for('admin_slide_delete', slide_id=slide.id) }}"
+              style="margin-top:8px;"
+              onsubmit="return confirm('Una uhakika unataka kufuta slide hii?');">
+            <button class="btn" type="submit" style="background:#3a0a0a; color:#ff6b6b; width:100%;">
+                Futa Slide
+            </button>
+        </form>
+    </div>
+    {% else %}
+    <div class="card">
+        <p class="muted">Hakuna slides bado. Ongeza hapo juu.</p>
+    </div>
+    {% endfor %}
+
+    <!-- ==================== ODA ZA BANDO ==================== -->
+    <div style="margin:24px 0 12px;">
+        <h2 style="font-size:17px; font-weight:800;">Oda za Bando</h2>
+    </div>
+
+    {% for order in orders %}
+    <div class="application-card">
+        <div class="application-top">
+            <div>
+                <div class="application-code">Oda #{{ order.id }} - {{ order.amount }}</div>
+                <div class="application-network">TSh {{ "{:,}".format(order.price) }}</div>
+            </div>
+
+            {% if order.status == "pending" %}
+                <span class="status pending">Inasubiri</span>
+            {% elif order.status == "completed" %}
+                <span class="status completed">Imekamilika</span>
+            {% else %}
+                <span class="status rejected">Imekataliwa</span>
+            {% endif %}
+        </div>
+
+        <div style="margin-top:12px; font-size:13px; line-height:1.5;">
+            <strong>Mteja:</strong>
+            {{ order.user.username if order.user else '—' }}
+            ({{ order.user.phone if order.user else '—' }})
+            <br>
+            <strong style="color:#f56b00;">Taarifa:</strong>
+            {{ order.note }}
+        </div>
+
+        {% if order.status == "pending" %}
+        <form method="POST"
+              action="{{ url_for('update_order_status', order_id=order.id) }}"
+              style="margin-top:14px; display:flex; gap:8px;">
+            <input type="hidden" name="status" value="completed">
+            <button class="btn green" type="submit">
+                Weka DONE
+            </button>
+        </form>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="card">
+        <p class="muted">Hakuna oda za bando kwa sasa.</p>
+    </div>
+    {% endfor %}
+
+    <!-- ==================== MAOMBI YA UWAKALA ==================== -->
+    <div style="margin:24px 0 12px;">
+        <h2 style="font-size:17px; font-weight:800;">Maombi ya Uwakala</h2>
+    </div>
+
+    {% for application in applications %}
+    <div class="application-card">
+        <div class="application-top">
+            <div>
+                <div class="application-code">{{ application.application_code }}</div>
+                <div class="application-network">
+                    {{ application.network }} · {{ application.service_type }}
+                </div>
+            </div>
+
+            {% if application.status == "pending" %}
+                <span class="status pending">Inasubiri</span>
+            {% elif application.status == "processing" %}
+                <span class="status processing">Inachakatwa</span>
+            {% elif application.status == "completed" %}
+                <span class="status completed">Imekamilika</span>
+            {% else %}
+                <span class="status rejected">Imekataliwa</span>
+            {% endif %}
+        </div>
+
+        <div style="margin-top:12px; font-size:13px;">
+            <strong>{{ application.full_name }}</strong>
+            <div class="muted" style="margin-top:3px;">{{ application.phone }}</div>
+        </div>
+
+        <form method="POST"
+              action="{{ url_for('update_agency_status', application_id=application.id) }}"
+              style="margin-top:14px;">
+
+            <select class="input" name="status">
+                <option value="pending" {% if application.status == "pending" %}selected{% endif %}>Inasubiri</option>
+                <option value="processing" {% if application.status == "processing" %}selected{% endif %}>Inachakatwa</option>
+                <option value="completed" {% if application.status == "completed" %}selected{% endif %}>Imekamilika</option>
+                <option value="rejected" {% if application.status == "rejected" %}selected{% endif %}>Imekataliwa</option>
+            </select>
+
+            <textarea
+                class="input"
+                name="note"
+                placeholder="Ujumbe / maelezo kwa mteja..."
+            >{{ application.admin_note }}</textarea>
+
+            <button class="btn orange" type="submit" style="margin-top:10px;">
+                Hifadhi Status
+            </button>
+        </form>
+
+        <a href="{{ url_for('admin_agency_chat', application_id=application.id) }}"
+           class="btn"
+           style="display:block; text-align:center; margin-top:10px; background:#151515;">
+            Fungua Chat na Mteja
+        </a>
+    </div>
+    {% else %}
+    <div class="card">
+        <div class="title" style="font-size:18px;">Hakuna maombi mapya</div>
+        <p class="muted">Maombi ya usajili na uwakala yataonekana hapa.</p>
+    </div>
+    {% endfor %}
+
+</div>
+
+{% endblock %}

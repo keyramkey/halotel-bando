@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Nyumbani | MR. SULE DIGITAL SERVICES{% endblock %}
+
+{% block content %}
+
+<header class="topbar">
+    <div>
+        <div class="brand">MR. SULE <span>DIGITAL</span></div>
+        <div class="muted">Huduma za Bando, Usajili & Uwakala</div>
+    </div>
+    <div style="display:flex; gap:8px; align-items:center;">
+        {% if current_user %}
+            {% if current_user.is_admin %}
+                <a href="{{ url_for('dashboard') }}" class="icon-btn" title="Dashboard">⚙</a>
+            {% endif %}
+            <a href="{{ url_for('profile') }}" class="icon-btn" title="Profile">👤</a>
+            <a href="{{ url_for('chat') }}" class="icon-btn" title="Chat">💬</a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="btn" style="padding:8px 14px; font-size:13px;">Ingia</a>
+        {% endif %}
+    </div>
+</header>
+
+<div class="page">
+
+    <!-- ==================== SLIDESHOW / MATANGAZO ==================== -->
+    {% if slides %}
+    <div class="slideshow-wrap" style="margin-bottom:20px; position:relative; overflow:hidden; border-radius:16px; background:#111;">
+        <div class="slideshow" id="slideshow" style="display:flex; transition:transform 0.5s ease; width:100%;">
+            {% for slide in slides %}
+            <div class="slide-item" style="min-width:100%; position:relative;">
+                {% if slide.link %}
+                <a href="{{ slide.link }}" target="_blank" rel="noopener" style="display:block;">
+                    <img src="{{ url_for('static', filename='uploads/slide/' + slide.image) }}"
+                         alt="{{ slide.title or 'Tangazo' }}"
+                         style="width:100%; max-height:220px; object-fit:cover; display:block; border-radius:16px;">
+                    {% if slide.title %}
+                    <div style="position:absolute; bottom:0; left:0; right:0; padding:12px 16px; background:linear-gradient(transparent, rgba(0,0,0,0.75)); color:#fff; font-size:14px; font-weight:600; border-radius:0 0 16px 16px;">
+                        {{ slide.title }}
+                    </div>
+                    {% endif %}
+                </a>
+                {% else %}
+                <div style="display:block;">
+                    <img src="{{ url_for('static', filename='uploads/slide/' + slide.image) }}"
+                         alt="{{ slide.title or 'Tangazo' }}"
+                         style="width:100%; max-height:220px; object-fit:cover; display:block; border-radius:16px;">
+                    {% if slide.title %}
+                    <div style="position:absolute; bottom:0; left:0; right:0; padding:12px 16px; background:linear-gradient(transparent, rgba(0,0,0,0.75)); color:#fff; font-size:14px; font-weight:600; border-radius:0 0 16px 16px;">
+                        {{ slide.title }}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Dots -->
+        {% if slides|length > 1 %}
+        <div id="slide-dots" style="position:absolute; bottom:10px; left:0; right:0; display:flex; justify-content:center; gap:6px; z-index:2;">
+            {% for slide in slides %}
+            <span class="dot" data-index="{{ loop.index0 }}"
+                  style="width:8px; height:8px; border-radius:50%; background:rgba(255,255,255,0.4); cursor:pointer;"></span>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+    (function() {
+        const slides = document.querySelectorAll('#slideshow .slide-item');
+        const dots = document.querySelectorAll('#slide-dots .dot');
+        if (slides.length <= 1) return;
+
+        let current = 0;
+        const total = slides.length;
+        const track = document.getElementById('slideshow');
+
+        function goTo(i) {
+            current = (i + total) % total;
+            track.style.transform = 'translateX(-' + (current * 100) + '%)';
+            dots.forEach((d, idx) => {
+                d.style.background = idx === current ? '#f56b00' : 'rgba(255,255,255,0.4)';
+            });
+        }
+
+        dots.forEach(d => {
+            d.addEventListener('click', () => goTo(parseInt(d.dataset.index)));
+        });
+
+        // Auto play
+        setInterval(() => goTo(current + 1), 4500);
+        goTo(0);
+    })();
+    </script>
+    {% endif %}
+
+    <!-- ==================== QUICK LINKS ==================== -->
+    <div class="network-grid" style="margin-bottom:20px;">
+        <a href="{{ url_for('order') }}" class="card" style="margin:0; text-align:center; text-decoration:none; color:inherit;">
+            <div style="font-size:28px;">📦</div>
+            <strong style="font-size:14px; display:block; margin-top:6px;">Nunua Bando</strong>
+        </a>
+        <a href="{{ url_for('agency') }}" class="card" style="margin:0; text-align:center; text-decoration:none; color:inherit;">
+            <div style="font-size:28px;">🏪</div>
+            <strong style="font-size:14px; display:block; margin-top:6px;">Uwakala / Usajili</strong>
+        </a>
+        <a href="{{ url_for('chat') }}" class="card" style="margin:0; text-align:center; text-decoration:none; color:inherit;">
+            <div style="font-size:28px;">💬</div>
+            <strong style="font-size:14px; display:block; margin-top:6px;">Chat na Admin</strong>
+        </a>
+    </div>
+
+    <!-- ==================== OFERS ==================== -->
+    {% if offers %}
+    <div style="margin-bottom:12px;">
+        <h2 style="font-size:17px; font-weight:800;">🔥 Ofa Maalum</h2>
+    </div>
+    {% for offer in offers %}
+    <div class="card" style="margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <div>
+                <div style="font-weight:700; font-size:16px;">{{ offer.title }}</div>
+                <div class="muted" style="margin-top:4px;">{{ offer.amount }}</div>
+                {% if offer.description %}
+                <div class="muted" style="font-size:12px; margin-top:4px;">{{ offer.description }}</div>
+                {% endif %}
+            </div>
+            <div style="text-align:right;">
+                <div style="font-weight:800; font-size:18px; color:#f56b00;">TSh {{ "{:,}".format(offer.price) }}</div>
+                <a href="{{ url_for('order', offer_title=offer.title, offer_price=offer.price, offer_amount=offer.amount) }}"
+                   class="btn orange" style="margin-top:8px; display:inline-block; padding:8px 14px; font-size:13px;">
+                    Nunua Sasa
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- ==================== BANDO / BUNDLES ==================== -->
+    <div style="margin:20px 0 12px;">
+        <h2 style="font-size:17px; font-weight:800;">📦 Bando Zetu</h2>
+    </div>
+
+    {% if bundles %}
+    <div class="network-grid">
+        {% for bundle in bundles %}
+        <div class="card" style="margin:0; text-align:center;">
+            <div class="muted" style="font-size:12px;">{{ bundle.name }}</div>
+            <strong style="font-size:22px; display:block; margin-top:4px;">{{ bundle.amount }}</strong>
+            <div class="muted" style="font-size:12px; margin-top:2px;">{{ bundle.validity }}</div>
+            <div style="font-weight:800; font-size:16px; color:#f56b00; margin-top:8px;">
+                TSh {{ "{:,}".format(bundle.price) }}
+            </div>
+            <a href="{{ url_for('order', bundle_id=bundle.id) }}"
+               class="btn orange" style="margin-top:10px; display:inline-block; padding:8px 16px; font-size:13px; width:100%; box-sizing:border-box;">
+                Chagua
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="card">
+        <p class="muted">Hakuna bando kwa sasa.</p>
+    </div>
+    {% endif %}
+
+    <!-- ==================== INFO ==================== -->
+    <div class="card" style="margin-top:24px; text-align:center;">
+        <div class="muted" style="font-size:13px;">
+            Malipo: {{ PAYMENT_NETWORK }} <strong>{{ PAYMENT_NUMBER }}</strong><br>
+            Jina: {{ PAYMENT_NAME }}
+        </div>
+        <p class="muted" style="font-size:12px; margin-top:10px;">
+            Baada ya malipo wasiliana na chat ili bando liwekwe haraka.
+        </p>
+    </div>
+
+</div>
+
+{% endblock %}

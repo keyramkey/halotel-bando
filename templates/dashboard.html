@@ -4,6 +4,130 @@
 
 {% block content %}
 
+<style>
+    .dash-section-title {
+        font-size: 17px;
+        font-weight: 800;
+        margin: 0 0 4px;
+    }
+    .dash-section-sub {
+        font-size: 12px;
+        color: #888;
+        margin: 0 0 14px;
+    }
+    .slide-add-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 16px;
+    }
+    .slide-add-card h3 {
+        font-size: 15px;
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .slide-form-grid {
+        display: grid;
+        gap: 12px;
+    }
+    .slide-form-grid label {
+        display: block;
+        font-size: 12px;
+        color: #666;
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+    .slide-form-grid .req {
+        color: #e74c3c;
+    }
+    .slide-list {
+        display: grid;
+        gap: 14px;
+        margin-bottom: 8px;
+    }
+    .slide-item-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .slide-item-preview {
+        width: 100%;
+        height: 140px;
+        background: #f3f3f3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .slide-item-preview img {
+        width: 100%;
+        height: 140px;
+        object-fit: contain;
+        display: block;
+        background: #fafafa;
+    }
+    .slide-item-body {
+        padding: 14px;
+    }
+    .slide-item-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    .slide-item-meta .code {
+        font-weight: 700;
+        font-size: 14px;
+    }
+    .slide-item-meta .link-line {
+        font-size: 12px;
+        margin-top: 3px;
+        word-break: break-all;
+    }
+    .slide-item-meta .link-line a {
+        color: #f56b00;
+        text-decoration: none;
+    }
+    .slide-actions {
+        display: grid;
+        gap: 8px;
+        margin-top: 10px;
+    }
+    .btn-danger-soft {
+        background: #3a0a0a !important;
+        color: #ff6b6b !important;
+        border: none;
+        width: 100%;
+    }
+    .empty-slides {
+        text-align: center;
+        padding: 28px 16px;
+        background: #fff;
+        border: 1px dashed #ddd;
+        border-radius: 16px;
+        margin-bottom: 16px;
+    }
+    .empty-slides .icon {
+        font-size: 32px;
+        margin-bottom: 8px;
+    }
+    .hint-box {
+        background: #fff8f0;
+        border: 1px solid #ffe0c2;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 12px;
+        color: #a65c00;
+        margin-bottom: 14px;
+        line-height: 1.4;
+    }
+</style>
+
 <header class="topbar">
     <div>
         <div class="brand">Admin <span>Dashboard</span></div>
@@ -30,116 +154,151 @@
         </div>
     </div>
 
-    <!-- ==================== MATANGAZO / SLIDESHOW ==================== -->
-    <div style="margin:24px 0 12px;">
-        <h2 style="font-size:17px; font-weight:800;">Matangazo / Slideshow</h2>
-        <p class="muted" style="font-size:12px; margin-top:4px;">
-            Ongeza picha + link. Mteja akibonyeza slide ataenda kwenye link moja kwa moja.
+    <!-- ==================== MATANGAZO / BANNER ==================== -->
+    <div style="margin:8px 0 4px;">
+        <h2 class="dash-section-title">📢 Matangazo / Banner</h2>
+        <p class="dash-section-sub">
+            Picha + link. Mteja akibonyeza banner anaenda kwenye link.
+            Ikiwa hakuna tangazo, sehemu ya slideshow haitoki kwenye ukurasa wa nyumbani.
         </p>
     </div>
 
-    <!-- Form ya kuongeza slide mpya -->
-    <div class="card" style="margin-bottom:16px;">
-        <div class="title" style="font-size:15px; margin-bottom:10px;">➕ Ongeza Tangazo / Slide</div>
+    <div class="hint-box">
+        <strong>Muhimu:</strong> Picha ni lazima. Tumia picha ya banner (mfano 1200×400) ili ionekane vizuri.
+        Link ni lazima pia (mfano: /order au https://...).
+    </div>
+
+    <!-- Form ya kuongeza -->
+    <div class="slide-add-card">
+        <h3>➕ Ongeza Tangazo Jipya</h3>
         <form method="POST"
               action="{{ url_for('admin_slide_add') }}"
               enctype="multipart/form-data"
-              style="display:flex; flex-direction:column; gap:10px;">
+              class="slide-form-grid"
+              onsubmit="return validateSlideAdd(this);">
             <div>
-                <label class="muted" style="font-size:12px;">Picha (png, jpg, gif, webp, bmp, svg, ...)</label>
-                <input type="file" name="image" class="input" accept="image/*,.heic,.avif,.tiff,.bmp,.svg,.ico" required>
+                <label>Picha ya Banner <span class="req">*</span></label>
+                <input type="file"
+                       name="image"
+                       class="input"
+                       accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/bmp,image/svg+xml,.heic,.avif"
+                       required>
             </div>
             <div>
-                <label class="muted" style="font-size:12px;">Link (URL) — optional</label>
-                <input type="url" name="link" class="input" placeholder="https://example.com au /order">
+                <label>Link (URL) <span class="req">*</span></label>
+                <input type="text"
+                       name="link"
+                       class="input"
+                       placeholder="https://... au /order"
+                       required>
             </div>
             <div>
-                <label class="muted" style="font-size:12px;">Kichwa / Title (optional)</label>
-                <input type="text" name="title" class="input" placeholder="Jina la tangazo">
+                <label>Kichwa (optional)</label>
+                <input type="text" name="title" class="input" placeholder="Mfano: Ofa ya wiki hii">
             </div>
             <div>
-                <label class="muted" style="font-size:12px;">Mpangilio (namba ndogo = mbele)</label>
+                <label>Mpangilio (0 = mbele)</label>
                 <input type="number" name="sort_order" class="input" value="0" min="0">
             </div>
-            <button class="btn orange" type="submit">Hifadhi Slide</button>
-        </form>
-    </div>
-
-    <!-- Orodha ya slides zilizopo -->
-    {% for slide in slides %}
-    <div class="application-card">
-        <div class="application-top">
-            <div>
-                <div class="application-code">Slide #{{ slide.id }}{% if slide.title %} — {{ slide.title }}{% endif %}</div>
-                <div class="application-network" style="font-size:12px;">
-                    {% if slide.link %}
-                        Link: <a href="{{ slide.link }}" target="_blank" style="color:#f56b00;">{{ slide.link }}</a>
-                    {% else %}
-                        <span class="muted">Hakuna link</span>
-                    {% endif %}
-                </div>
-            </div>
-            {% if slide.is_active %}
-                <span class="status completed">Active</span>
-            {% else %}
-                <span class="status rejected">Imezimwa</span>
-            {% endif %}
-        </div>
-
-        <div style="margin-top:12px;">
-            <img src="{{ url_for('media_file', filename='slide/' + slide.image) }}"
-                 alt="slide"
-                 style="max-width:100%; max-height:160px; border-radius:10px; object-fit:cover; background:#111;">
-        </div>
-
-        <form method="POST"
-              action="{{ url_for('admin_slide_update', slide_id=slide.id) }}"
-              enctype="multipart/form-data"
-              style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
-            <div>
-                <label class="muted" style="font-size:12px;">Badilisha picha (optional)</label>
-                <input type="file" name="image" class="input" accept="image/*,.heic,.avif,.tiff,.bmp,.svg,.ico">
-            </div>
-            <div>
-                <label class="muted" style="font-size:12px;">Link</label>
-                <input type="url" name="link" class="input" value="{{ slide.link or '' }}" placeholder="https://...">
-            </div>
-            <div>
-                <label class="muted" style="font-size:12px;">Title</label>
-                <input type="text" name="title" class="input" value="{{ slide.title or '' }}">
-            </div>
-            <div>
-                <label class="muted" style="font-size:12px;">Mpangilio</label>
-                <input type="number" name="sort_order" class="input" value="{{ slide.sort_order }}" min="0">
-            </div>
-            <div>
-                <label class="muted" style="font-size:12px;">Hali</label>
-                <select class="input" name="is_active">
-                    <option value="1" {% if slide.is_active %}selected{% endif %}>Active (ionekane)</option>
-                    <option value="0" {% if not slide.is_active %}selected{% endif %}>Zima</option>
-                </select>
-            </div>
-            <button class="btn orange" type="submit">Hifadhi Mabadiliko</button>
-        </form>
-
-        <form method="POST"
-              action="{{ url_for('admin_slide_delete', slide_id=slide.id) }}"
-              style="margin-top:8px;"
-              onsubmit="return confirm('Una uhakika unataka kufuta slide hii?');">
-            <button class="btn" type="submit" style="background:#3a0a0a; color:#ff6b6b; width:100%;">
-                Futa Slide
+            <button class="btn orange" type="submit" style="width:100%;">
+                Hifadhi Tangazo
             </button>
         </form>
     </div>
-    {% else %}
-    <div class="card">
-        <p class="muted">Hakuna slides bado. Ongeza hapo juu.</p>
+
+    <!-- Orodha -->
+    {% if slides %}
+    <div class="slide-list">
+        {% for slide in slides %}
+        <div class="slide-item-card">
+            <div class="slide-item-preview">
+                <img src="{{ url_for('media_file', filename='slide/' + slide.image) }}"
+                     alt="Banner {{ slide.id }}">
+            </div>
+            <div class="slide-item-body">
+                <div class="slide-item-meta">
+                    <div>
+                        <div class="code">
+                            #{{ slide.id }}{% if slide.title %} — {{ slide.title }}{% endif %}
+                        </div>
+                        <div class="link-line">
+                            {% if slide.link %}
+                                <a href="{{ slide.link }}" target="_blank" rel="noopener">{{ slide.link }}</a>
+                            {% else %}
+                                <span class="muted">Hakuna link</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if slide.is_active %}
+                        <span class="status completed">Active</span>
+                    {% else %}
+                        <span class="status rejected">Zimwa</span>
+                    {% endif %}
+                </div>
+
+                <form method="POST"
+                      action="{{ url_for('admin_slide_update', slide_id=slide.id) }}"
+                      enctype="multipart/form-data"
+                      class="slide-actions">
+                    <div>
+                        <label class="muted" style="font-size:12px;">Badilisha picha</label>
+                        <input type="file" name="image" class="input"
+                               accept="image/png,image/jpeg,image/jpg,image/gif,image/webp,image/bmp,.heic,.avif">
+                    </div>
+                    <div>
+                        <label class="muted" style="font-size:12px;">Link <span style="color:#e74c3c;">*</span></label>
+                        <input type="text" name="link" class="input"
+                               value="{{ slide.link or '' }}"
+                               placeholder="https://... au /order" required>
+                    </div>
+                    <div>
+                        <label class="muted" style="font-size:12px;">Title</label>
+                        <input type="text" name="title" class="input" value="{{ slide.title or '' }}">
+                    </div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+                        <div>
+                            <label class="muted" style="font-size:12px;">Mpangilio</label>
+                            <input type="number" name="sort_order" class="input"
+                                   value="{{ slide.sort_order }}" min="0">
+                        </div>
+                        <div>
+                            <label class="muted" style="font-size:12px;">Hali</label>
+                            <select class="input" name="is_active">
+                                <option value="1" {% if slide.is_active %}selected{% endif %}>Active</option>
+                                <option value="0" {% if not slide.is_active %}selected{% endif %}>Zima</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn orange" type="submit" style="width:100%;">
+                        Hifadhi Mabadiliko
+                    </button>
+                </form>
+
+                <form method="POST"
+                      action="{{ url_for('admin_slide_delete', slide_id=slide.id) }}"
+                      style="margin-top:8px;"
+                      onsubmit="return confirm('Futa tangazo hili kabisa?');">
+                    <button class="btn btn-danger-soft" type="submit">
+                        🗑 Futa Tangazo
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
     </div>
-    {% endfor %}
+    {% else %}
+    <div class="empty-slides">
+        <div class="icon">🖼️</div>
+        <div style="font-weight:700; margin-bottom:4px;">Hakuna matangazo</div>
+        <p class="muted" style="font-size:13px; margin:0;">
+            Ongeza tangazo hapo juu. Ukurasa wa nyumbani hautaonyesha slideshow hadi uongeze angalau moja.
+        </p>
+    </div>
+    {% endif %}
 
     <!-- ==================== ODA ZA BANDO ==================== -->
-    <div style="margin:24px 0 12px;">
-        <h2 style="font-size:17px; font-weight:800;">Oda za Bando</h2>
+    <div style="margin:28px 0 12px;">
+        <h2 class="dash-section-title">Oda za Bando</h2>
     </div>
 
     {% for order in orders %}
@@ -187,7 +346,7 @@
 
     <!-- ==================== MAOMBI YA UWAKALA ==================== -->
     <div style="margin:24px 0 12px;">
-        <h2 style="font-size:17px; font-weight:800;">Maombi ya Uwakala</h2>
+        <h2 class="dash-section-title">Maombi ya Uwakala</h2>
     </div>
 
     {% for application in applications %}
@@ -252,5 +411,21 @@
     {% endfor %}
 
 </div>
+
+<script>
+function validateSlideAdd(form) {
+    var img = form.querySelector('input[name="image"]');
+    var link = form.querySelector('input[name="link"]');
+    if (!img.files || !img.files.length) {
+        alert('Chagua picha ya banner — ni lazima.');
+        return false;
+    }
+    if (!link.value || !link.value.trim()) {
+        alert('Weka link — ni lazima.');
+        return false;
+    }
+    return true;
+}
+</script>
 
 {% endblock %}

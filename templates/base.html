@@ -329,20 +329,50 @@
             margin-bottom: 15px;
         }
         
-        /* PC FULL SCREEN - simu ibaki kama ilivyo */
-        @media (min-width: 768px) {
-            .app {
-                max-width: 100%;
-                width: 100%;
-                margin: 0;
-            }
-        
-            .bottom-nav {
-                width: 100%;
-                max-width: 100%;
-            }
-        }
-        
+/* =========================
+   DESKTOP
+   ========================= */
+@media (min-width: 768px) {
+
+    /* Background itumie screen yote */
+    .app {
+        width: 100%;
+        max-width: 100%;
+        margin: 0;
+    }
+
+    /* Content ibaki na ukubwa mzuri */
+    .page {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 24px;
+    }
+
+    /* Cards zisiwe kubwa kupita kiasi */
+    .card {
+        max-width: 900px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Hero iwe wide lakini isiwe oversized */
+    .agency-hero {
+        max-width: 1100px;
+        margin: 14px auto;
+    }
+
+    /* Services zisitanuke kupita kiasi */
+    .service-grid {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    /* Navigation iwe full screen */
+    .bottom-nav {
+        width: 100%;
+        max-width: 100%;
+    }
+}
     </style>
 </head>
 <body>

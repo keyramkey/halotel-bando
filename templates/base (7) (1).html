@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- PWA Manifest Links -->
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <meta name="theme-color" content="#f56b00">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <title>
+        {% block title %}MR. SULE DIGITAL SERVICES BUSINESS{% endblock %}
+    </title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f5f7;
+            color: #161616;
+        }
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+        button, input, textarea, select { font: inherit; }
+        .app {
+            width: 100%;
+            max-width: 520px;
+            min-height: 100vh;
+            margin: auto;
+            background: #f4f5f7;
+            padding-bottom: 92px;
+        }
+        .topbar {
+            background: #fff;
+            padding: 17px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+        }
+        .brand {
+            font-size: 21px;
+            font-weight: 900;
+        }
+        .brand span { color: #f56b00; }
+        .icon-btn {
+            border: 0;
+            background: #f1f1f1;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+        }
+        .page { padding: 16px; }
+        .card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 14px;
+        }
+        .title {
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 5px;
+        }
+        .muted {
+            color: #777;
+            font-size: 13px;
+        }
+        .input {
+            width: 100%;
+            height: 50px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
+            padding: 0 14px;
+            outline: none;
+            background: #fff;
+            margin-top: 7px;
+        }
+        .input:focus { border-color: #f56b00; }
+        textarea.input {
+            height: 100px;
+            padding-top: 14px;
+            resize: vertical;
+        }
+        .btn {
+            width: 100%;
+            border: 0;
+            border-radius: 13px;
+            min-height: 50px;
+            background: #151515;
+            color: white;
+            font-weight: 800;
+            cursor: pointer;
+            padding: 10px 15px;
+        }
+        .btn.orange { background: #f56b00; }
+        .btn.green { background: #159447; }
+        .btn.danger { background: #d92d20; }
+        .flash {
+            margin: 12px 16px;
+            padding: 13px;
+            border-radius: 12px;
+            background: #fff;
+            font-size: 13px;
+        }
+        .flash.success { border-left: 4px solid #169b45; }
+        .flash.error { border-left: 4px solid #d92d20; }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(520px, 100%);
+            height: 70px;
+            background: #fff;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+        .nav-item {
+            text-align: center;
+            color: #777;
+            font-size: 19px;
+        }
+        .nav-item small {
+            display: block;
+            font-size: 9px;
+            margin-top: 4px;
+        }
+        .nav-item.active { color: #f56b00; }
+        .network-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .network-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 17px;
+            border: 1px solid #eee;
+        }
+        .network-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 15px;
+            background: #fff2e8;
+            display: grid;
+            place-items: center;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+        .network-card h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+        .network-card p {
+            font-size: 11px;
+            color: #777;
+        }
+        .agency-hero {
+            margin: 14px;
+            padding: 23px;
+            border-radius: 22px;
+            color: white;
+            background: linear-gradient(135deg, #111, #2d2d2d);
+        }
+        .agency-hero-icon { font-size: 43px; }
+        .agency-hero h1 {
+            font-size: 27px;
+            margin: 8px 0;
+        }
+        .agency-hero p {
+            font-size: 13px;
+            color: #ccc;
+            line-height: 1.5;
+        }
+        .service-grid {
+            display: grid;
+            gap: 11px;
+            padding: 0 14px;
+        }
+        .service-card {
+            background: white;
+            border-radius: 17px;
+            padding: 16px;
+            display: flex;
+            gap: 13px;
+            align-items: center;
+            border: 1px solid #eee;
+        }
+        .service-icon {
+            width: 47px;
+            height: 47px;
+            border-radius: 14px;
+            background: #fff1e7;
+            display: grid;
+            place-items: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .service-info { flex: 1; }
+        .service-info h3 {
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        .service-info p {
+            font-size: 11px;
+            color: #777;
+            line-height: 1.4;
+        }
+        .arrow {
+            font-size: 20px;
+            color: #f56b00;
+        }
+        .form-label {
+            display: block;
+            margin-top: 14px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 30px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        .status.pending { background: #fff4d6; color: #996b00; }
+        .status.processing { background: #e7f0ff; color: #2761ad; }
+        .status.completed { background: #e4f8eb; color: #168044; }
+        .status.rejected { background: #ffe7e7; color: #b42318; }
+        .application-card {
+            background: #fff;
+            border-radius: 18px;
+            padding: 17px;
+            margin-bottom: 12px;
+            border: 1px solid #eee;
+        }
+        .application-top {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .application-code {
+            font-size: 13px;
+            font-weight: 900;
+        }
+        .application-network {
+            margin-top: 7px;
+            font-size: 12px;
+            color: #777;
+        }
+        .chat-box {
+            background: #eee;
+            border-radius: 18px;
+            padding: 12px;
+            min-height: 350px;
+            max-height: 520px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+        }
+        .chat-message {
+            max-width: 82%;
+            padding: 10px 12px;
+            border-radius: 15px;
+            margin-bottom: 9px;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .chat-message.customer {
+            margin-left: auto;
+            background: #f56b00;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-message.admin {
+            margin-right: auto;
+            background: white;
+            border-bottom-left-radius: 4px;
+        }
+        .chat-message.system {
+            margin: 10px auto;
+            background: #ddd;
+            color: #555;
+            text-align: center;
+            font-size: 11px;
+        }
+        .chat-time {
+            display: block;
+            margin-top: 4px;
+            opacity: .65;
+            font-size: 9px;
+        }
+        .chat-form {
+            display: flex;
+            gap: 8px;
+        }
+        .chat-form input {
+            flex: 1;
+            height: 48px;
+            border: 1px solid #ddd;
+            border-radius: 13px;
+            padding: 0 13px;
+        }
+        .chat-form button {
+            width: 55px;
+            border: 0;
+            border-radius: 13px;
+            background: #f56b00;
+            color: white;
+            font-size: 20px;
+        }
+        .info-box {
+            background: #fff7ed;
+            border: 1px solid #ffd8b5;
+            color: #744210;
+            padding: 13px;
+            border-radius: 14px;
+            font-size: 11px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+        }
+        
+    </style>
+</head>
+<body>
+<div class="app">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for category, message in messages %}
+            <div class="flash {{ category }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endwith %}
+    {% block content %}
+    {% endblock %}
+    <nav class="bottom-nav">
+        <a href="{{ url_for('home') }}" class="nav-item">
+            🏠<small>Home</small>
+        </a>
+        <a href="{{ url_for('order') }}" class="nav-item">
+            📦<small>Bando</small>
+        </a>
+        <a href="{{ url_for('agency') }}" class="nav-item">
+            🏪<small>Uwakala</small>
+        </a>
+        {% if current_user %}
+            <a href="{{ url_for('my_nakala') }}" class="nav-item">
+                📄<small>Nakala</small>
+            </a>
+            <a href="{{ url_for('profile') }}" class="nav-item">
+                👤<small>Profile</small>
+            </a>
+        {% else %}
+            <a href="{{ url_for('login') }}" class="nav-item">
+                🔐<small>Login</small>
+            </a>
+        {% endif %}
+    </nav>
+</div>
+</body>
+</html>

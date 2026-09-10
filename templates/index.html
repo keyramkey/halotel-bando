@@ -8,8 +8,19 @@
         border-radius: 23px;
         color: white;
         background: linear-gradient(135deg, #ff7a00, #ed4800);
+        text-align: center;
     }
-    .home-hero-icon { font-size: 45px; }
+    .home-hero-img {
+        width: 90px;
+        height: 90px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid rgba(255,255,255,0.85);
+        margin-bottom: 10px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+    }
     .home-hero h1 {
         font-size: 28px;
         margin: 8px 0;
@@ -58,70 +69,8 @@
     }
     .section-title { padding: 18px 16px 11px; }
     .section-title h2 { font-size: 19px; }
-    .bundle-grid {
-        padding: 0 14px;
-        display: grid;
-        gap: 12px;
-    }
-    .bundle {
-        background: white;
-        border-radius: 18px;
-        padding: 17px;
-        border: 1px solid #eee;
-    }
-    .bundle-top {
-        display: flex;
-        justify-content: space-between;
-    }
-    .bundle h3 {
-        font-size: 27px;
-        margin-top: 4px;
-    }
-    .bundle-icon {
-        width: 45px;
-        height: 45px;
-        border-radius: 14px;
-        background: #fff0e5;
-        display: grid;
-        place-items: center;
-        font-size: 21px;
-    }
-    .bundle-bottom {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-top: 15px;
-    }
-    .price {
-        font-size: 17px;
-        font-weight: 900;
-    }
-    .validity {
-        color: #777;
-        font-size: 12px;
-    }
-    .offer {
-        margin: 0 14px 12px;
-        background: #151515;
-        color: white;
-        padding: 17px;
-        border-radius: 18px;
-        display: block;
-    }
-    .offer-title {
-        color: #ff8a29;
-        font-weight: bold;
-        font-size: 13px;
-    }
-    .offer h3 {
-        margin: 5px 0;
-        font-size: 22px;
-    }
-    .offer p {
-        color: #bbb;
-        font-size: 12px;
-    }
 </style>
+
 <header class="topbar">
     <div>
         <div class="brand">MR. SULE <span>DIGITAL</span></div>
@@ -133,14 +82,19 @@
         <a href="{{ url_for('login') }}" class="icon-btn">🔐</a>
     {% endif %}
 </header>
+
 <section class="home-hero">
-    <div class="home-hero-icon">🇹🇿</div>
+    <!-- Badilisha src hapa na path ya picha yako -->
+    <img src="{{ url_for('static', filename='images/profile.jpg') }}" alt="Mr. Sule" class="home-hero-img">
+    
     <h1>Karibu MR. SULE DIGITAL SERVICES BUSINESS</h1>
     <p>Pata huduma za bando, usajili wa laini, uwakala na huduma za malipo sehemu moja.</p>
 </section>
+
 <div class="section-title">
     <h2>Huduma Kuu</h2>
 </div>
+
 <div class="main-services">
     <a href="{{ url_for('order') }}" class="main-service">
         <div class="main-service-icon">📦</div>
@@ -150,6 +104,7 @@
         </div>
         <div class="main-arrow">→</div>
     </a>
+
     <a href="{{ url_for('agency') }}" class="main-service">
         <div class="main-service-icon">🏪</div>
         <div class="main-service-content">
@@ -158,43 +113,5 @@
         </div>
         <div class="main-arrow">→</div>
     </a>
-</div>
-{% if offers %}
-<div class="section-title">
-    <h2>🔥 Offers</h2>
-</div>
-{% for offer in offers %}
-<a href="{{ url_for('order', offer_title=offer.title, offer_price=offer.price, offer_amount=offer.amount) }}" class="offer">
-    <div class="offer-title">{{ offer.title }}</div>
-    <h3>{{ offer.amount }} — TSh {{ "{:,}".format(offer.price) }}</h3>
-    <p>{{ offer.description }}</p>
-</a>
-{% endfor %}
-{% endif %}
-<div class="section-title">
-    <h2>Bundles</h2>
-</div>
-<div class="bundle-grid">
-{% for bundle in bundles %}
-<a href="{{ url_for('order', bundle_id=bundle.id) }}">
-    <div class="bundle">
-        <div class="bundle-top">
-            <div>
-                <div class="muted">{{ bundle.name }}</div>
-                <h3>{{ bundle.amount }}</h3>
-            </div>
-            <div class="bundle-icon">📡</div>
-        </div>
-        <div class="bundle-bottom">
-            <div class="validity">{{ bundle.validity }}</div>
-            <div class="price">TSh {{ "{:,}".format(bundle.price) }}</div>
-        </div>
-    </div>
-</a>
-{% else %}
-<div class="card">
-    <p>Hakuna bundle kwa sasa.</p>
-</div>
-{% endfor %}
 </div>
 {% endblock %}

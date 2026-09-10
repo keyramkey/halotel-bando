@@ -152,6 +152,10 @@
             <div class="muted" style="font-size:12px;">Agency Pending</div>
             <strong style="font-size:26px; display:block; margin-top:4px;">{{ agency_pending }}</strong>
         </div>
+        <div class="card" style="margin:0; text-align:center;">
+            <div class="muted" style="font-size:12px;">Nakala Pending</div>
+            <strong style="font-size:26px; display:block; margin-top:4px;">{{ nakala_pending or 0 }}</strong>
+        </div>
     </div>
 
     <!-- ==================== MATANGAZO / BANNER ==================== -->
@@ -296,9 +300,101 @@
     </div>
     {% endif %}
 
+    <!-- ==================== MAOMBI YA NAKALA ==================== -->
+    <div style="margin:28px 0 12px;">
+        <h2 class="dash-section-title">📄 Maombi ya Nakala {% if nakala_pending %}<span class="status pending" style="font-size:11px;">{{ nakala_pending }}</span>{% endif %}</h2>
+        <p class="dash-section-sub">TIN • Leseni • Online Copy NIDA</p>
+    </div>
+
+    {% if nakala_list %}
+    {% for req in nakala_list %}
+    <div class="application-card">
+        <div class="application-top">
+            <div>
+                <div class="application-code">{{ req.request_code }}</div>
+                <div class="application-network">
+                    {% if req.service_type == 'tin' %}TIN Number
+                    {% elif req.service_type == 'license' %}Leseni ({{ 'Uwakala' if req.license_type == 'uwakala' else 'Duka' }})
+                    {% else %}Online Copy NIDA{% endif %}
+                    · TSh {{ "{:,}".format(req.price) }}
+                </div>
+            </div>
+            {% if req.status == "pending" %}
+                <span class="status pending">Inasubiri</span>
+            {% elif req.status == "paid" %}
+                <span class="status processing">Imelipwa</span>
+            {% elif req.status == "processing" %}
+                <span class="status processing">Inachakatwa</span>
+            {% elif req.status == "completed" %}
+                <span class="status completed">Imekamilika</span>
+            {% else %}
+                <span class="status rejected">Imekataliwa</span>
+            {% endif %}
+        </div>
+
+        <div style="margin-top:12px; font-size:13px; line-height:1.5;">
+            <strong>{{ req.full_name }}</strong><br>
+            <span class="muted">{{ req.phone1 }}{% if req.phone2 %} / {{ req.phone2 }}{% endif %}</span>
+        </div>
+
+        <!-- COPY DETAILS BOX -->
+        <div style="margin-top:12px; background:#f8f8f8; border-radius:12px; padding:12px; font-size:12px; line-height:1.6;" id="copy-box-{{ req.id }}">
+            <strong>Taarifa za Kunakili:</strong><br>
+            Jina: {{ req.full_name }}<br>
+            Mama: {{ req.mother_name }}<br>
+            NIDA: {{ req.nida_number }}<br>
+            Simu1: {{ req.phone1 }}{% if req.phone2 %} | Simu2: {{ req.phone2 }}{% endif %}<br>
+            Shule: {{ req.primary_school }} ({{ req.year_completed }})<br>
+            Wilaya Shule: {{ req.school_district }} | Mkoa: {{ req.school_region }}<br>
+            Wilaya NIDA: {{ req.nida_reg_district }} | Mkoa: {{ req.nida_reg_region }}<br>
+            Mtaa: {{ req.nida_reg_street }}
+            {% if req.nida_reg_phone %}<br>Simu Usajili NIDA: {{ req.nida_reg_phone }}{% endif %}
+            {% if req.license_type %}<br>Aina Leseni: {{ 'Uwakala' if req.license_type == 'uwakala' else 'Duka' }}{% endif %}
+        </div>
+        <button type="button" class="btn" style="margin-top:8px; background:#333; font-size:13px;"
+                onclick="copyNakala({{ req.id }})">
+            📋 Copy Taarifa Zote
+        </button>
+
+        <form method="POST"
+              action="{{ url_for('admin_nakala_update', req_id=req.id) }}"
+              enctype="multipart/form-data"
+              style="margin-top:14px;">
+            <select class="input" name="status">
+                <option value="pending" {% if req.status == "pending" %}selected{% endif %}>Inasubiri</option>
+                <option value="paid" {% if req.status == "paid" %}selected{% endif %}>Imelipwa</option>
+                <option value="processing" {% if req.status == "processing" %}selected{% endif %}>Inachakatwa</option>
+                <option value="completed" {% if req.status == "completed" %}selected{% endif %}>Imekamilika</option>
+                <option value="rejected" {% if req.status == "rejected" %}selected{% endif %}>Imekataliwa</option>
+            </select>
+            <textarea class="input" name="admin_note" placeholder="Ujumbe / maelezo kwa mteja...">{{ req.admin_note or '' }}</textarea>
+            <textarea class="input" name="result_message" placeholder="Matokeo (TIN number, link, au maelezo ya kumpatia mteja)...">{{ req.result_message or '' }}</textarea>
+            <div style="margin-top:10px;">
+                <label class="muted" style="font-size:12px;">Pakia faili ya matokeo (PDF / Picha) — si lazima</label>
+                <input type="file" name="result_file" class="input"
+                       accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.bmp">
+                {% if req.result_file %}
+                <p class="muted" style="font-size:11px; margin-top:4px;">
+                    Faili iliyopo: <a href="{{ url_for('media_file', filename=req.result_file) }}" target="_blank">{{ req.result_file }}</a>
+                </p>
+                {% endif %}
+            </div>
+            <button class="btn orange" type="submit" style="margin-top:10px;">
+                Hifadhi & Tuma kwa Mteja
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="card">
+        <p class="muted">Hakuna maombi ya Nakala kwa sasa.</p>
+    </div>
+    {% endif %}
+
     <!-- ==================== ODA ZA BANDO ==================== -->
     <div style="margin:28px 0 12px;">
         <h2 class="dash-section-title">Oda za Bando</h2>
+        <p class="dash-section-sub">Inaonyesha oda zilizolipwa (pending) na zilizoshindwa</p>
     </div>
 
     {% for order in orders %}
@@ -313,6 +409,10 @@
                 <span class="status pending">Inasubiri</span>
             {% elif order.status == "completed" %}
                 <span class="status completed">Imekamilika</span>
+            {% elif order.status == "failed" %}
+                <span class="status rejected">Imeshindwa</span>
+            {% elif order.status == "awaiting_payment" %}
+                <span class="status processing">Inasubiri Malipo</span>
             {% else %}
                 <span class="status rejected">Imekataliwa</span>
             {% endif %}
@@ -325,6 +425,16 @@
             <br>
             <strong style="color:#f56b00;">Taarifa:</strong>
             {{ order.note }}
+
+            {% if order.order_reference %}
+            <br>
+            <strong>Ref:</strong> {{ order.order_reference }}
+            {% endif %}
+
+            {% if order.status == "failed" and order.fail_reason %}
+            <br>
+            <strong style="color:#e74c3c;">Sababu:</strong> {{ order.fail_reason }}
+            {% endif %}
         </div>
 
         {% if order.status == "pending" %}
@@ -425,6 +535,29 @@ function validateSlideAdd(form) {
         return false;
     }
     return true;
+}
+function copyNakala(id) {
+    var box = document.getElementById('copy-box-' + id);
+    if (!box) return;
+    var text = box.innerText || box.textContent;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+            alert('Taarifa zimenakiliwa!');
+        }).catch(function() {
+            fallbackCopy(text);
+        });
+    } else {
+        fallbackCopy(text);
+    }
+}
+function fallbackCopy(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); alert('Taarifa zimenakiliwa!'); }
+    catch(e) { alert('Imeshindwa kunakili. Nakili kwa mkono.'); }
+    document.body.removeChild(ta);
 }
 </script>
 

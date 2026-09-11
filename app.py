@@ -1526,7 +1526,12 @@ def nakala_tin():
         }
         return redirect(url_for("nakala_review"))
 
-    return render_template("nakala_tin.html")
+    admin = User.query.filter_by(is_admin=True).first()
+    return render_template(
+        "nakala_tin.html",
+        admin_phone=(admin.phone if admin else None) or "0700000000",
+        admin_email=(admin.email if admin else None),
+    )
 
 
 

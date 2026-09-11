@@ -280,58 +280,105 @@
     .user-search-bar {
         display: flex;
         gap: 8px;
-        margin-bottom: 14px;
+        margin-bottom: 12px;
+        align-items: stretch;
     }
     .user-search-bar input {
         flex: 1;
+        min-width: 0;
+        margin: 0 !important;
+        font-size: 15px !important;
+        padding: 14px 14px !important;
+        border-radius: 12px !important;
     }
-    .user-card {
+    .user-search-bar .btn {
+        flex-shrink: 0;
+        padding: 0 18px;
+        border-radius: 12px;
+        font-size: 14px;
+    }
+    .users-table-wrap {
         background: #fff;
         border: 1px solid #eee;
         border-radius: 16px;
         overflow: hidden;
         margin-bottom: 12px;
     }
-    .user-card-head {
-        padding: 14px;
+    .users-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .users-table th {
+        text-align: left;
+        font-size: 11px;
+        font-weight: 700;
+        color: #999;
+        padding: 10px 12px;
+        background: #fafafa;
+        border-bottom: 1px solid #f0f0f0;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    .users-table td {
+        padding: 12px;
+        border-bottom: 1px solid #f5f5f5;
+        font-size: 13px;
+        vertical-align: middle;
+    }
+    .users-table tr.user-row {
         cursor: pointer;
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        gap: 10px;
+        transition: background 0.12s;
     }
-    .user-card-head:hover {
-        background: #fffaf5;
+    .users-table tr.user-row:hover {
+        background: #fff8f0;
     }
-    .user-card-head .uid {
+    .users-table tr.user-row.active {
+        background: #fff5ef;
+    }
+    .users-table .col-id {
+        width: 48px;
+        color: #aaa;
+        font-weight: 700;
+        font-size: 12px;
+    }
+    .users-table .col-name {
+        font-weight: 800;
+        color: #222;
+        font-size: 14px;
+    }
+    .users-table .col-name .mini {
+        font-weight: 600;
         font-size: 11px;
         color: #999;
-        font-weight: 700;
+        margin-left: 6px;
     }
-    .user-card-head .uname {
-        font-size: 15px;
-        font-weight: 800;
-        margin-top: 2px;
-    }
-    .user-card-head .uphone {
+    .users-table .col-arrow {
+        width: 28px;
+        text-align: right;
+        color: #ccc;
         font-size: 12px;
-        color: #666;
-        margin-top: 2px;
     }
-    .user-card-head .joined {
-        font-size: 11px;
-        color: #888;
-        margin-top: 4px;
+    .user-detail-row td {
+        padding: 0 !important;
+        border-bottom: 1px solid #eee;
+        background: #fafafa;
     }
     .user-detail-wrap {
         display: none;
-        border-top: 1px solid #f0f0f0;
-        padding: 14px;
-        background: #fafafa;
+        padding: 14px 12px 16px;
     }
     .user-detail-wrap.open {
         display: block;
-        animation: fadeInForm 0.2s ease;
+        animation: fadeInForm 0.18s ease;
+    }
+    .user-meta-line {
+        font-size: 12px;
+        color: #666;
+        line-height: 1.55;
+        margin-bottom: 12px;
+    }
+    .user-meta-line strong {
+        color: #333;
     }
     .user-actions-grid {
         display: grid;
@@ -339,9 +386,7 @@
         gap: 8px;
         margin-bottom: 12px;
     }
-    .user-actions-grid form {
-        margin: 0;
-    }
+    .user-actions-grid form { margin: 0; }
     .user-actions-grid .btn {
         width: 100%;
         font-size: 12px;
@@ -352,10 +397,9 @@
         border: 1px solid #eee;
         border-radius: 12px;
         padding: 12px;
-        margin-top: 8px;
     }
     .user-orders-box h4 {
-        margin: 0 0 10px;
+        margin: 0 0 8px;
         font-size: 13px;
         font-weight: 800;
     }
@@ -365,26 +409,26 @@
         border-bottom: 1px solid #f3f3f3;
         line-height: 1.45;
     }
-    .user-order-row:last-child {
-        border-bottom: none;
-    }
+    .user-order-row:last-child { border-bottom: none; }
     .badge-blocked {
         display: inline-block;
-        padding: 2px 8px;
+        padding: 1px 7px;
         border-radius: 20px;
         background: #3a0a0a;
         color: #ff6b6b;
         font-size: 10px;
         font-weight: 800;
+        vertical-align: middle;
     }
     .badge-admin {
         display: inline-block;
-        padding: 2px 8px;
+        padding: 1px 7px;
         border-radius: 20px;
         background: #1a3a1a;
         color: #6bff8a;
         font-size: 10px;
         font-weight: 800;
+        vertical-align: middle;
     }
 </style>
 
@@ -879,115 +923,111 @@
 
     <!-- ==================== USERS ==================== -->
     <div class="tab-panel" id="panel-users">
-        <div style="margin:0 0 12px;">
-            <h2 class="dash-section-title">👥 Watumiaji Wote</h2>
-            <p class="dash-section-sub">
-                ID · Join time (Dar es Salaam) · Block / Futa · Oda zake · Download CSV
-            </p>
+        <div style="margin:0 0 10px;">
+            <h2 class="dash-section-title">👥 Users</h2>
         </div>
 
         <form method="GET" action="{{ url_for('dashboard') }}" class="user-search-bar" id="usersSearchForm">
-            <input type="hidden" name="_tab" value="users">
             <input class="input" type="search" name="q" value="{{ users_search_q or '' }}"
-                   placeholder="Tafuta: username, simu, email au ID..."
-                   style="margin:0;">
-            <button class="btn orange" type="submit" style="white-space:nowrap;">🔍 Tafuta</button>
+                   placeholder="Tafuta jina, simu, email au ID...">
+            <button class="btn orange" type="submit">Tafuta</button>
         </form>
         {% if users_search_q %}
-        <p class="muted" style="font-size:12px;margin:-6px 0 12px;">
-            Matokeo ya “{{ users_search_q }}” —
-            <a href="{{ url_for('dashboard') }}#users" style="color:#f56b00;font-weight:700;">Ondoa filter</a>
+        <p style="font-size:12px;margin:-4px 0 10px;">
+            <a href="{{ url_for('dashboard') }}#users" style="color:#f56b00;font-weight:700;">✕ Ondoa filter</a>
         </p>
         {% endif %}
 
         {% if all_users %}
-        <div class="list-more-wrap" data-list="users" data-limit="8">
-            {% for u in all_users %}
-            <div class="user-card list-item{% if loop.index > 8 %} list-item-hidden{% endif %}">
-                <div class="user-card-head" onclick="toggleUserDetail({{ u.id }})" title="Gusa kuona actions">
-                    <div style="min-width:0;flex:1;">
-                        <div class="uid">ID #{{ u.id }}
+        <div class="users-table-wrap list-more-wrap" data-list="users" data-limit="12">
+            <table class="users-table">
+                <thead>
+                    <tr>
+                        <th class="col-id">ID</th>
+                        <th>Jina</th>
+                        <th class="col-arrow"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for u in all_users %}
+                    <tr class="user-row list-item{% if loop.index > 12 %} list-item-hidden{% endif %}"
+                        id="user-row-{{ u.id }}"
+                        onclick="toggleUserDetail({{ u.id }})">
+                        <td class="col-id">#{{ u.id }}</td>
+                        <td class="col-name">
+                            {{ u.username }}
                             {% if u.is_admin %}<span class="badge-admin">ADMIN</span>{% endif %}
                             {% if u.is_blocked %}<span class="badge-blocked">BLOCKED</span>{% endif %}
-                        </div>
-                        <div class="uname">{{ u.username }}</div>
-                        <div class="uphone">{{ u.phone }}{% if u.email %} · {{ u.email }}{% endif %}</div>
-                        <div class="joined">Amejoin: {{ to_dar_es_salaam(u.created_at) }} (Dar)</div>
-                    </div>
-                    <div style="text-align:right;flex-shrink:0;">
-                        <div class="muted" style="font-size:11px;">Oda</div>
-                        <strong style="font-size:18px;">{{ u.orders|length }}</strong>
-                    </div>
-                </div>
+                        </td>
+                        <td class="col-arrow" id="user-arrow-{{ u.id }}">›</td>
+                    </tr>
+                    <tr class="user-detail-row list-item{% if loop.index > 12 %} list-item-hidden{% endif %}">
+                        <td colspan="3">
+                            <div class="user-detail-wrap" id="user-detail-{{ u.id }}">
+                                <div class="user-meta-line">
+                                    <strong>Simu:</strong> {{ u.phone }}
+                                    {% if u.email %}<br><strong>Email:</strong> {{ u.email }}{% endif %}
+                                    <br><strong>Amejoin:</strong> {{ to_dar_es_salaam(u.created_at) }} (Dar)
+                                    <br><strong>Oda:</strong> {{ u.orders|length }}
+                                </div>
 
-                <div class="user-detail-wrap" id="user-detail-{{ u.id }}">
-                    <div class="user-actions-grid">
-                        {% if not u.is_admin and u.id != current_user.id %}
-                            {% if u.is_blocked %}
-                            <form method="POST" action="{{ url_for('admin_user_unblock', user_id=u.id) }}">
-                                <button class="btn green" type="submit">✅ Fungua Block</button>
-                            </form>
-                            {% else %}
-                            <form method="POST" action="{{ url_for('admin_user_block', user_id=u.id) }}"
-                                  onsubmit="return confirm('Fungia akaunti ya {{ u.username }}?');">
-                                <button class="btn" type="submit" style="background:#3a2a0a;color:#ffb86b;">🚫 Block</button>
-                            </form>
-                            {% endif %}
-                            <form method="POST" action="{{ url_for('admin_user_delete', user_id=u.id) }}"
-                                  onsubmit="return confirm('FUTA kabisa akaunti ya {{ u.username }} na data zake? Hii hairudishwi!');">
-                                <button class="btn btn-danger-soft" type="submit">🗑 Futa Account</button>
-                            </form>
-                        {% else %}
-                            <div class="muted" style="font-size:12px;grid-column:1/-1;">
-                                {% if u.is_admin %}Akaunti ya admin — hairuhusiwi block/futa.{% else %}Hii ni akaunti yako.{% endif %}
+                                <div class="user-actions-grid">
+                                    {% if not u.is_admin and u.id != current_user.id %}
+                                        {% if u.is_blocked %}
+                                        <form method="POST" action="{{ url_for('admin_user_unblock', user_id=u.id) }}">
+                                            <button class="btn green" type="submit">✅ Fungua</button>
+                                        </form>
+                                        {% else %}
+                                        <form method="POST" action="{{ url_for('admin_user_block', user_id=u.id) }}"
+                                              onsubmit="return confirm('Block {{ u.username }}?');">
+                                            <button class="btn" type="submit" style="background:#3a2a0a;color:#ffb86b;">🚫 Block</button>
+                                        </form>
+                                        {% endif %}
+                                        <form method="POST" action="{{ url_for('admin_user_delete', user_id=u.id) }}"
+                                              onsubmit="return confirm('FUTA {{ u.username }} kabisa?');">
+                                            <button class="btn btn-danger-soft" type="submit">🗑 Futa</button>
+                                        </form>
+                                    {% endif %}
+                                    <a href="{{ url_for('admin_chat', user_id=u.id) }}"
+                                       class="btn" style="background:#151515;text-align:center;">💬 Chat</a>
+                                    <a href="{{ url_for('admin_user_orders_csv', user_id=u.id) }}"
+                                       class="btn" style="background:#0a2a3a;color:#6bcfff;text-align:center;">⬇ CSV</a>
+                                </div>
+
+                                <div class="user-orders-box">
+                                    <h4>Oda ({{ u.orders|length }})</h4>
+                                    {% if u.orders %}
+                                        {% for o in u.orders|sort(attribute='created_at', reverse=True) %}
+                                        <div class="user-order-row">
+                                            <strong>#{{ o.id }}</strong> · {{ o.amount }} · TSh {{ "{:,}".format(o.price or 0) }}
+                                            ·
+                                            {% if o.status == "pending" %}<span class="status pending">pending</span>
+                                            {% elif o.status == "completed" %}<span class="status completed">done</span>
+                                            {% elif o.status == "failed" %}<span class="status rejected">failed</span>
+                                            {% elif o.status == "awaiting_payment" %}<span class="status processing">awaiting</span>
+                                            {% else %}<span class="status rejected">{{ o.status }}</span>{% endif %}
+                                            <br>
+                                            <span class="muted">{{ o.phone }} · {{ to_dar_es_salaam(o.created_at) }}</span>
+                                            {% if o.note %}<br><span style="color:#f56b00;">{{ o.note }}</span>{% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    {% else %}
+                                        <p class="muted" style="margin:0;font-size:12px;">Hakuna oda.</p>
+                                    {% endif %}
+                                </div>
                             </div>
-                        {% endif %}
-                        <a href="{{ url_for('admin_chat', user_id=u.id) }}"
-                           class="btn" style="background:#151515;text-align:center;font-size:12px;padding:10px 8px;">
-                            💬 Chat
-                        </a>
-                        <a href="{{ url_for('admin_user_orders_csv', user_id=u.id) }}"
-                           class="btn" style="background:#0a2a3a;color:#6bcfff;text-align:center;font-size:12px;padding:10px 8px;">
-                            ⬇ Download Oda (CSV)
-                        </a>
-                    </div>
-
-                    <div class="user-orders-box">
-                        <h4>Oda za {{ u.username }} ({{ u.orders|length }})</h4>
-                        {% if u.orders %}
-                            {% for o in u.orders|sort(attribute='created_at', reverse=True) %}
-                            <div class="user-order-row">
-                                <strong>#{{ o.id }}</strong> · {{ o.amount }} · TSh {{ "{:,}".format(o.price or 0) }}
-                                ·
-                                {% if o.status == "pending" %}<span class="status pending">pending</span>
-                                {% elif o.status == "completed" %}<span class="status completed">completed</span>
-                                {% elif o.status == "failed" %}<span class="status rejected">failed</span>
-                                {% elif o.status == "awaiting_payment" %}<span class="status processing">awaiting</span>
-                                {% else %}<span class="status rejected">{{ o.status }}</span>{% endif %}
-                                <br>
-                                <span class="muted">{{ o.phone }} · {{ to_dar_es_salaam(o.created_at) }}</span>
-                                {% if o.note %}<br><span style="color:#f56b00;">{{ o.note }}</span>{% endif %}
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="muted" style="margin:0;font-size:12px;">Hakuna oda.</p>
-                        {% endif %}
-                    </div>
-
-                    <button type="button" class="btn" style="width:100%;margin-top:10px;background:#eee;color:#444;"
-                            onclick="toggleUserDetail({{ u.id }})">
-                        Funga
-                    </button>
-                </div>
-            </div>
-            {% endfor %}
-            <button type="button" class="see-more-btn" data-list="users" style="display:none;" onclick="toggleSeeMore(this)">
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+            <button type="button" class="see-more-btn" data-list="users" style="display:none;margin:8px;" onclick="toggleSeeMore(this)">
                 See more
             </button>
         </div>
         {% else %}
         <div class="card">
-            <p class="muted">Hakuna users{% if users_search_q %} wanaolingana na utafutaji{% endif %}.</p>
+            <p class="muted" style="margin:0;">Hakuna user{% if users_search_q %} aliye patikana{% endif %}.</p>
         </div>
         {% endif %}
     </div>
@@ -1052,21 +1092,26 @@ if (window.location.hash === '#users' || (new URLSearchParams(window.location.se
 
 function toggleUserDetail(id) {
     var el = document.getElementById('user-detail-' + id);
+    var row = document.getElementById('user-row-' + id);
+    var arrow = document.getElementById('user-arrow-' + id);
     if (!el) return;
     var wasOpen = el.classList.contains('open');
     document.querySelectorAll('.user-detail-wrap.open').forEach(function(n) {
         n.classList.remove('open');
     });
+    document.querySelectorAll('.users-table tr.user-row.active').forEach(function(n) {
+        n.classList.remove('active');
+    });
+    document.querySelectorAll('[id^="user-arrow-"]').forEach(function(n) {
+        n.textContent = '›';
+    });
     if (!wasOpen) {
         el.classList.add('open');
+        if (row) row.classList.add('active');
+        if (arrow) arrow.textContent = '▾';
         el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 }
-
-// Baada ya search, weka hash #users ili tab ibaki
-document.getElementById('usersSearchForm') && document.getElementById('usersSearchForm').addEventListener('submit', function() {
-    // form GET — hash itaongezwa baada ya load kwa q check juu
-});
 
 
 function initSeeMore() {

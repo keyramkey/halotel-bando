@@ -13,24 +13,48 @@
 </header>
 
 <div class="page">
+
+{% if coming_soon %}
+    <div style="text-align:center; padding:40px 20px;">
+        <div style="
+            width:80px; height:80px; border-radius:24px;
+            background: linear-gradient(135deg, #f0f0f0, #e0e0e0);
+            display:grid; place-items:center; margin:0 auto 20px;
+            font-size:32px;
+        ">⏳</div>
+        <h2 style="font-size:20px; font-weight:800; margin-bottom:8px;">Coming Soon</h2>
+        <p class="muted" style="font-size:14px; line-height:1.5; max-width:280px; margin:0 auto 24px;">
+            Huduma za <strong>{{ network }}</strong> bado hazijaanza.
+            Tunafanya maandalizi. Tafadhali rudi baadaye.
+        </p>
+        <a href="{{ url_for('agency') }}" class="card" style="display:inline-block; padding:12px 28px; text-decoration:none; font-weight:600; color:#f56b00;">
+            ← Rudi kwenye Mitandao
+        </a>
+    </div>
+{% else %}
     <div style="margin-bottom:16px;">
         <h2 style="font-size:18px; font-weight:800;">Huduma za {{ network }}</h2>
         <p class="muted" style="margin-top:4px;">Chagua huduma unayohitaji</p>
     </div>
 
-    <div class="service-grid" style="padding:0;">
-        {% for service in services %}
-        <a href="{{ url_for('agency_apply', service_id=service.id) }}" class="service-card">
-            <div class="service-icon">
-                {{ service.icon if service.icon else service.title[0] }}
+    <div class="service-grid" style="padding:0; display:flex; flex-direction:column; gap:12px;">
+        <a href="{{ url_for('agency_service', network=network, service_type='lipa') }}" class="service-card" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border-radius:16px; text-decoration:none; color:inherit; border:1px solid #f0f0f0; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+            <div style="width:52px; height:52px; border-radius:14px; background:#e8f5e9; display:grid; place-items:center; font-size:24px; flex-shrink:0;">💳</div>
+            <div style="flex:1;">
+                <h3 style="font-size:15px; font-weight:700; margin:0 0 3px;">Lipa Namba / Merchant</h3>
+                <p class="muted" style="font-size:12px; margin:0;">Usajili wa namba ya malipo (Lipa / Merchant)</p>
             </div>
-            <div class="service-info">
-                <h3>{{ service.title }}</h3>
-                <p>{{ service.description }}</p>
-            </div>
-            <div class="arrow">→</div>
+            <div style="color:#f56b00; font-size:18px;">→</div>
         </a>
-        {% endfor %}
+
+        <a href="{{ url_for('agency_service', network=network, service_type='uwakala') }}" class="service-card" style="display:flex; align-items:center; gap:14px; padding:16px; background:#fff; border-radius:16px; text-decoration:none; color:inherit; border:1px solid #f0f0f0; box-shadow:0 2px 8px rgba(0,0,0,0.05);">
+            <div style="width:52px; height:52px; border-radius:14px; background:#fff3e0; display:grid; place-items:center; font-size:24px; flex-shrink:0;">🏪</div>
+            <div style="flex:1;">
+                <h3 style="font-size:15px; font-weight:700; margin:0 0 3px;">Uwakala / Usajili wa Laini</h3>
+                <p class="muted" style="font-size:12px; margin:0;">Omba kuwa wakala au sajili laini</p>
+            </div>
+            <div style="color:#f56b00; font-size:18px;">→</div>
+        </a>
     </div>
 
     <div class="info-box" style="margin-top:20px;">
@@ -39,6 +63,8 @@
         MR. SULE DIGITAL SERVICES BUSINESS inapokea ombi lako na kukuwezesha
         kuwasiliana na mhudumu/wakala.
     </div>
+{% endif %}
+
 </div>
 
 {% endblock %}

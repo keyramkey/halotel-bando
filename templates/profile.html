@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}Profile{% endblock %}
-
 {% block content %}
 <style>
 :root {
@@ -16,14 +14,11 @@
     --radius-xl: 22px;
     --radius-lg: 18px;
 }
-
 .profile-page {
     min-height: 100vh;
     background: var(--bg);
     padding-bottom: 40px;
 }
-
-/* Hero */
 .profile-hero {
     padding: 28px 20px 30px;
     color: white;
@@ -51,7 +46,6 @@
     font-size: 11px;
     font-weight: 600;
 }
-
 .avatar-wrapper {
     width: 70px;
     height: 70px;
@@ -69,7 +63,6 @@
     font-weight: 800;
     border: 3px solid rgba(255,255,255,0.4);
 }
-
 .profile-name {
     margin: 0;
     font-size: 24px;
@@ -80,8 +73,6 @@
     font-size: 13px;
     opacity: 0.85;
 }
-
-/* Stats */
 .profile-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -105,8 +96,6 @@
     font-weight: 800;
     color: var(--text);
 }
-
-/* Sections */
 .profile-section {
     padding: 0 16px;
     margin-bottom: 24px;
@@ -126,8 +115,6 @@
     font-size: 11px;
     color: var(--muted);
 }
-
-/* Menu */
 .profile-menu {
     background: var(--card);
     border: 1px solid var(--border);
@@ -178,8 +165,6 @@
     color: #aaa;
     font-size: 18px;
 }
-
-/* Orders */
 .orders-list {
     display: flex;
     flex-direction: column;
@@ -191,6 +176,9 @@
     background: #ffffff;
     border: 1px solid var(--border);
     border-left: 3px solid var(--primary);
+}
+.order-card.list-item-hidden {
+    display: none !important;
 }
 .order-top {
     display: flex;
@@ -211,6 +199,10 @@
     font-weight: 700;
     text-transform: uppercase;
 }
+.status.pending { background: #fff4d6; color: #996b00; }
+.status.completed { background: #e4f8eb; color: #168044; }
+.status.failed, .status.rejected { background: #ffe7e7; color: #b42318; }
+.status.awaiting_payment, .status.processing { background: #e7f0ff; color: #2761ad; }
 .order-phone {
     margin-top: 7px;
     color: var(--muted);
@@ -222,7 +214,6 @@
     font-weight: 800;
     color: var(--primary);
 }
-
 .empty-orders {
     padding: 28px 20px;
     text-align: center;
@@ -240,28 +231,41 @@
     font-size: 12px;
     color: var(--muted);
 }
+.see-more-btn {
+    width: 100%;
+    margin-top: 4px;
+    padding: 12px;
+    border: 1.5px dashed #ffc999;
+    border-radius: 12px;
+    background: #fff8f0;
+    color: #f56b00;
+    font-size: 13px;
+    font-weight: 800;
+    cursor: pointer;
+    text-align: center;
+}
+.see-more-btn.expanded {
+    background: #f5f5f5;
+    border-color: #ddd;
+    color: #666;
+}
 </style>
 
 <div class="profile-page">
-
-    <!-- Hero -->
     <header class="profile-hero">
         <div class="profile-top">
             <span class="profile-label">My Profile</span>
             <div class="profile-badge">Active Account</div>
         </div>
-
         <div class="avatar-wrapper">
             <div class="avatar">
                 {{ current_user.username[0]|upper }}
             </div>
         </div>
-
         <h1 class="profile-name">{{ current_user.username }}</h1>
         <p class="profile-phone">{{ current_user.phone }}</p>
     </header>
 
-    <!-- Stats -->
     <div class="profile-stats">
         <div class="stat-card">
             <div class="stat-label">Total Orders</div>
@@ -273,13 +277,11 @@
         </div>
     </div>
 
-    <!-- Menu -->
     <section class="profile-section">
         <div class="section-heading">
             <h2>Account</h2>
             <span>Manage</span>
         </div>
-
         <div class="profile-menu">
             <a href="{{ url_for('order') }}" class="profile-link">
                 <div class="menu-left">
@@ -291,7 +293,6 @@
                 </div>
                 <div class="menu-arrow">›</div>
             </a>
-
             <a href="{{ url_for('chat') }}" class="profile-link">
                 <div class="menu-left">
                     <div class="menu-icon">C</div>
@@ -302,7 +303,6 @@
                 </div>
                 <div class="menu-arrow">›</div>
             </a>
-
             {% if current_user.is_admin %}
             <a href="{{ url_for('dashboard') }}" class="profile-link">
                 <div class="menu-left">
@@ -315,7 +315,6 @@
                 <div class="menu-arrow">›</div>
             </a>
             {% endif %}
-
             <a href="{{ url_for('settings') }}" class="profile-link">
                 <div class="menu-left">
                     <div class="menu-icon">S</div>
@@ -326,7 +325,6 @@
                 </div>
                 <div class="menu-arrow">›</div>
             </a>
-
             <a href="{{ url_for('logout') }}" class="profile-link">
                 <div class="menu-left">
                     <div class="menu-icon">L</div>
@@ -340,19 +338,17 @@
         </div>
     </section>
 
-    <!-- Orders -->
     <section class="profile-section">
         <div class="section-heading">
             <h2>Orders zako</h2>
             <span>History</span>
         </div>
-
-        <div class="orders-list">
+        <div class="orders-list" id="ordersList" data-limit="2">
             {% for order in orders %}
-            <article class="order-card">
+            <article class="order-card list-item{% if loop.index > 2 %} list-item-hidden{% endif %}">
                 <div class="order-top">
                     <strong class="order-amount">{{ order.amount }}</strong>
-                    <span class="status">{{ order.status }}</span>
+                    <span class="status {{ order.status }}">{{ order.status }}</span>
                 </div>
                 <div class="order-phone">{{ order.phone }}</div>
                 {% if order.price %}
@@ -368,7 +364,36 @@
             </div>
             {% endfor %}
         </div>
+        {% if orders and orders|length > 2 %}
+        <button type="button" class="see-more-btn" id="ordersSeeMore" onclick="toggleOrdersMore()">
+            See more ({{ orders|length - 2 }} zaidi)
+        </button>
+        {% endif %}
     </section>
-
 </div>
+
+<script>
+function toggleOrdersMore() {
+    var list = document.getElementById('ordersList');
+    var btn = document.getElementById('ordersSeeMore');
+    if (!list || !btn) return;
+    var items = list.querySelectorAll('.list-item');
+    var limit = 2;
+    var expanded = btn.getAttribute('data-expanded') === '1';
+    if (expanded) {
+        items.forEach(function(el, idx) {
+            if (idx >= limit) el.classList.add('list-item-hidden');
+        });
+        btn.setAttribute('data-expanded', '0');
+        btn.classList.remove('expanded');
+        btn.textContent = 'See more (' + (items.length - limit) + ' zaidi)';
+        list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        items.forEach(function(el) { el.classList.remove('list-item-hidden'); });
+        btn.setAttribute('data-expanded', '1');
+        btn.classList.add('expanded');
+        btn.textContent = 'See less ▲';
+    }
+}
+</script>
 {% endblock %}

@@ -663,25 +663,63 @@ def profile():
 @app.route("/settings", methods=["GET", "POST"])
 @login_required
 def settings():
+    """Hariri taarifa za akaunti: username, simu, email, password."""
     user = get_current_user()
     if request.method == "POST":
         username = request.form.get("username", "").strip()
         phone = request.form.get("phone", "").strip()
+        email = request.form.get("email", "").strip() or None
+        current_password = request.form.get("current_password", "")
+        new_password = request.form.get("new_password", "")
+        new_password2 = request.form.get("new_password2", "")
+
         if not username or not phone:
-            flash("Jaza taarifa zote.", "error")
+            flash("Jaza username na namba ya simu.", "error")
             return redirect(url_for("settings"))
+
         existing = User.query.filter(
             ((User.username == username) | (User.phone == phone)) & (User.id != user.id)
         ).first()
         if existing:
             flash("Username au namba tayari inatumika.", "error")
             return redirect(url_for("settings"))
+
+        if email:
+            email_taken = User.query.filter(
+                (User.email == email) & (User.id != user.id)
+            ).first()
+            if email_taken:
+                flash("Email tayari inatumika.", "error")
+                return redirect(url_for("settings"))
+
         user.username = username
         user.phone = phone
+        user.email = email
+
+        # Badilisha password ikiwa imejaa
+        if new_password or new_password2 or current_password:
+            if not current_password:
+                flash("Weka password ya sasa ili ubadilishe password.", "error")
+                return redirect(url_for("settings"))
+            if not user.check_password(current_password):
+                flash("Password ya sasa si sahihi.", "error")
+                return redirect(url_for("settings"))
+            if len(new_password) < 4:
+                flash("Password mpya iwe angalau herufi 4.", "error")
+                return redirect(url_for("settings"))
+            if new_password != new_password2:
+                flash("Password mpya hazifanani.", "error")
+                return redirect(url_for("settings"))
+            user.set_password(new_password)
+
         db.session.commit()
-        flash("Taarifa zimehifadhiwa.", "success")
+        flash("Taarifa za akaunti zimehifadhiwa.", "success")
+        # Admin akarudi dashboard; user kawaida settings
+        if user.is_admin and request.form.get("from_dashboard") == "1":
+            return redirect(url_for("dashboard") + "#account")
         return redirect(url_for("settings"))
-    return render_template("settings.html")
+
+    return render_template("settings.html", user=user)
 
 
 # ---------------------------------------------------------------------------

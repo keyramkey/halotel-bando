@@ -2,186 +2,482 @@
 {% block title %}Leseni ya Biashara{% endblock %}
 {% block content %}
 <style>
-    .form-section { margin-bottom: 18px; }
-    .form-section h3 { font-size: 14px; margin-bottom: 10px; color: #333; }
-    .req { color: #e74c3c; }
-    .license-search {
-        width: 100%;
-        padding: 12px 14px;
-        border: 1px solid #e0e0e0;
-        border-radius: 12px;
-        font-size: 14px;
-        margin-bottom: 10px;
-        box-sizing: border-box;
+    .lic-wrap { max-width: 640px; margin: 0 auto; }
+
+    .lic-hero {
+        background: linear-gradient(135deg, #f56b00 0%, #e85d04 50%, #dc2f02 100%);
+        border-radius: 20px;
+        padding: 22px 20px;
+        color: #fff;
+        margin-bottom: 16px;
+        box-shadow: 0 8px 24px rgba(245, 107, 0, 0.25);
     }
-    .license-list {
-        max-height: 220px;
-        overflow-y: auto;
+    .lic-hero h1 {
+        font-size: 20px;
+        font-weight: 800;
+        margin: 0 0 6px;
+        letter-spacing: -0.3px;
+    }
+    .lic-hero p {
+        font-size: 13px;
+        opacity: 0.92;
+        margin: 0;
+        line-height: 1.45;
+    }
+
+    .step-bar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+    .step-pill {
+        flex: 1;
+        text-align: center;
+        padding: 8px 6px;
+        border-radius: 10px;
+        background: #f5f5f5;
+        font-size: 11px;
+        font-weight: 700;
+        color: #999;
+    }
+    .step-pill.on {
+        background: #fff3e8;
+        color: #f56b00;
+    }
+
+    .panel {
+        background: #fff;
+        border-radius: 18px;
         border: 1px solid #eee;
-        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 14px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .panel-title {
+        font-size: 14px;
+        font-weight: 800;
+        color: #222;
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .panel-title .num {
+        width: 24px; height: 24px;
+        border-radius: 8px;
+        background: #fff3e8;
+        color: #f56b00;
+        display: grid;
+        place-items: center;
+        font-size: 12px;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    .cat-scroll {
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding: 2px 2px 10px;
+        margin: 0 -4px 4px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .cat-scroll::-webkit-scrollbar { display: none; }
+    .cat-chip {
+        flex-shrink: 0;
+        padding: 9px 14px;
+        border-radius: 999px;
+        border: 1.5px solid #ebebeb;
         background: #fafafa;
+        font-size: 12px;
+        font-weight: 700;
+        color: #555;
+        cursor: pointer;
+        transition: all 0.15s;
+        white-space: nowrap;
+    }
+    .cat-chip:active { transform: scale(0.96); }
+    .cat-chip.active {
+        background: linear-gradient(135deg, #f56b00, #e85d04);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 4px 12px rgba(245, 107, 0, 0.3);
+    }
+
+    .search-wrap {
+        position: relative;
+        margin-bottom: 12px;
+    }
+    .search-wrap input {
+        width: 100%;
+        padding: 13px 14px 13px 42px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 14px;
+        font-size: 14px;
+        background: #f9f9f9;
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.15s, background 0.15s;
+    }
+    .search-wrap input:focus {
+        border-color: #f56b00;
+        background: #fff;
+    }
+    .search-wrap .icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 16px;
+        opacity: 0.5;
+        pointer-events: none;
+    }
+
+    .license-list {
+        max-height: 280px;
+        overflow-y: auto;
+        border-radius: 14px;
+        border: 1px solid #f0f0f0;
+        background: #fcfcfc;
     }
     .license-item {
+        display: none;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 14px;
+        border-bottom: 1px solid #f3f3f3;
+        cursor: pointer;
+        transition: background 0.12s;
+    }
+    .license-item.visible { display: flex; }
+    .license-item:last-child { border-bottom: none; }
+    .license-item:hover { background: #fff8f3; }
+    .license-item.selected {
+        background: linear-gradient(90deg, #fff3e8, #fff);
+        box-shadow: inset 3px 0 0 #f56b00;
+    }
+    .lic-radio {
+        width: 20px; height: 20px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        flex-shrink: 0;
+        margin-top: 2px;
+        display: grid;
+        place-items: center;
+        transition: all 0.15s;
+    }
+    .license-item.selected .lic-radio {
+        border-color: #f56b00;
+        background: #f56b00;
+    }
+    .license-item.selected .lic-radio::after {
+        content: '';
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #fff;
+    }
+    .lic-body { flex: 1; min-width: 0; }
+    .lic-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #222;
+        line-height: 1.35;
+    }
+    .lic-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 6px;
+        align-items: center;
+    }
+    .lic-badge {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 6px;
+        background: #f0f0f0;
+        color: #666;
+    }
+    .lic-note {
+        font-size: 11px;
+        color: #888;
+        font-style: italic;
+        line-height: 1.3;
+    }
+    .lic-price {
+        font-size: 13px;
+        font-weight: 800;
+        color: #f56b00;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .empty-msg {
+        padding: 28px 16px;
+        text-align: center;
+        color: #aaa;
+        font-size: 13px;
+        display: none;
+    }
+
+    .price-card {
+        display: none;
+        margin-top: 14px;
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid #c8e6c9;
+        background: #fff;
+    }
+    .price-card.show { display: block; }
+    .price-card-top {
+        background: linear-gradient(135deg, #2e7d32, #43a047);
+        color: #fff;
+        padding: 14px 16px;
+    }
+    .price-card-top .lbl {
+        font-size: 11px;
+        opacity: 0.9;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+    .price-card-top .name {
+        font-size: 14px;
+        font-weight: 700;
+        margin-top: 4px;
+        line-height: 1.35;
+    }
+    .price-card-bottom {
+        padding: 14px 16px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        gap: 10px;
-        padding: 12px 14px;
-        border-bottom: 1px solid #f0f0f0;
-        cursor: pointer;
-        font-size: 13px;
-    }
-    .license-item:last-child { border-bottom: none; }
-    .license-item:hover, .license-item.selected {
-        background: #fff3e8;
-    }
-    .license-item.selected {
-        border-left: 3px solid #f56b00;
-    }
-    .license-name { flex: 1; font-weight: 600; color: #333; }
-    .license-price { font-weight: 800; color: #f56b00; white-space: nowrap; font-size: 12px; }
-    .license-cat {
-        font-size: 10px;
-        color: #999;
-        display: block;
-        margin-top: 2px;
-        font-weight: 500;
-    }
-    .price-box {
-        margin-top: 12px;
-        padding: 14px;
         background: #e8f5e9;
-        border: 1px solid #c8e6c9;
-        border-radius: 12px;
-        display: none;
     }
-    .price-box.show { display: block; }
-    .price-box .label { font-size: 12px; color: #2e7d32; }
-    .price-box .amount { font-size: 20px; font-weight: 800; color: #1b5e20; margin-top: 4px; }
-    .price-box .selected-name { font-size: 13px; font-weight: 600; color: #333; margin-top: 4px; }
+    .price-card-bottom .amt {
+        font-size: 22px;
+        font-weight: 800;
+        color: #1b5e20;
+    }
+    .price-card-bottom .hint {
+        font-size: 11px;
+        color: #558b2f;
+        max-width: 45%;
+        text-align: right;
+        line-height: 1.3;
+    }
+
+    .field { margin-bottom: 14px; }
+    .field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 6px;
+    }
+    .field label .req { color: #e53935; }
+    .field .input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 12px;
+        font-size: 14px;
+        background: #fafafa;
+        box-sizing: border-box;
+        outline: none;
+        transition: border-color 0.15s, background 0.15s;
+    }
+    .field .input:focus {
+        border-color: #f56b00;
+        background: #fff;
+    }
+
+    .submit-btn {
+        width: 100%;
+        padding: 15px;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #f56b00, #e85d04);
+        color: #fff;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(245, 107, 0, 0.35);
+        margin-top: 6px;
+    }
+    .submit-btn:active { transform: scale(0.98); }
 </style>
 
 <header class="topbar">
     <div>
         <div class="brand">Leseni ya Biashara</div>
-        <div class="muted">Jaza taarifa kwa usahihi</div>
+        <div class="muted">Nakala · Halmashauri</div>
     </div>
     <a href="{{ url_for('nakala') }}" class="icon-btn">←</a>
 </header>
 
-<div class="page">
-    <div class="info-box">
-        <strong>Chagua leseni</strong> kutoka orodha, bei itaonekana moja kwa moja.
-        Jaza taarifa zako kama zilivyo kwenye NIDA.
+<div class="page lic-wrap">
+
+    <div class="lic-hero">
+        <h1>Ombi la Leseni</h1>
+        <p>Chagua aina ya biashara, angalia bei, kisha jaza taarifa kama zilivyo kwenye NIDA.</p>
+    </div>
+
+    <div class="step-bar">
+        <div class="step-pill on">1. Leseni</div>
+        <div class="step-pill">2. Taarifa</div>
+        <div class="step-pill">3. Malipo</div>
     </div>
 
     <form method="POST" action="{{ url_for('nakala_license') }}" id="licenseForm">
-        <div class="card">
-            <div class="form-section">
-                <label class="form-label">Aina ya Leseni <span class="req">*</span></label>
-                <input type="hidden" name="license_type" id="license_type" required>
-                <input
-                    type="text"
-                    class="license-search"
-                    id="licenseSearch"
-                    placeholder="🔍 Tafuta leseni... mfano: uwakala, duka, salon"
-                    autocomplete="off"
-                >
-                <div class="license-list" id="licenseList">
-                    {% for lic in licenses %}
-                    <div
-                        class="license-item"
-                        data-id="{{ lic.id }}"
-                        data-name="{{ lic.name }}"
-                        data-price="{{ lic.price }}"
-                        data-search="{{ lic.name|lower }} {{ lic.category|lower }}"
-                        onclick="selectLicense(this)"
-                    >
-                        <div>
-                            <span class="license-name">{{ lic.name }}</span>
-                            <span class="license-cat">{{ lic.category }}</span>
-                        </div>
-                        <span class="license-price">TSh {{ "{:,}".format(lic.price) }}</span>
-                    </div>
-                    {% endfor %}
-                </div>
-                <div class="price-box" id="priceBox">
-                    <div class="label">Bei ya leseni uliyochagua</div>
-                    <div class="selected-name" id="selectedName"></div>
-                    <div class="amount" id="selectedPrice"></div>
-                </div>
+
+        <div class="panel">
+            <div class="panel-title"><span class="num">1</span> Chagua Leseni</div>
+
+            <div class="cat-scroll" id="catScroll">
+                <div class="cat-chip active" data-cat="all" onclick="filterCat(this)">Zote</div>
+                {% for cat in categories %}
+                <div class="cat-chip" data-cat="{{ cat }}" onclick="filterCat(this)">{{ loop.index }}. {{ cat }}</div>
+                {% endfor %}
             </div>
 
-            <div class="form-section">
-                <label class="form-label">Jina Kamili (Kwanza + Kati + Mwisho) <span class="req">*</span></label>
+            <div class="search-wrap">
+                <span class="icon">🔍</span>
+                <input type="text" id="licenseSearch" placeholder="Tafuta leseni... mfano: uwakala, duka, salon">
+            </div>
+
+            <input type="hidden" name="license_type" id="license_type" required>
+
+            <div class="license-list" id="licenseList">
+                {% for lic in licenses %}
+                <div
+                    class="license-item visible"
+                    data-id="{{ lic.id }}"
+                    data-name="{{ lic.name }}"
+                    data-price="{{ lic.price }}"
+                    data-cat="{{ lic.category }}"
+                    data-note="{{ lic.note|default('', true) }}"
+                    data-search="{{ lic.name|lower }} {{ lic.category|lower }} {{ lic.note|default('', true)|lower }}"
+                    onclick="selectLicense(this)"
+                >
+                    <div class="lic-radio"></div>
+                    <div class="lic-body">
+                        <div class="lic-name">{{ lic.name }}</div>
+                        <div class="lic-meta">
+                            <span class="lic-badge">{{ lic.category }}</span>
+                            {% if lic.note %}<span class="lic-note">{{ lic.note }}</span>{% endif %}
+                        </div>
+                    </div>
+                    <div class="lic-price">TSh {{ "{:,}".format(lic.price) }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="empty-msg" id="emptyMsg">Hakuna leseni inayolingana. Badilisha search au kategoria.</div>
+
+            <div class="price-card" id="priceBox">
+                <div class="price-card-top">
+                    <div class="lbl">Leseni uliyochagua</div>
+                    <div class="name" id="selectedName"></div>
+                </div>
+                <div class="price-card-bottom">
+                    <div class="amt" id="selectedPrice"></div>
+                    <div class="hint" id="selectedNote"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-title"><span class="num">2</span> Taarifa Binafsi</div>
+
+            <div class="field">
+                <label>Jina Kamili (Kwanza + Kati + Mwisho) <span class="req">*</span></label>
                 <input type="text" name="full_name" class="input" placeholder="Mfano: Juma Ally Hassan" required>
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Jina Kamili la Mama <span class="req">*</span></label>
-                <input type="text" name="mother_name" class="input" required>
+            <div class="field">
+                <label>Jina Kamili la Mama <span class="req">*</span></label>
+                <input type="text" name="mother_name" class="input" placeholder="Jina la mama" required>
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Namba ya NIDA / NIN (namba 20 tu) <span class="req">*</span></label>
+            <div class="field">
+                <label>Namba ya NIDA / NIN <span class="req">*</span></label>
                 <input type="text" name="nida_number" class="input" maxlength="20" pattern="[0-9]{1,20}"
-                       placeholder="Namba za NIDA tu" required
+                       placeholder="Namba 20 za NIDA" required
                        oninput="this.value=this.value.replace(/[^0-9]/g,'')">
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Namba ya Simu 1 <span class="req">*</span></label>
+            <div class="field">
+                <label>Namba ya Simu 1 <span class="req">*</span></label>
                 <input type="tel" name="phone1" class="input" placeholder="07XXXXXXXX" required>
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Namba ya Simu 2 (si lazima)</label>
+            <div class="field">
+                <label>Namba ya Simu 2 <span style="color:#aaa;font-weight:500">(si lazima)</span></label>
                 <input type="tel" name="phone2" class="input" placeholder="07XXXXXXXX">
             </div>
+        </div>
 
-            <div class="form-section">
-                <label class="form-label">Jina la Shule ya Msingi <span class="req">*</span></label>
+        <div class="panel">
+            <div class="panel-title"><span class="num">3</span> Shule & Usajili wa NIDA</div>
+
+            <div class="field">
+                <label>Jina la Shule ya Msingi <span class="req">*</span></label>
                 <input type="text" name="primary_school" class="input" required>
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Mwaka wa Kuhitimu Darasa la Saba <span class="req">*</span></label>
+            <div class="field">
+                <label>Mwaka wa Kuhitimu Darasa la Saba <span class="req">*</span></label>
                 <input type="text" name="year_completed" class="input" placeholder="Mfano: 2010" required>
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Wilaya uliyosomea Shule ya Msingi <span class="req">*</span></label>
+            <div class="field">
+                <label>Wilaya uliyosomea Shule ya Msingi <span class="req">*</span></label>
                 <input type="text" name="school_district" class="input" required>
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Mkoa uliyosomea Shule ya Msingi <span class="req">*</span></label>
+            <div class="field">
+                <label>Mkoa uliyosomea Shule ya Msingi <span class="req">*</span></label>
                 <input type="text" name="school_region" class="input" required>
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Wilaya uliyojiandikishia NIDA <span class="req">*</span></label>
+            <div class="field">
+                <label>Wilaya uliyojiandikishia NIDA <span class="req">*</span></label>
                 <input type="text" name="nida_reg_district" class="input" required>
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Mkoa uliyojiandikishia NIDA <span class="req">*</span></label>
+            <div class="field">
+                <label>Mkoa uliyojiandikishia NIDA <span class="req">*</span></label>
                 <input type="text" name="nida_reg_region" class="input" required>
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Mtaa / Kijiji ulipojiandikishia NIDA <span class="req">*</span></label>
+            <div class="field">
+                <label>Mtaa / Kijiji ulipojiandikishia NIDA <span class="req">*</span></label>
                 <input type="text" name="nida_reg_street" class="input" required>
             </div>
-
-            <button type="submit" class="btn orange" style="margin-top:16px;" onclick="return validateLicense()">
-                Endelea → Hakiki Taarifa
-            </button>
         </div>
+
+        <button type="submit" class="submit-btn" onclick="return validateLicense()">
+            Endelea → Hakiki Taarifa
+        </button>
     </form>
 </div>
 
 <script>
+let currentCat = 'all';
+
+function filterCat(el) {
+    document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    el.classList.add('active');
+    currentCat = el.dataset.cat;
+    applyFilters();
+}
+
+function applyFilters() {
+    const q = document.getElementById('licenseSearch').value.toLowerCase().trim();
+    let shown = 0;
+    document.querySelectorAll('.license-item').forEach(item => {
+        const catOk = currentCat === 'all' || item.dataset.cat === currentCat;
+        const searchOk = !q || item.dataset.search.includes(q);
+        const show = catOk && searchOk;
+        item.classList.toggle('visible', show);
+        if (show) shown++;
+    });
+    document.getElementById('emptyMsg').style.display = shown ? 'none' : 'block';
+}
+
+document.getElementById('licenseSearch').addEventListener('input', applyFilters);
+
 function selectLicense(el) {
     document.querySelectorAll('.license-item').forEach(i => i.classList.remove('selected'));
     el.classList.add('selected');
@@ -189,20 +485,15 @@ function selectLicense(el) {
     document.getElementById('selectedName').textContent = el.dataset.name;
     const price = Number(el.dataset.price);
     document.getElementById('selectedPrice').textContent = 'TSh ' + price.toLocaleString();
+    document.getElementById('selectedNote').textContent = el.dataset.note || '';
     document.getElementById('priceBox').classList.add('show');
+    document.getElementById('priceBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
-
-document.getElementById('licenseSearch').addEventListener('input', function () {
-    const q = this.value.toLowerCase().trim();
-    document.querySelectorAll('.license-item').forEach(item => {
-        const match = !q || item.dataset.search.includes(q);
-        item.style.display = match ? 'flex' : 'none';
-    });
-});
 
 function validateLicense() {
     if (!document.getElementById('license_type').value) {
         alert('Tafadhali chagua aina ya leseni kwenye orodha.');
+        document.getElementById('licenseList').scrollIntoView({ behavior: 'smooth' });
         return false;
     }
     return true;

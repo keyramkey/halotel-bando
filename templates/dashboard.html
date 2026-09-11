@@ -276,6 +276,116 @@
         margin-bottom: 14px;
         line-height: 1.4;
     }
+
+    .user-search-bar {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    .user-search-bar input {
+        flex: 1;
+    }
+    .user-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 16px;
+        overflow: hidden;
+        margin-bottom: 12px;
+    }
+    .user-card-head {
+        padding: 14px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .user-card-head:hover {
+        background: #fffaf5;
+    }
+    .user-card-head .uid {
+        font-size: 11px;
+        color: #999;
+        font-weight: 700;
+    }
+    .user-card-head .uname {
+        font-size: 15px;
+        font-weight: 800;
+        margin-top: 2px;
+    }
+    .user-card-head .uphone {
+        font-size: 12px;
+        color: #666;
+        margin-top: 2px;
+    }
+    .user-card-head .joined {
+        font-size: 11px;
+        color: #888;
+        margin-top: 4px;
+    }
+    .user-detail-wrap {
+        display: none;
+        border-top: 1px solid #f0f0f0;
+        padding: 14px;
+        background: #fafafa;
+    }
+    .user-detail-wrap.open {
+        display: block;
+        animation: fadeInForm 0.2s ease;
+    }
+    .user-actions-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-bottom: 12px;
+    }
+    .user-actions-grid form {
+        margin: 0;
+    }
+    .user-actions-grid .btn {
+        width: 100%;
+        font-size: 12px;
+        padding: 10px 8px;
+    }
+    .user-orders-box {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        padding: 12px;
+        margin-top: 8px;
+    }
+    .user-orders-box h4 {
+        margin: 0 0 10px;
+        font-size: 13px;
+        font-weight: 800;
+    }
+    .user-order-row {
+        font-size: 12px;
+        padding: 8px 0;
+        border-bottom: 1px solid #f3f3f3;
+        line-height: 1.45;
+    }
+    .user-order-row:last-child {
+        border-bottom: none;
+    }
+    .badge-blocked {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: #3a0a0a;
+        color: #ff6b6b;
+        font-size: 10px;
+        font-weight: 800;
+    }
+    .badge-admin {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 20px;
+        background: #1a3a1a;
+        color: #6bff8a;
+        font-size: 10px;
+        font-weight: 800;
+    }
 </style>
 
 <header class="topbar">
@@ -321,6 +431,10 @@
         <button type="button" class="nav-tab" data-tab="agency">
             🏪 Uwakala
             {% if agency_pending %}<span class="count">{{ agency_pending }}</span>{% endif %}
+        </button>
+        <button type="button" class="nav-tab" data-tab="users">
+            👥 Users
+            {% if users_count %}<span class="count">{{ users_count }}</span>{% endif %}
         </button>
         <button type="button" class="nav-tab" data-tab="announcement">
             📢 Matangazo
@@ -763,6 +877,122 @@
     </div>
 
 
+    <!-- ==================== USERS ==================== -->
+    <div class="tab-panel" id="panel-users">
+        <div style="margin:0 0 12px;">
+            <h2 class="dash-section-title">👥 Watumiaji Wote</h2>
+            <p class="dash-section-sub">
+                ID · Join time (Dar es Salaam) · Block / Futa · Oda zake · Download CSV
+            </p>
+        </div>
+
+        <form method="GET" action="{{ url_for('dashboard') }}" class="user-search-bar" id="usersSearchForm">
+            <input type="hidden" name="_tab" value="users">
+            <input class="input" type="search" name="q" value="{{ users_search_q or '' }}"
+                   placeholder="Tafuta: username, simu, email au ID..."
+                   style="margin:0;">
+            <button class="btn orange" type="submit" style="white-space:nowrap;">🔍 Tafuta</button>
+        </form>
+        {% if users_search_q %}
+        <p class="muted" style="font-size:12px;margin:-6px 0 12px;">
+            Matokeo ya “{{ users_search_q }}” —
+            <a href="{{ url_for('dashboard') }}#users" style="color:#f56b00;font-weight:700;">Ondoa filter</a>
+        </p>
+        {% endif %}
+
+        {% if all_users %}
+        <div class="list-more-wrap" data-list="users" data-limit="8">
+            {% for u in all_users %}
+            <div class="user-card list-item{% if loop.index > 8 %} list-item-hidden{% endif %}">
+                <div class="user-card-head" onclick="toggleUserDetail({{ u.id }})" title="Gusa kuona actions">
+                    <div style="min-width:0;flex:1;">
+                        <div class="uid">ID #{{ u.id }}
+                            {% if u.is_admin %}<span class="badge-admin">ADMIN</span>{% endif %}
+                            {% if u.is_blocked %}<span class="badge-blocked">BLOCKED</span>{% endif %}
+                        </div>
+                        <div class="uname">{{ u.username }}</div>
+                        <div class="uphone">{{ u.phone }}{% if u.email %} · {{ u.email }}{% endif %}</div>
+                        <div class="joined">Amejoin: {{ to_dar_es_salaam(u.created_at) }} (Dar)</div>
+                    </div>
+                    <div style="text-align:right;flex-shrink:0;">
+                        <div class="muted" style="font-size:11px;">Oda</div>
+                        <strong style="font-size:18px;">{{ u.orders|length }}</strong>
+                    </div>
+                </div>
+
+                <div class="user-detail-wrap" id="user-detail-{{ u.id }}">
+                    <div class="user-actions-grid">
+                        {% if not u.is_admin and u.id != current_user.id %}
+                            {% if u.is_blocked %}
+                            <form method="POST" action="{{ url_for('admin_user_unblock', user_id=u.id) }}">
+                                <button class="btn green" type="submit">✅ Fungua Block</button>
+                            </form>
+                            {% else %}
+                            <form method="POST" action="{{ url_for('admin_user_block', user_id=u.id) }}"
+                                  onsubmit="return confirm('Fungia akaunti ya {{ u.username }}?');">
+                                <button class="btn" type="submit" style="background:#3a2a0a;color:#ffb86b;">🚫 Block</button>
+                            </form>
+                            {% endif %}
+                            <form method="POST" action="{{ url_for('admin_user_delete', user_id=u.id) }}"
+                                  onsubmit="return confirm('FUTA kabisa akaunti ya {{ u.username }} na data zake? Hii hairudishwi!');">
+                                <button class="btn btn-danger-soft" type="submit">🗑 Futa Account</button>
+                            </form>
+                        {% else %}
+                            <div class="muted" style="font-size:12px;grid-column:1/-1;">
+                                {% if u.is_admin %}Akaunti ya admin — hairuhusiwi block/futa.{% else %}Hii ni akaunti yako.{% endif %}
+                            </div>
+                        {% endif %}
+                        <a href="{{ url_for('admin_chat', user_id=u.id) }}"
+                           class="btn" style="background:#151515;text-align:center;font-size:12px;padding:10px 8px;">
+                            💬 Chat
+                        </a>
+                        <a href="{{ url_for('admin_user_orders_csv', user_id=u.id) }}"
+                           class="btn" style="background:#0a2a3a;color:#6bcfff;text-align:center;font-size:12px;padding:10px 8px;">
+                            ⬇ Download Oda (CSV)
+                        </a>
+                    </div>
+
+                    <div class="user-orders-box">
+                        <h4>Oda za {{ u.username }} ({{ u.orders|length }})</h4>
+                        {% if u.orders %}
+                            {% for o in u.orders|sort(attribute='created_at', reverse=True) %}
+                            <div class="user-order-row">
+                                <strong>#{{ o.id }}</strong> · {{ o.amount }} · TSh {{ "{:,}".format(o.price or 0) }}
+                                ·
+                                {% if o.status == "pending" %}<span class="status pending">pending</span>
+                                {% elif o.status == "completed" %}<span class="status completed">completed</span>
+                                {% elif o.status == "failed" %}<span class="status rejected">failed</span>
+                                {% elif o.status == "awaiting_payment" %}<span class="status processing">awaiting</span>
+                                {% else %}<span class="status rejected">{{ o.status }}</span>{% endif %}
+                                <br>
+                                <span class="muted">{{ o.phone }} · {{ to_dar_es_salaam(o.created_at) }}</span>
+                                {% if o.note %}<br><span style="color:#f56b00;">{{ o.note }}</span>{% endif %}
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="muted" style="margin:0;font-size:12px;">Hakuna oda.</p>
+                        {% endif %}
+                    </div>
+
+                    <button type="button" class="btn" style="width:100%;margin-top:10px;background:#eee;color:#444;"
+                            onclick="toggleUserDetail({{ u.id }})">
+                        Funga
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+            <button type="button" class="see-more-btn" data-list="users" style="display:none;" onclick="toggleSeeMore(this)">
+                See more
+            </button>
+        </div>
+        {% else %}
+        <div class="card">
+            <p class="muted">Hakuna users{% if users_search_q %} wanaolingana na utafutaji{% endif %}.</p>
+        </div>
+        {% endif %}
+    </div>
+
+
     <!-- ==================== AKAUNTI YA ADMIN ==================== -->
     <div class="tab-panel" id="panel-account">
         <div style="margin:0 0 12px;">
@@ -816,6 +1046,27 @@ document.querySelectorAll('.nav-tab').forEach(function(btn) {
 if (window.location.hash === '#account') {
     openDashTab('account');
 }
+if (window.location.hash === '#users' || (new URLSearchParams(window.location.search)).has('q')) {
+    openDashTab('users');
+}
+
+function toggleUserDetail(id) {
+    var el = document.getElementById('user-detail-' + id);
+    if (!el) return;
+    var wasOpen = el.classList.contains('open');
+    document.querySelectorAll('.user-detail-wrap.open').forEach(function(n) {
+        n.classList.remove('open');
+    });
+    if (!wasOpen) {
+        el.classList.add('open');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+
+// Baada ya search, weka hash #users ili tab ibaki
+document.getElementById('usersSearchForm') && document.getElementById('usersSearchForm').addEventListener('submit', function() {
+    // form GET — hash itaongezwa baada ya load kwa q check juu
+});
 
 
 function initSeeMore() {

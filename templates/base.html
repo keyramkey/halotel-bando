@@ -118,15 +118,37 @@
         }
         .nav-item {
             text-align: center;
-            color: #777;
-            font-size: 19px;
+            color: #8a8a8a;
+            font-size: 11px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            min-width: 52px;
+            padding: 4px 2px;
         }
         .nav-item small {
             display: block;
             font-size: 9px;
-            margin-top: 4px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
         }
-        .nav-item.active { color: #f56b00; }
+        .nav-item svg {
+            width: 22px;
+            height: 22px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.85;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .nav-item.active {
+            color: #f56b00;
+        }
+        .nav-item.active svg {
+            stroke: #f56b00;
+        }
         .network-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -319,7 +341,6 @@
             line-height: 1.5;
             margin-bottom: 15px;
         }
-
         /* ===== APP TOAST / MODAL ===== */
         .app-toast-overlay {
             position: fixed;
@@ -390,7 +411,6 @@
         .app-toast-btn:active {
             transform: scale(0.98);
         }
-
         /* ===== TOP PUSH NOTIFICATION BANNER ===== */
         #pushBannerStack {
             position: fixed;
@@ -509,8 +529,7 @@
             from { transform: scaleX(1); }
             to { transform: scaleX(0); }
         }
-
-        /* Enable notifications prompt (subtle) */
+        /* Enable notifications prompt */
         #enablePushBar {
             display: none;
             position: fixed;
@@ -558,24 +577,30 @@
 
     <nav class="bottom-nav">
         <a href="{{ url_for('home') }}" class="nav-item">
-            🏠<small>Home</small>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/></svg>
+            <small>Home</small>
         </a>
         <a href="{{ url_for('order') }}" class="nav-item">
-            📦<small>Bando</small>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>
+            <small>Bando</small>
         </a>
         <a href="{{ url_for('agency') }}" class="nav-item">
-            🏪<small>Uwakala</small>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 21h18"/><path d="M5 21V8l7-4 7 4v13"/><path d="M9 21v-6h6v6"/><path d="M10 11h4"/></svg>
+            <small>Uwakala</small>
         </a>
         {% if current_user %}
             <a href="{{ url_for('nakala') }}" class="nav-item">
-                📄<small>Nakala</small>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h6"/></svg>
+                <small>Nakala</small>
             </a>
             <a href="{{ url_for('profile') }}" class="nav-item">
-                👤<small>Profile</small>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <small>Profile</small>
             </a>
         {% else %}
             <a href="{{ url_for('login') }}" class="nav-item">
-                🔐<small>Login</small>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>
+                <small>Login</small>
             </a>
         {% endif %}
     </nav>
@@ -594,7 +619,7 @@
 <!-- APP TOAST MODAL -->
 <div class="app-toast-overlay" id="appToast">
     <div class="app-toast">
-        <div class="app-toast-icon" id="toastIcon">⚠️</div>
+        <div class="app-toast-icon" id="toastIcon">!</div>
         <div class="app-toast-title" id="toastTitle">Taarifa</div>
         <div class="app-toast-msg" id="toastMsg"></div>
         <button type="button" class="app-toast-btn" id="toastClose">Sawa</button>
@@ -603,7 +628,6 @@
 
 <script>
 (function() {
-    // ---- Flash toast modal ----
     var overlay = document.getElementById('appToast');
     var iconEl = document.getElementById('toastIcon');
     var titleEl = document.getElementById('toastTitle');
@@ -613,7 +637,7 @@
     function showToast(message, category) {
         if (!message) return;
         var isError = (category || '').indexOf('error') !== -1 || (category || '').indexOf('danger') !== -1;
-        iconEl.textContent = isError ? '⚠️' : '✓';
+        iconEl.textContent = isError ? '!' : '✓';
         iconEl.className = 'app-toast-icon ' + (isError ? 'error' : 'success');
         titleEl.textContent = isError ? 'Imeshindwa' : 'Imefanikiwa';
         msgEl.textContent = message;
@@ -635,14 +659,12 @@
         {% endif %}
     {% endwith %}
 
-    // ---- Top banner notifications ----
     var stack = document.getElementById('pushBannerStack');
-
     function showPushBanner(title, body, url) {
         var el = document.createElement('div');
         el.className = 'push-banner';
         el.innerHTML =
-            '<div class="push-banner-icon">🔔</div>' +
+            '<div class="push-banner-icon">•</div>' +
             '<div class="push-banner-body">' +
                 '<div class="push-banner-title"></div>' +
                 '<div class="push-banner-msg"></div>' +
@@ -652,19 +674,12 @@
         el.querySelector('.push-banner-title').textContent = title || 'MR. SULE';
         el.querySelector('.push-banner-msg').textContent = body || '';
         stack.appendChild(el);
-
-        requestAnimationFrame(function() {
-            el.classList.add('show');
-        });
-
+        requestAnimationFrame(function() { el.classList.add('show'); });
         function dismiss() {
             el.classList.remove('show');
             el.classList.add('hide');
-            setTimeout(function() {
-                if (el.parentNode) el.parentNode.removeChild(el);
-            }, 320);
+            setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 320);
         }
-
         el.querySelector('.push-banner-close').addEventListener('click', function(e) {
             e.stopPropagation();
             dismiss();
@@ -676,21 +691,17 @@
         setTimeout(dismiss, 5000);
     }
 
-    // Listen for SW postMessage (when app is open)
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.addEventListener('message', function(event) {
             var d = event.data || {};
             if (d.type === 'PUSH_NOTIFICATION') {
                 showPushBanner(d.title, d.body, d.url);
             } else if (d.type === 'NOTIFICATION_CLICK' && d.url) {
-                if (window.location.pathname !== d.url) {
-                    window.location.href = d.url;
-                }
+                if (window.location.pathname !== d.url) window.location.href = d.url;
             }
         });
     }
 
-    // ---- Push subscription ----
     var isLoggedIn = {{ 'true' if current_user else 'false' }};
     var enableBar = document.getElementById('enablePushBar');
     var enableBtn = document.getElementById('enablePushBtn');
@@ -701,9 +712,7 @@
         var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
         var rawData = window.atob(base64);
         var outputArray = new Uint8Array(rawData.length);
-        for (var i = 0; i < rawData.length; ++i) {
-            outputArray[i] = rawData.charCodeAt(i);
-        }
+        for (var i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
         return outputArray;
     }
 
@@ -715,12 +724,10 @@
             if (!keyRes.ok) return false;
             var keyData = await keyRes.json();
             if (!keyData.publicKey) return false;
-
             var sub = await reg.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: urlBase64ToUint8Array(keyData.publicKey)
             });
-
             var res = await fetch('/api/push/subscribe', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -736,17 +743,9 @@
     async function ensurePush() {
         if (!isLoggedIn) return;
         if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
-
-        if (Notification.permission === 'granted') {
-            await subscribePush();
-            return;
-        }
+        if (Notification.permission === 'granted') { await subscribePush(); return; }
         if (Notification.permission === 'denied') return;
-
-        // Show soft prompt if not dismissed recently
-        try {
-            if (localStorage.getItem('push_dismissed') === '1') return;
-        } catch (_) {}
+        try { if (localStorage.getItem('push_dismissed') === '1') return; } catch (_) {}
         enableBar.classList.add('show');
     }
 
@@ -767,7 +766,6 @@
         });
     }
 
-    // Register SW
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('/sw.js').then(function() {

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sule-digital-v2';
+const CACHE_NAME = 'sule-digital-v3';
 const ASSETS = [
   '/',
   '/static/manifest.json'

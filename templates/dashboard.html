@@ -96,6 +96,46 @@
         gap: 14px;
         margin-bottom: 8px;
     }
+
+    .slide-item-preview {
+        cursor: pointer;
+        position: relative;
+    }
+    .slide-item-preview .tap-hint {
+        position: absolute;
+        left: 0; right: 0; bottom: 0;
+        padding: 8px;
+        background: linear-gradient(transparent, rgba(0,0,0,0.55));
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+        text-align: center;
+        pointer-events: none;
+    }
+    .slide-edit-wrap {
+        display: none;
+    }
+    .slide-edit-wrap.open {
+        display: block;
+        animation: fadeInForm 0.2s ease;
+    }
+    .slide-meta-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        background: #fafafa;
+        border-top: 1px solid #f0f0f0;
+    }
+    .slide-meta-bar .code { font-weight: 700; font-size: 13px; }
+    .slide-meta-bar .link-line {
+        font-size: 11px;
+        margin-top: 2px;
+        word-break: break-all;
+    }
+    .slide-meta-bar .link-line a { color: #f56b00; text-decoration: none; }
+
     .slide-item-card {
         background: #fff;
         border: 1px solid #eee;
@@ -626,31 +666,33 @@
         <div class="slide-list list-more-wrap" data-list="slides" data-limit="2">
             {% for slide in slides %}
             <div class="slide-item-card list-item{% if loop.index > 2 %} list-item-hidden{% endif %}">
-                <div class="slide-item-preview">
+                <div class="slide-item-preview" onclick="toggleSlideEdit({{ slide.id }})" title="Gusa kuhariri">
                     <img src="{{ url_for('media_file', filename='slide/' + slide.image) }}"
                          alt="Banner {{ slide.id }}">
+                    <div class="tap-hint">Gusa kuhariri</div>
                 </div>
-                <div class="slide-item-body">
-                    <div class="slide-item-meta">
-                        <div>
-                            <div class="code">
-                                #{{ slide.id }}{% if slide.title %} — {{ slide.title }}{% endif %}
-                            </div>
-                            <div class="link-line">
-                                {% if slide.link %}
-                                    <a href="{{ slide.link }}" target="_blank" rel="noopener">{{ slide.link }}</a>
-                                {% else %}
-                                    <span class="muted">Hakuna link</span>
-                                {% endif %}
-                            </div>
+                <div class="slide-meta-bar">
+                    <div style="min-width:0;flex:1;">
+                        <div class="code">
+                            #{{ slide.id }}{% if slide.title %} — {{ slide.title }}{% endif %}
                         </div>
-                        {% if slide.is_active %}
-                            <span class="status completed">Active</span>
-                        {% else %}
-                            <span class="status rejected">Zimwa</span>
-                        {% endif %}
+                        <div class="link-line">
+                            {% if slide.link %}
+                                <a href="{{ slide.link }}" target="_blank" rel="noopener" onclick="event.stopPropagation()">{{ slide.link }}</a>
+                            {% else %}
+                                <span class="muted">Hakuna link</span>
+                            {% endif %}
+                        </div>
                     </div>
+                    {% if slide.is_active %}
+                        <span class="status completed">Active</span>
+                    {% else %}
+                        <span class="status rejected">Zimwa</span>
+                    {% endif %}
+                </div>
 
+                <div class="slide-edit-wrap" id="slide-edit-{{ slide.id }}">
+                <div class="slide-item-body">
                     <form method="POST"
                           action="{{ url_for('admin_slide_update', slide_id=slide.id) }}"
                           enctype="multipart/form-data"
@@ -697,6 +739,11 @@
                             🗑 Futa Tangazo
                         </button>
                     </form>
+                    <button type="button" class="btn" style="width:100%;margin-top:8px;background:#eee;color:#444;"
+                            onclick="toggleSlideEdit({{ slide.id }})">
+                        Funga
+                    </button>
+                </div>
                 </div>
             </div>
             {% endfor %}
@@ -809,6 +856,20 @@ function toggleSeeMore(btn) {
 }
 document.addEventListener('DOMContentLoaded', initSeeMore);
 
+
+
+function toggleSlideEdit(id) {
+    var el = document.getElementById('slide-edit-' + id);
+    if (!el) return;
+    var wasOpen = el.classList.contains('open');
+    document.querySelectorAll('.slide-edit-wrap.open').forEach(function(n) {
+        n.classList.remove('open');
+    });
+    if (!wasOpen) {
+        el.classList.add('open');
+        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
 
 function toggleTangazoForm() {
     var wrap = document.getElementById('tangazoFormWrap');

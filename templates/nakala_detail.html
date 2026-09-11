@@ -1,94 +1,104 @@
 {% extends "base.html" %}
-{% block title %}Ombi {{ req.request_code }}{% endblock %}
+{% block title %}{{ req.request_code }}{% endblock %}
 {% block content %}
 <style>
-    .review-row {
-        display: flex;
-        justify-content: space-between;
-        padding: 9px 0;
-        border-bottom: 1px solid #f0f0f0;
-        font-size: 13px;
+    .nd-wrap { max-width: 640px; margin: 0 auto; }
+    .nd-card {
+        background: #fff; border-radius: 18px; border: 1px solid #eee;
+        padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
     }
-    .review-row .label { color: #777; }
-    .review-row .value { font-weight: 600; text-align: right; max-width: 60%; word-break: break-word; }
-    .result-box {
-        background: #e4f8eb;
-        border: 1px solid #b8e6c8;
-        border-radius: 14px;
-        padding: 16px;
-        margin-top: 16px;
+    .nd-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
+    .nd-row { display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid #f3f3f3; font-size:13px; }
+    .nd-row:last-child { border-bottom:none; }
+    .nd-lbl { color:#888; font-weight:600; }
+    .nd-val { font-weight:700; text-align:right; word-break:break-word; }
+    .ctrl-box {
+        background: linear-gradient(135deg, #fff3e8, #fff8f0);
+        border: 1px solid #ffd0b0; border-radius: 16px; padding: 16px; margin-bottom: 14px;
+    }
+    .ctrl-box .big { font-size: 20px; font-weight: 900; color: #e65100; letter-spacing: 0.5px; word-break: break-all; }
+    .ctrl-box .exp { font-size: 12px; color: #a65c00; margin-top: 8px; line-height: 1.4; }
+    .file-btn {
+        display:block; text-align:center; padding:14px; border-radius:14px;
+        background: linear-gradient(135deg, #f56b00, #e85d04); color:#fff !important;
+        font-weight:800; text-decoration:none; margin-top:8px;
     }
 </style>
 
 <header class="topbar">
     <div>
-        <div class="brand">{{ req.request_code }}</div>
-        <div class="muted">
-            {% if req.service_type == 'tin' %}TIN Number
-            {% elif req.service_type == 'license' %}Leseni ya Biashara
-            {% else %}Online Copy NIDA{% endif %}
-        </div>
+        <div class="brand">Ombi la Nakala</div>
+        <div class="muted">{{ req.request_code }}</div>
     </div>
     <a href="{{ url_for('my_nakala') }}" class="icon-btn">←</a>
 </header>
 
-<div class="page">
-    <div style="margin-bottom:12px;">
-        {% if req.status == "pending" %}
-            <span class="status pending">Inasubiri</span>
-        {% elif req.status == "paid" %}
-            <span class="status processing">Imelipwa</span>
-        {% elif req.status == "processing" %}
-            <span class="status processing">Inachakatwa</span>
-        {% elif req.status == "completed" %}
-            <span class="status completed">Imekamilika</span>
-        {% else %}
-            <span class="status rejected">Imekataliwa</span>
-        {% endif %}
-        <span class="muted" style="margin-left:8px; font-size:12px;">
-            TSh {{ "{:,}".format(req.price) }}
-        </span>
-    </div>
-
-    <div class="card">
-        <div class="review-row"><span class="label">Jina Kamili</span><span class="value">{{ req.full_name }}</span></div>
-        <div class="review-row"><span class="label">Jina la Mama</span><span class="value">{{ req.mother_name }}</span></div>
-        <div class="review-row"><span class="label">NIDA / NIN</span><span class="value">{{ req.nida_number }}</span></div>
-        <div class="review-row"><span class="label">Simu 1</span><span class="value">{{ req.phone1 }}</span></div>
-        {% if req.phone2 %}
-        <div class="review-row"><span class="label">Simu 2</span><span class="value">{{ req.phone2 }}</span></div>
-        {% endif %}
-        <div class="review-row"><span class="label">Shule ya Msingi</span><span class="value">{{ req.primary_school }}</span></div>
-        <div class="review-row"><span class="label">Mwaka</span><span class="value">{{ req.year_completed }}</span></div>
-        <div class="review-row"><span class="label">Wilaya (Shule)</span><span class="value">{{ req.school_district }}</span></div>
-        <div class="review-row"><span class="label">Mkoa (Shule)</span><span class="value">{{ req.school_region }}</span></div>
-        <div class="review-row"><span class="label">Wilaya (NIDA)</span><span class="value">{{ req.nida_reg_district }}</span></div>
-        <div class="review-row"><span class="label">Mkoa (NIDA)</span><span class="value">{{ req.nida_reg_region }}</span></div>
-        <div class="review-row"><span class="label">Mtaa/Kijiji</span><span class="value">{{ req.nida_reg_street }}</span></div>
-        {% if req.nida_reg_phone %}
-        <div class="review-row"><span class="label">Simu ya Usajili NIDA</span><span class="value">{{ req.nida_reg_phone }}</span></div>
-        {% endif %}
-        {% if req.license_type %}
-        <div class="review-row"><span class="label">Aina ya Leseni</span><span class="value">{{ 'Uwakala' if req.license_type == 'uwakala' else 'Duka' }}</span></div>
+<div class="page nd-wrap">
+    <div class="nd-card">
+        <div class="nd-title">
+            {% if req.service_type == 'tin' %}TIN Number
+            {% elif req.service_type == 'license' %}Leseni ya Biashara
+            {% else %}Online Copy NIDA{% endif %}
+        </div>
+        <div class="nd-row"><span class="nd-lbl">Code</span><span class="nd-val">{{ req.request_code }}</span></div>
+        <div class="nd-row">
+            <span class="nd-lbl">Hali</span>
+            <span class="nd-val">
+                {% if req.status == 'pending' %}Inasubiri malipo
+                {% elif req.status == 'paid' %}Imelipwa
+                {% elif req.status == 'waiting_control_number' %}Inasubiri Control Number
+                {% elif req.status == 'control_issued' %}Control Number Imetolewa
+                {% elif req.status == 'processing' %}Inachakatwa
+                {% elif req.status == 'completed' %}Imekamilika
+                {% else %}{{ req.status }}{% endif %}
+            </span>
+        </div>
+        <div class="nd-row"><span class="nd-lbl">Jina</span><span class="nd-val">{{ req.full_name }}</span></div>
+        <div class="nd-row"><span class="nd-lbl">Simu</span><span class="nd-val">{{ req.phone1 }}</span></div>
+        {% if req.service_type == 'license' %}
+        <div class="nd-row"><span class="nd-lbl">Aina ya Leseni</span><span class="nd-val">{{ req.license_type }}</span></div>
+        <div class="nd-row"><span class="nd-lbl">Eneo</span><span class="nd-val">{{ req.license_location or '—' }}</span></div>
+        <div class="nd-row"><span class="nd-lbl">Ada ya huduma</span><span class="nd-val">TSh {{ "{:,}".format(req.service_fee or req.price or 0) }}</span></div>
+        <div class="nd-row"><span class="nd-lbl">Bei Control Number</span><span class="nd-val">TSh {{ "{:,}".format(req.control_number_fee or 0) }}</span></div>
         {% endif %}
     </div>
 
-    {% if req.status == "completed" and req.result_message %}
-    <div class="result-box">
-        <strong style="display:block; margin-bottom:8px;">✅ Matokeo Yako</strong>
-        <div style="font-size:13px; line-height:1.5; white-space:pre-wrap;">{{ req.result_message }}</div>
-        {% if req.result_file %}
-        <a href="{{ url_for('media_file', filename=req.result_file) }}" target="_blank" class="btn green" style="margin-top:12px; display:block; text-align:center;">
-            Pakua Faili
-        </a>
-        {% endif %}
+    {% if req.service_type == 'license' and req.control_number %}
+    <div class="ctrl-box">
+        <div style="font-size:12px;font-weight:700;color:#a65c00;">CONTROL NUMBER YAKO</div>
+        <div class="big">{{ req.control_number }}</div>
+        <div class="exp">
+            Lipa <strong>TSh {{ "{:,}".format(req.control_number_fee or 0) }}</strong> kwa control number hii.
+            {% if req.control_expires_at %}
+            <br>Inaisha: <strong>{{ req.control_expires_at.strftime('%d/%m/%Y %H:%M') }} UTC</strong> (siku 1).
+            {% else %}
+            <br>Inaisha baada ya <strong>siku 1</strong> tangu kutolewa.
+            {% endif %}
+            Baada ya kulipia, admin atakupakia leseni (PDF/picha).
+        </div>
     </div>
     {% endif %}
 
     {% if req.admin_note %}
-    <div class="card" style="margin-top:12px;">
-        <div class="muted" style="font-size:12px;">Ujumbe kutoka Admin</div>
-        <div style="margin-top:6px; font-size:13px;">{{ req.admin_note }}</div>
+    <div class="nd-card">
+        <div class="nd-title">Ujumbe wa Admin</div>
+        <p style="font-size:13px;line-height:1.5;color:#333;">{{ req.admin_note }}</p>
+    </div>
+    {% endif %}
+
+    {% if req.result_message %}
+    <div class="nd-card">
+        <div class="nd-title">Matokeo</div>
+        <p style="font-size:13px;line-height:1.5;">{{ req.result_message }}</p>
+    </div>
+    {% endif %}
+
+    {% if req.result_file %}
+    <div class="nd-card">
+        <div class="nd-title">Faili / Leseni</div>
+        <a class="file-btn" href="{{ url_for('media_file', filename=req.result_file) }}" target="_blank">
+            📄 Pakua Leseni / Faili
+        </a>
     </div>
     {% endif %}
 </div>

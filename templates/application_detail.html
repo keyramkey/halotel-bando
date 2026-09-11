@@ -14,7 +14,6 @@
 
 <div class="page">
 
-    <!-- Status Card -->
     <div class="card">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px;">
             <div>
@@ -37,7 +36,86 @@
         </div>
     </div>
 
-    <!-- Messages -->
+    <div class="card" style="margin-top:12px; padding:14px;">
+        <div style="font-size:13px; font-weight:700; margin-bottom:10px;">Taarifa za Ombi</div>
+
+        <div class="detail-row">
+            <span class="muted">Code</span>
+            <span class="copyable" data-copy="{{ application.application_code }}">{{ application.application_code }} <button type="button" class="copy-btn" onclick="copyText(this)">📋</button></span>
+        </div>
+        <div class="detail-row">
+            <span class="muted">Mtandao</span>
+            <span>{{ application.network }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="muted">Huduma</span>
+            <span>{{ application.service_type }}</span>
+        </div>
+        <div class="detail-row">
+            <span class="muted">Jina Kamili</span>
+            <span class="copyable" data-copy="{{ application.full_name }}">{{ application.full_name }} <button type="button" class="copy-btn" onclick="copyText(this)">📋</button></span>
+        </div>
+        <div class="detail-row">
+            <span class="muted">Simu</span>
+            <span class="copyable" data-copy="{{ application.phone }}">{{ application.phone }} <button type="button" class="copy-btn" onclick="copyText(this)">📋</button></span>
+        </div>
+        {% if application.tin_number %}
+        <div class="detail-row">
+            <span class="muted">TIN Number</span>
+            <span class="copyable" data-copy="{{ application.tin_number }}">{{ application.tin_number }} <button type="button" class="copy-btn" onclick="copyText(this)">📋</button></span>
+        </div>
+        {% endif %}
+        {% if application.target_phone %}
+        <div class="detail-row">
+            <span class="muted">Namba ya Kusajiliwa</span>
+            <span class="copyable" data-copy="{{ application.target_phone }}">{{ application.target_phone }} <button type="button" class="copy-btn" onclick="copyText(this)">📋</button></span>
+        </div>
+        {% endif %}
+        {% if application.contact_phone %}
+        <div class="detail-row">
+            <span class="muted">Simu ya Mawasiliano</span>
+            <span class="copyable" data-copy="{{ application.contact_phone }}">{{ application.contact_phone }} <button type="button" class="copy-btn" onclick="copyText(this)">📋</button></span>
+        </div>
+        {% endif %}
+        {% if application.id_type %}
+        <div class="detail-row">
+            <span class="muted">Aina ya Kitambulisho</span>
+            <span>{{ application.id_type }}</span>
+        </div>
+        {% endif %}
+        {% if application.id_number %}
+        <div class="detail-row">
+            <span class="muted">Namba ya Kitambulisho</span>
+            <span class="copyable" data-copy="{{ application.id_number }}">{{ application.id_number }} <button type="button" class="copy-btn" onclick="copyText(this)">📋</button></span>
+        </div>
+        {% endif %}
+        {% if application.description %}
+        <div class="detail-row">
+            <span class="muted">Maelezo</span>
+            <span style="text-align:right; max-width:60%;">{{ application.description }}</span>
+        </div>
+        {% endif %}
+
+        {% if application.tin_cert %}
+        <div class="detail-row">
+            <span class="muted">TIN Certificate</span>
+            <a href="{{ url_for('media_file', filename=application.tin_cert) }}" target="_blank" style="color:#f56b00; font-weight:600;">Pakua / Angalia</a>
+        </div>
+        {% endif %}
+        {% if application.id_doc %}
+        <div class="detail-row">
+            <span class="muted">Kitambulisho</span>
+            <a href="{{ url_for('media_file', filename=application.id_doc) }}" target="_blank" style="color:#f56b00; font-weight:600;">Pakua / Angalia</a>
+        </div>
+        {% endif %}
+        {% if application.shop_photo %}
+        <div class="detail-row">
+            <span class="muted">Picha ya Duka</span>
+            <a href="{{ url_for('media_file', filename=application.shop_photo) }}" target="_blank" style="color:#f56b00; font-weight:600;">Pakua / Angalia</a>
+        </div>
+        {% endif %}
+    </div>
+
     <div class="chat-box">
         {% if messages %}
             {% for message in messages %}
@@ -55,7 +133,6 @@
         {% endif %}
     </div>
 
-    <!-- Admin Note -->
     {% if application.admin_note %}
     <div class="info-box">
         <strong>Maelezo kutoka kwa mhudumu:</strong><br>
@@ -63,16 +140,9 @@
     </div>
     {% endif %}
 
-    <!-- Reply Form -->
     {% if application.status not in ["completed", "rejected"] %}
         <form method="POST" class="chat-form">
-            <input
-                type="text"
-                name="message"
-                placeholder="Andika ujumbe..."
-                autocomplete="off"
-                required
-            >
+            <input type="text" name="message" placeholder="Andika ujumbe..." autocomplete="off" required>
             <button type="submit">Tuma</button>
         </form>
     {% else %}
@@ -84,5 +154,28 @@
     {% endif %}
 
 </div>
+
+<style>
+.detail-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px; padding: 8px 0; border-bottom: 1px solid #f5f5f5; font-size: 13px;
+}
+.detail-row:last-child { border-bottom: none; }
+.copy-btn {
+    border: none; background: #f0f0f0; border-radius: 6px;
+    padding: 2px 6px; font-size: 11px; cursor: pointer; margin-left: 4px;
+}
+.copy-btn:active { background: #ddd; }
+</style>
+<script>
+function copyText(btn) {
+    const el = btn.closest('.copyable');
+    const text = el.getAttribute('data-copy') || el.innerText.replace('📋','').trim();
+    navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '✓';
+        setTimeout(() => btn.textContent = '📋', 1200);
+    });
+}
+</script>
 
 {% endblock %}

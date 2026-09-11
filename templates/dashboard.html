@@ -302,9 +302,9 @@
                     <div class="application-code">{{ req.request_code }}</div>
                     <div class="application-network">
                         {% if req.service_type == 'tin' %}TIN Number
-                        {% elif req.service_type == 'license' %}Leseni ({{ 'Uwakala' if req.license_type == 'uwakala' else 'Duka' }})
+                        {% elif req.service_type == 'license' %}Leseni · {{ req.license_type }}
                         {% else %}Online Copy NIDA{% endif %}
-                        · TSh {{ "{:,}".format(req.price) }}
+                        · Ada TSh {{ "{:,}".format(req.price) }}
                     </div>
                 </div>
                 {% if req.status == "pending" %}
@@ -313,6 +313,10 @@
                     <span class="status processing">Imelipwa</span>
                 {% elif req.status == "processing" %}
                     <span class="status processing">Inachakatwa</span>
+                {% elif req.status == "waiting_control_number" %}
+                    <span class="status processing">Inasubiri Control No.</span>
+                {% elif req.status == "control_issued" %}
+                    <span class="status pending">Control Imetolewa</span>
                 {% elif req.status == "completed" %}
                     <span class="status completed">Imekamilika</span>
                 {% else %}
@@ -336,7 +340,10 @@
                 Wilaya NIDA: {{ req.nida_reg_district }} | Mkoa: {{ req.nida_reg_region }}<br>
                 Mtaa: {{ req.nida_reg_street }}
                 {% if req.nida_reg_phone %}<br>Simu Usajili NIDA: {{ req.nida_reg_phone }}{% endif %}
-                {% if req.license_type %}<br>Aina Leseni: {{ 'Uwakala' if req.license_type == 'uwakala' else 'Duka' }}{% endif %}
+                {% if req.license_type %}<br>Aina Leseni: {{ req.license_type }}{% endif %}
+                {% if req.license_location %}<br>Eneo: {{ req.license_location }}{% endif %}
+                {% if req.control_number_fee %}<br>Bei Control Number: TSh {{ "{:,}".format(req.control_number_fee) }}{% endif %}
+                {% if req.control_number %}<br>Control Number: {{ req.control_number }}{% endif %}
             </div>
             <button type="button" class="btn" style="margin-top:8px; background:#333; font-size:13px;"
                     onclick="copyNakala({{ req.id }})">
@@ -348,16 +355,31 @@
                   enctype="multipart/form-data"
                   style="margin-top:14px;">
                 <select class="input" name="status">
-                    <option value="pending" {% if req.status == "pending" %}selected{% endif %}>Inasubiri</option>
+                    <option value="pending" {% if req.status == "pending" %}selected{% endif %}>Inasubiri (pending)</option>
                     <option value="paid" {% if req.status == "paid" %}selected{% endif %}>Imelipwa</option>
                     <option value="processing" {% if req.status == "processing" %}selected{% endif %}>Inachakatwa</option>
+                    <option value="waiting_control_number" {% if req.status == "waiting_control_number" %}selected{% endif %}>Inasubiri Control Number</option>
+                    <option value="control_issued" {% if req.status == "control_issued" %}selected{% endif %}>Control Number Imetolewa</option>
                     <option value="completed" {% if req.status == "completed" %}selected{% endif %}>Imekamilika</option>
                     <option value="rejected" {% if req.status == "rejected" %}selected{% endif %}>Imekataliwa</option>
                 </select>
+                {% if req.service_type == 'license' %}
+                <div style="margin-top:10px;background:#fff8f0;border:1px solid #ffe0c2;border-radius:12px;padding:12px;">
+                    <label class="muted" style="font-size:12px;font-weight:700;">Control Number (leseni)</label>
+                    <input type="text" name="control_number" class="input"
+                           value="{{ req.control_number or '' }}"
+                           placeholder="Weka control number hapa">
+                    <p class="muted" style="font-size:11px;margin-top:6px;line-height:1.4;">
+                        Bei ya control number: <strong>TSh {{ "{:,}".format(req.control_number_fee or 0) }}</strong>
+                        · Itaisha baada ya <strong>siku 1</strong> baada ya kuiweka.
+                        {% if req.control_expires_at %}<br>Inaisha: {{ req.control_expires_at.strftime('%d/%m/%Y %H:%M') }} UTC{% endif %}
+                    </p>
+                </div>
+                {% endif %}
                 <textarea class="input" name="admin_note" placeholder="Ujumbe / maelezo kwa mteja...">{{ req.admin_note or '' }}</textarea>
-                <textarea class="input" name="result_message" placeholder="Matokeo (TIN number, link, au maelezo ya kumpatia mteja)...">{{ req.result_message or '' }}</textarea>
+                <textarea class="input" name="result_message" placeholder="Matokeo (TIN, control number, maelezo)...">{{ req.result_message or '' }}</textarea>
                 <div style="margin-top:10px;">
-                    <label class="muted" style="font-size:12px;">Pakia faili ya matokeo (PDF / Picha) — si lazima</label>
+                    <label class="muted" style="font-size:12px;">Pakia leseni / matokeo (PDF au Picha) — baada ya mteja kulipia control number</label>
                     <input type="file" name="result_file" class="input"
                            accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.bmp">
                     {% if req.result_file %}

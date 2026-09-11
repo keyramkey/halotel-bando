@@ -1,13 +1,15 @@
 import os
+import csv
+import io
 import json
 import secrets
 import time
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import wraps
 from flask import (
     Flask, render_template, request, redirect, url_for,
-    flash, session, jsonify, send_from_directory
+    flash, session, jsonify, send_from_directory, Response
 )
 from werkzeug.exceptions import RequestEntityTooLarge
 from flask_sqlalchemy import SQLAlchemy
@@ -100,6 +102,7 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=True)
     password_hash = db.Column(db.String(256), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
+    is_blocked = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     reset_otp = db.Column(db.String(10), default="")
     reset_otp_expires = db.Column(db.DateTime, nullable=True)
@@ -275,6 +278,20 @@ def get_current_user():
     return User.query.get(uid)
 
 
+# Dar es Salaam = Africa/Dar_es_Salaam (EAT, UTC+3)
+DAR_TZ = timezone(timedelta(hours=3))
+
+
+def to_dar_es_salaam(dt):
+    """Convert UTC datetime to Dar es Salaam local time string."""
+    if not dt:
+        return "—"
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    local = dt.astimezone(DAR_TZ)
+    return local.strftime("%d/%m/%Y %H:%M")
+
+
 @app.context_processor
 def inject_globals():
     return {
@@ -282,16 +299,22 @@ def inject_globals():
         "PAYMENT_NUMBER": PAYMENT_NUMBER,
         "PAYMENT_NAME": PAYMENT_NAME,
         "PAYMENT_NETWORK": PAYMENT_NETWORK,
+        "to_dar_es_salaam": to_dar_es_salaam,
     }
 
 
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not get_current_user():
+        user = get_current_user()
+        if not user:
             flash("Tafadhali ingia kwanza ili upate huduma.", "error")
             # Kumbuka ukurasa aliotaka aende baada ya login
             session["next_url"] = request.path
+            return redirect(url_for("login"))
+        if getattr(user, "is_blocked", False):
+            session.clear()
+            flash("Akaunti yako imefungwa. Wasiliana na admin.", "error")
             return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated
@@ -304,6 +327,10 @@ def admin_required(f):
         if not user or not user.is_admin:
             flash("Huna ruhusa ya kufikia ukurasa huu.", "error")
             return redirect(url_for("home"))
+        if getattr(user, "is_blocked", False):
+            session.clear()
+            flash("Akaunti yako imefungwa. Wasiliana na admin.", "error")
+            return redirect(url_for("login"))
         return f(*args, **kwargs)
     return decorated
 
@@ -572,6 +599,9 @@ def login():
             | (User.email == identity)
         ).first()
         if user and user.check_password(password):
+            if getattr(user, "is_blocked", False):
+                flash("Akaunti yako imefungwa. Wasiliana na admin.", "error")
+                return redirect(url_for("login"))
             session.permanent = True
             session["user_id"] = user.id
             flash("Umefanikiwa kuingia.", "success")
@@ -2126,6 +2156,21 @@ def dashboard():
         .limit(20)
         .all()
     )
+    # Users list + search (admin Users tab)
+    q = (request.args.get("q") or "").strip()
+    users_query = User.query.order_by(User.created_at.desc())
+    if q:
+        like = f"%{q}%"
+        filters = [
+            User.username.ilike(like),
+            User.phone.ilike(like),
+            User.email.ilike(like),
+        ]
+        if q.isdigit():
+            filters.append(User.id == int(q))
+        from sqlalchemy import or_
+        users_query = users_query.filter(or_(*filters))
+    all_users = users_query.limit(300).all()
     return render_template(
         "dashboard.html",
         users_count=users_count,
@@ -2137,6 +2182,98 @@ def dashboard():
         slides=slides,
         nakala_list=nakala_list,
         pending_resets=pending_resets,
+        all_users=all_users,
+        users_search_q=q,
+    )
+
+
+@app.route("/admin/users/block/<int:user_id>", methods=["POST"])
+@admin_required
+def admin_user_block(user_id):
+    target = User.query.get_or_404(user_id)
+    me = get_current_user()
+    if target.id == me.id:
+        flash("Huwezi kujifunga mwenyewe.", "error")
+        return redirect(url_for("dashboard") + "#users")
+    if target.is_admin:
+        flash("Huwezi kufunga akaunti ya admin.", "error")
+        return redirect(url_for("dashboard") + "#users")
+    target.is_blocked = True
+    db.session.commit()
+    flash(f"User #{target.id} ({target.username}) amefungwa.", "success")
+    return redirect(url_for("dashboard") + "#users")
+
+
+@app.route("/admin/users/unblock/<int:user_id>", methods=["POST"])
+@admin_required
+def admin_user_unblock(user_id):
+    target = User.query.get_or_404(user_id)
+    target.is_blocked = False
+    db.session.commit()
+    flash(f"User #{target.id} ({target.username}) amefunguliwa.", "success")
+    return redirect(url_for("dashboard") + "#users")
+
+
+@app.route("/admin/users/delete/<int:user_id>", methods=["POST"])
+@admin_required
+def admin_user_delete(user_id):
+    target = User.query.get_or_404(user_id)
+    me = get_current_user()
+    if target.id == me.id:
+        flash("Huwezi kujifuta mwenyewe.", "error")
+        return redirect(url_for("dashboard") + "#users")
+    if target.is_admin:
+        flash("Huwezi kufuta akaunti ya admin.", "error")
+        return redirect(url_for("dashboard") + "#users")
+    uname = target.username
+    uid = target.id
+    # Futa data zinazohusiana ili kuepuka FK errors
+    Order.query.filter_by(user_id=uid).delete()
+    Message.query.filter_by(user_id=uid).delete()
+    PushSubscription.query.filter_by(user_id=uid).delete()
+    for app_row in Application.query.filter_by(user_id=uid).all():
+        AgencyMessage.query.filter_by(application_id=app_row.id).delete()
+        db.session.delete(app_row)
+    NakalaRequest.query.filter_by(user_id=uid).delete()
+    db.session.delete(target)
+    db.session.commit()
+    flash(f"Akaunti #{uid} ({uname}) imefutwa kabisa.", "success")
+    return redirect(url_for("dashboard") + "#users")
+
+
+@app.route("/admin/users/<int:user_id>/orders.csv")
+@admin_required
+def admin_user_orders_csv(user_id):
+    target = User.query.get_or_404(user_id)
+    orders_list = (
+        Order.query.filter_by(user_id=target.id)
+        .order_by(Order.created_at.desc())
+        .all()
+    )
+    buf = io.StringIO()
+    writer = csv.writer(buf)
+    writer.writerow([
+        "order_id", "amount", "price", "phone", "status",
+        "order_reference", "note", "fail_reason", "created_at_dar",
+    ])
+    for o in orders_list:
+        writer.writerow([
+            o.id,
+            o.amount or "",
+            o.price or 0,
+            o.phone or "",
+            o.status or "",
+            o.order_reference or "",
+            (o.note or "").replace("\n", " "),
+            (o.fail_reason or "").replace("\n", " "),
+            to_dar_es_salaam(o.created_at),
+        ])
+    out = buf.getvalue()
+    filename = f"orders_user_{target.id}_{target.username}.csv"
+    return Response(
+        out,
+        mimetype="text/csv",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
 
 
@@ -2553,6 +2690,7 @@ def ensure_agency_columns():
             user_cols = {
                 "reset_otp": "VARCHAR(10) DEFAULT ''",
                 "reset_otp_expires": "TIMESTAMP",
+                "is_blocked": "BOOLEAN DEFAULT FALSE",
             }
             with db.engine.begin() as conn:
                 for name, typedef in user_cols.items():

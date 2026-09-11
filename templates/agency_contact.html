@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}{{ network }} · {{ service_label }}{% endblock %}
+
+{% block content %}
+
+<header class="topbar">
+    <div>
+        <div class="brand">{{ network }}</div>
+        <div class="muted">{{ service_label }}</div>
+    </div>
+    <a href="{{ url_for('agency_network', network=network) }}" class="icon-btn">←</a>
+</header>
+
+<div class="page">
+    <div class="card" style="text-align:center; padding:28px 18px;">
+        <div style="font-size:40px; margin-bottom:12px;">📞</div>
+        <h2 style="font-size:17px; font-weight:800; margin-bottom:10px;">
+            {{ title }}
+        </h2>
+        <p class="muted" style="font-size:13px; line-height:1.6; margin-bottom:20px;">
+            {{ message }}
+        </p>
+
+        <div style="background:#f8f9fa; border-radius:14px; padding:16px; margin-bottom:16px;">
+            <div class="muted" style="font-size:11px; margin-bottom:4px;">Namba ya simu / WhatsApp</div>
+            <a href="tel:0684319668" style="font-size:20px; font-weight:800; color:#f56b00; text-decoration:none;">
+                0684 319 668
+            </a>
+            <div style="margin-top:10px; display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                <a href="tel:0684319668" style="display:inline-block; padding:10px 18px; border-radius:10px; background:#e8f5e9; color:#2e7d32; font-weight:600; font-size:13px; text-decoration:none;">📞 Piga Simu</a>
+                <a href="https://wa.me/255684319668" target="_blank" style="display:inline-block; padding:10px 18px; border-radius:10px; background:#e8f5e9; color:#128c7e; font-weight:600; font-size:13px; text-decoration:none;">💬 WhatsApp</a>
+            </div>
+        </div>
+
+        <p class="muted" style="font-size:12px;">
+            Wasiliana na admin utapata maelekezo kamili ya kupata huduma hii.
+        </p>
+    </div>
+</div>
+
+{% endblock %}

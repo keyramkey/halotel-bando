@@ -1,7 +1,5 @@
 {% extends "base.html" %}
-
 {% block title %}Login{% endblock %}
-
 {% block content %}
 <style>
     .auth {
@@ -47,13 +45,22 @@
         color: #f56b00;
         font-weight: 700;
     }
+    .forgot-link {
+        display: block;
+        text-align: right;
+        margin-top: 10px;
+        font-size: 13px;
+    }
+    .forgot-link a {
+        color: #f56b00;
+        font-weight: 600;
+        text-decoration: none;
+    }
 </style>
-
 <div class="auth">
     <div class="auth-card">
         <h1>Karibu tena</h1>
         <p class="muted">Ingia kwenye akaunti yako</p>
-
         <form method="POST">
             <div class="field">
                 <label>Username / Namba / Email</label>
@@ -65,7 +72,6 @@
                     autocomplete="username"
                 >
             </div>
-
             <div class="field">
                 <label>Password</label>
                 <input
@@ -76,15 +82,16 @@
                     placeholder="Password"
                     autocomplete="current-password"
                 >
+                <div class="forgot-link">
+                    <a href="{{ url_for('forgot_password') }}">Umesahau password?</a>
+                </div>
             </div>
-
             <div style="margin-top:22px;">
                 <button class="btn orange" type="submit">
                     Ingia
                 </button>
             </div>
         </form>
-
         <div class="auth-link">
             Huna akaunti?
             <a href="{{ url_for('register') }}">Jisajili</a>

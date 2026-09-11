@@ -8,8 +8,7 @@
     <h1>Uwakala & Usajili</h1>
     <p>
         Chagua mtandao unaotaka kupata huduma.
-        Unaweza kuomba usajili wa laini, huduma za wakala,
-        merchant na huduma za fedha kwa simu.
+        Unaweza kuomba usajili wa lipa namba (merchant) na huduma za uwakala.
     </p>
 </div>
 
@@ -19,36 +18,44 @@
     </div>
 
     <div class="network-grid">
-        {% for network in networks %}
-        <a href="{{ url_for('agency_network', network=network.network) }}" class="network-card">
-            <div class="network-icon">
-                {{ network.network[0] }}
-            </div>
-            <h3>{{ network.network }}</h3>
-            <p>Angalia huduma zinazopatikana</p>
+        <a href="{{ url_for('agency_network', network='Vodacom') }}" class="network-card">
+            <div class="network-logo vodacom-logo"><span class="logo-text">vodacom</span></div>
+            <h3>Vodacom</h3>
+            <p>Lipa Namba & Uwakala</p>
         </a>
-        {% endfor %}
+        <a href="{{ url_for('agency_network', network='Airtel') }}" class="network-card">
+            <div class="network-logo airtel-logo"><span class="logo-text">airtel</span></div>
+            <h3>Airtel</h3>
+            <p>Lipa Namba & Uwakala</p>
+        </a>
+        <a href="{{ url_for('agency_network', network='Yas') }}" class="network-card">
+            <div class="network-logo yas-logo"><span class="logo-text">yas</span></div>
+            <h3>Yas</h3>
+            <p>Mixx by Yas · Lipa & Uwakala</p>
+        </a>
+        <a href="{{ url_for('agency_network', network='Halotel') }}" class="network-card">
+            <div class="network-logo halotel-logo"><span class="logo-text">halotel</span></div>
+            <h3>Halotel</h3>
+            <p>Lipa Namba & Uwakala</p>
+        </a>
+        <a href="{{ url_for('agency_network', network='TTCL') }}" class="network-card">
+            <div class="network-logo ttcl-logo"><span class="logo-text">TTCL</span></div>
+            <h3>TTCL</h3>
+            <p>Coming Soon</p>
+        </a>
+        <a href="{{ url_for('agency_network', network='Azam Pesa') }}" class="network-card">
+            <div class="network-logo azam-logo"><span class="logo-text">Azam</span></div>
+            <h3>Azam Pesa</h3>
+            <p>Coming Soon</p>
+        </a>
     </div>
 
     <div style="margin-top:24px;">
         <div class="section-title" style="margin-bottom:12px;">
             <h2 style="font-size:17px; font-weight:800;">Haraka</h2>
         </div>
-
         <a href="{{ url_for('my_applications') }}" class="card" style="display:flex; align-items:center; gap:14px; text-decoration:none;">
-            <div style="
-                width:48px;
-                height:48px;
-                border-radius:14px;
-                background:#fff1e7;
-                display:grid;
-                place-items:center;
-                font-weight:800;
-                color:#f56b00;
-                flex-shrink:0;
-            ">
-                MA
-            </div>
+            <div style="width:48px;height:48px;border-radius:14px;background:#fff1e7;display:grid;place-items:center;font-weight:800;color:#f56b00;flex-shrink:0;">MA</div>
             <div style="flex:1;">
                 <h3 style="font-size:15px; margin-bottom:3px;">Maombi Yangu</h3>
                 <p class="muted" style="font-size:12px;">Angalia maombi na status zake</p>
@@ -57,5 +64,28 @@
         </a>
     </div>
 </div>
+
+<style>
+.network-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.network-card {
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+    padding: 18px 12px; background: #fff; border-radius: 16px; text-decoration: none;
+    color: inherit; box-shadow: 0 2px 8px rgba(0,0,0,0.06); border: 1px solid #f0f0f0;
+}
+.network-card:active { transform: scale(0.98); }
+.network-logo {
+    width: 64px; height: 64px; border-radius: 16px; display: grid; place-items: center;
+    margin-bottom: 10px; font-weight: 800; font-size: 13px;
+}
+.logo-text { color: #fff; text-transform: lowercase; }
+.vodacom-logo { background: linear-gradient(135deg, #e60000, #c40000); }
+.airtel-logo { background: linear-gradient(135deg, #ed1c24, #b71c1c); }
+.yas-logo { background: linear-gradient(135deg, #5c2d91, #3f1a6b); }
+.halotel-logo { background: linear-gradient(135deg, #f7941d, #e85d04); }
+.ttcl-logo { background: linear-gradient(135deg, #003366, #001a33); }
+.azam-logo { background: linear-gradient(135deg, #00a651, #007a3d); }
+.network-card h3 { font-size: 15px; font-weight: 700; margin: 0 0 4px; }
+.network-card p { font-size: 11px; color: #888; margin: 0; }
+</style>
 
 {% endblock %}

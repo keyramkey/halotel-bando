@@ -70,7 +70,38 @@
     font-weight: 800;
     color: var(--text);
 }
-
+/* Offer banner from ad link */
+.offer-banner {
+    background: #e8f5e9;
+    border: 1px solid #a5d6a7;
+    border-radius: 14px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+    display: none;
+}
+.offer-banner.show { display: block; }
+.offer-banner .ob-lbl {
+    font-size: 11px;
+    font-weight: 700;
+    color: #2e7d32;
+    text-transform: uppercase;
+}
+.offer-banner .ob-val {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1b5e20;
+    margin-top: 2px;
+}
+.offer-banner .ob-sub {
+    font-size: 12px;
+    color: #558b2f;
+    margin-top: 2px;
+}
+.offer-banner a {
+    color: #f56b00;
+    font-weight: 700;
+    font-size: 12px;
+}
 /* Bundle Selector */
 .bundle-selector {
     position: relative;
@@ -91,6 +122,11 @@
 .bundle-selected.active {
     border-color: var(--orange);
     box-shadow: 0 0 0 3px rgba(255,101,0,0.08);
+}
+.bundle-selected.locked {
+    border-color: #a5d6a7;
+    background: #f1f8f2;
+    cursor: default;
 }
 .selected-left {
     display: flex;
@@ -160,8 +196,6 @@
     pointer-events: auto;
     transform: translateY(0);
 }
-
-/* Period buttons */
 .period-buttons {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -188,14 +222,8 @@
     border-color: var(--orange);
     color: var(--orange-dark);
 }
-
-/* Bundle options list */
-.bundle-list {
-    display: none;
-}
-.bundle-list.show {
-    display: block;
-}
+.bundle-list { display: none; }
+.bundle-list.show { display: block; }
 .bundle-option {
     width: 100%;
     border: 0;
@@ -205,12 +233,8 @@
     cursor: pointer;
     text-align: left;
 }
-.bundle-option:hover {
-    background: #fff5ef;
-}
-.bundle-option + .bundle-option {
-    margin-top: 3px;
-}
+.bundle-option:hover { background: #fff5ef; }
+.bundle-option + .bundle-option { margin-top: 3px; }
 .option-main {
     display: flex;
     align-items: center;
@@ -227,10 +251,7 @@
     font-weight: 800;
     color: #555;
 }
-.option-info {
-    flex: 1;
-    min-width: 0;
-}
+.option-info { flex: 1; min-width: 0; }
 .option-info strong {
     display: block;
     font-size: 13px;
@@ -248,7 +269,6 @@
     font-weight: 800;
     color: var(--orange-dark);
 }
-
 .price-box {
     margin-top: 14px;
     padding: 14px 16px;
@@ -258,10 +278,7 @@
     align-items: center;
     justify-content: space-between;
 }
-.price-label {
-    font-size: 11px;
-    color: #999;
-}
+.price-label { font-size: 11px; color: #999; }
 .price-value {
     margin-top: 2px;
     font-size: 22px;
@@ -273,10 +290,7 @@
     font-weight: 700;
     color: #999;
 }
-
-.input-group {
-    margin-bottom: 12px;
-}
+.input-group { margin-bottom: 12px; }
 .input-label {
     display: block;
     margin-bottom: 6px;
@@ -310,10 +324,7 @@ textarea.input {
     font-size: 11px;
     color: #888;
 }
-.hint.warning {
-    color: #c2410c;
-}
-
+.hint.warning { color: #c2410c; }
 .submit-btn {
     width: 100%;
     min-height: 52px;
@@ -329,9 +340,7 @@ textarea.input {
     box-shadow: 0 8px 20px rgba(237,77,0,0.18);
     transition: 0.2s;
 }
-.submit-btn:active {
-    transform: scale(0.98);
-}
+.submit-btn:active { transform: scale(0.98); }
 .submit-btn.loading {
     opacity: 0.75;
     pointer-events: none;
@@ -350,8 +359,6 @@ textarea.input {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
-
-/* Help link */
 .help-link-wrap {
     text-align: center;
     margin-top: 14px;
@@ -365,11 +372,7 @@ textarea.input {
     align-items: center;
     gap: 5px;
 }
-.help-link:hover {
-    text-decoration: underline;
-}
-
-/* ===== CUSTOM MODAL (Error + Help) ===== */
+.help-link:hover { text-decoration: underline; }
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -400,9 +403,7 @@ textarea.input {
     max-height: 85vh;
     overflow-y: auto;
 }
-.modal-overlay.show .modal-card {
-    transform: scale(1);
-}
+.modal-overlay.show .modal-card { transform: scale(1); }
 .modal-icon {
     width: 64px;
     height: 64px;
@@ -426,9 +427,7 @@ textarea.input {
     margin-bottom: 22px;
     text-align: left;
 }
-.modal-message strong {
-    color: var(--orange-dark);
-}
+.modal-message strong { color: var(--orange-dark); }
 .modal-btn {
     width: 100%;
     min-height: 48px;
@@ -441,20 +440,14 @@ textarea.input {
     cursor: pointer;
     box-shadow: 0 8px 18px rgba(237,77,0,0.2);
 }
-.modal-btn:active {
-    transform: scale(0.97);
-}
-
-/* Help content styles */
+.modal-btn:active { transform: scale(0.97); }
 .help-content h4 {
     font-size: 14px;
     font-weight: 800;
     color: #171717;
     margin: 16px 0 8px;
 }
-.help-content h4:first-child {
-    margin-top: 0;
-}
+.help-content h4:first-child { margin-top: 0; }
 .help-content ol, .help-content ul {
     padding-left: 18px;
     margin: 0 0 12px;
@@ -476,186 +469,144 @@ textarea.input {
 </style>
 
 <div class="order-page">
-    <!-- HEADER -->
     <header class="order-header">
         <div class="header-inner">
             <div>
                 <div class="header-title">Agiza Bando</div>
-                <div class="header-sub">Chagua kifurushi na lipa</div>
+                <div class="header-sub">
+                    {% if offer_amount %}Ofa: {{ offer_amount }}{% else %}Chagua kifurushi na lipa{% endif %}
+                </div>
             </div>
             <a href="{{ url_for('home') }}" class="back-btn">←</a>
         </div>
     </header>
 
     <main class="order-container">
-        <form method="POST" action="{{ url_for('order') }}" id="orderForm">
+        {# Banner inayoonekana ikiwa imetoka tangazo #}
+        <div class="offer-banner{% if offer_amount and offer_price %} show{% endif %}" id="offerBanner">
+            <div class="ob-lbl">Kifurushi kutoka tangazo</div>
+            <div class="ob-val" id="offerBannerVal">{{ offer_amount or '' }}</div>
+            <div class="ob-sub">
+                Bei: TSh <span id="offerBannerPrice">{{ offer_price or '' }}</span>
+                {% if offer_title %} · {{ offer_title }}{% endif %}
+                · <a href="{{ url_for('order') }}">Badilisha kifurushi</a>
+            </div>
+        </div>
 
-            <!-- BUNDLE -->
+        <form method="POST" action="{{ url_for('order') }}" id="orderForm">
             <section class="order-card">
                 <div class="section-title">Kifurushi</div>
-
                 <div class="bundle-selector" id="bundleSelector">
-                    <button type="button" class="bundle-selected" id="bundleSelected">
+                    <button type="button" class="bundle-selected{% if offer_amount and offer_price %} locked{% endif %}" id="bundleSelected">
                         <div class="selected-left">
                             <div class="selected-icon">GB</div>
                             <div>
-                                <div class="selected-name" id="selectedName">Chagua kifurushi</div>
-                                <div class="selected-small" id="selectedSmall">Gusa hapa kuchagua</div>
+                                <div class="selected-name" id="selectedName">
+                                    {% if offer_amount %}{{ offer_amount }}{% else %}Chagua kifurushi{% endif %}
+                                </div>
+                                <div class="selected-small" id="selectedSmall">
+                                    {% if offer_amount and offer_price %}Kimejazwa kutoka tangazo{% else %}Gusa hapa kuchagua{% endif %}
+                                </div>
                             </div>
                         </div>
-                        <div class="dropdown-arrow">⌄</div>
+                        <div class="dropdown-arrow" id="dropdownArrow">{% if not (offer_amount and offer_price) %}⌄{% else %}✓{% endif %}</div>
                     </button>
 
                     <div class="bundle-options" id="bundleOptions">
-                        <!-- Step 1: Period selection -->
                         <div class="period-buttons" id="periodButtons">
                             <button type="button" class="period-btn" data-period="wiki">Wiki Mbili</button>
                             <button type="button" class="period-btn" data-period="mwezi">Mwezi</button>
                         </div>
-
-                        <!-- Wiki Mbili packages -->
                         <div class="bundle-list" id="wikiList">
                             <button type="button" class="bundle-option"
-                                data-amount="GB 3 - Wiki Mbili"
-                                data-price="4000"
-                                data-name="GB 3"
-                                data-amount-display="Wiki Mbili">
+                                data-amount="GB 3 - Wiki Mbili" data-price="4000"
+                                data-name="GB 3" data-amount-display="Wiki Mbili">
                                 <div class="option-main">
                                     <div class="option-icon">3</div>
-                                    <div class="option-info">
-                                        <strong>GB 3</strong>
-                                        <span>Wiki Mbili</span>
-                                    </div>
+                                    <div class="option-info"><strong>GB 3</strong><span>Wiki Mbili</span></div>
                                     <div class="option-price">TSh 4,000</div>
                                 </div>
                             </button>
                             <button type="button" class="bundle-option"
-                                data-amount="GB 4 - Wiki Mbili"
-                                data-price="5000"
-                                data-name="GB 4"
-                                data-amount-display="Wiki Mbili">
+                                data-amount="GB 4 - Wiki Mbili" data-price="5000"
+                                data-name="GB 4" data-amount-display="Wiki Mbili">
                                 <div class="option-main">
                                     <div class="option-icon">4</div>
-                                    <div class="option-info">
-                                        <strong>GB 4</strong>
-                                        <span>Wiki Mbili</span>
-                                    </div>
+                                    <div class="option-info"><strong>GB 4</strong><span>Wiki Mbili</span></div>
                                     <div class="option-price">TSh 5,000</div>
                                 </div>
                             </button>
                             <button type="button" class="bundle-option"
-                                data-amount="GB 5 - Wiki Mbili"
-                                data-price="6000"
-                                data-name="GB 5"
-                                data-amount-display="Wiki Mbili">
+                                data-amount="GB 5 - Wiki Mbili" data-price="6000"
+                                data-name="GB 5" data-amount-display="Wiki Mbili">
                                 <div class="option-main">
                                     <div class="option-icon">5</div>
-                                    <div class="option-info">
-                                        <strong>GB 5</strong>
-                                        <span>Wiki Mbili</span>
-                                    </div>
+                                    <div class="option-info"><strong>GB 5</strong><span>Wiki Mbili</span></div>
                                     <div class="option-price">TSh 6,000</div>
                                 </div>
                             </button>
                         </div>
-
-                        <!-- Mwezi packages -->
                         <div class="bundle-list" id="mweziList">
                             <button type="button" class="bundle-option"
-                                data-amount="GB 10 - Mwezi"
-                                data-price="10000"
-                                data-name="GB 10"
-                                data-amount-display="Mwezi">
+                                data-amount="GB 10 - Mwezi" data-price="10000"
+                                data-name="GB 10" data-amount-display="Mwezi">
                                 <div class="option-main">
                                     <div class="option-icon">10</div>
-                                    <div class="option-info">
-                                        <strong>GB 10</strong>
-                                        <span>Mwezi</span>
-                                    </div>
+                                    <div class="option-info"><strong>GB 10</strong><span>Mwezi</span></div>
                                     <div class="option-price">TSh 10,000</div>
                                 </div>
                             </button>
                             <button type="button" class="bundle-option"
-                                data-amount="GB 13 - Mwezi"
-                                data-price="12500"
-                                data-name="GB 13"
-                                data-amount-display="Mwezi">
+                                data-amount="GB 13 - Mwezi" data-price="12500"
+                                data-name="GB 13" data-amount-display="Mwezi">
                                 <div class="option-main">
                                     <div class="option-icon">13</div>
-                                    <div class="option-info">
-                                        <strong>GB 13</strong>
-                                        <span>Mwezi</span>
-                                    </div>
+                                    <div class="option-info"><strong>GB 13</strong><span>Mwezi</span></div>
                                     <div class="option-price">TSh 12,500</div>
                                 </div>
                             </button>
                             <button type="button" class="bundle-option"
-                                data-amount="GB 15 - Mwezi"
-                                data-price="14000"
-                                data-name="GB 15"
-                                data-amount-display="Mwezi">
+                                data-amount="GB 15 - Mwezi" data-price="14000"
+                                data-name="GB 15" data-amount-display="Mwezi">
                                 <div class="option-main">
                                     <div class="option-icon">15</div>
-                                    <div class="option-info">
-                                        <strong>GB 15</strong>
-                                        <span>Mwezi</span>
-                                    </div>
+                                    <div class="option-info"><strong>GB 15</strong><span>Mwezi</span></div>
                                     <div class="option-price">TSh 14,000</div>
                                 </div>
                             </button>
                             <button type="button" class="bundle-option"
-                                data-amount="GB 20 - Mwezi"
-                                data-price="18500"
-                                data-name="GB 20"
-                                data-amount-display="Mwezi">
+                                data-amount="GB 20 - Mwezi" data-price="18500"
+                                data-name="GB 20" data-amount-display="Mwezi">
                                 <div class="option-main">
                                     <div class="option-icon">20</div>
-                                    <div class="option-info">
-                                        <strong>GB 20</strong>
-                                        <span>Mwezi</span>
-                                    </div>
+                                    <div class="option-info"><strong>GB 20</strong><span>Mwezi</span></div>
                                     <div class="option-price">TSh 18,500</div>
                                 </div>
                             </button>
                             <button type="button" class="bundle-option"
-                                data-amount="GB 30 - Mwezi"
-                                data-price="28000"
-                                data-name="GB 30"
-                                data-amount-display="Mwezi">
+                                data-amount="GB 30 - Mwezi" data-price="28000"
+                                data-name="GB 30" data-amount-display="Mwezi">
                                 <div class="option-main">
                                     <div class="option-icon">30</div>
-                                    <div class="option-info">
-                                        <strong>GB 30</strong>
-                                        <span>Mwezi</span>
-                                    </div>
+                                    <div class="option-info"><strong>GB 30</strong><span>Mwezi</span></div>
                                     <div class="option-price">TSh 28,000</div>
                                 </div>
                             </button>
                             <button type="button" class="bundle-option"
-                                data-amount="GB 40 - Mwezi"
-                                data-price="37000"
-                                data-name="GB 40"
-                                data-amount-display="Mwezi">
+                                data-amount="GB 40 - Mwezi" data-price="37000"
+                                data-name="GB 40" data-amount-display="Mwezi">
                                 <div class="option-main">
                                     <div class="option-icon">40</div>
-                                    <div class="option-info">
-                                        <strong>GB 40</strong>
-                                        <span>Mwezi</span>
-                                    </div>
+                                    <div class="option-info"><strong>GB 40</strong><span>Mwezi</span></div>
                                     <div class="option-price">TSh 37,000</div>
                                 </div>
                             </button>
                             <button type="button" class="bundle-option"
-                                data-amount="GB 50 - Mwezi"
-                                data-price="45000"
-                                data-name="GB 50"
-                                data-amount-display="Mwezi">
+                                data-amount="GB 50 - Mwezi" data-price="45000"
+                                data-name="GB 50" data-amount-display="Mwezi">
                                 <div class="option-main">
                                     <div class="option-icon">50</div>
-                                    <div class="option-info">
-                                        <strong>GB 50</strong>
-                                        <span>Mwezi</span>
-                                    </div>
+                                    <div class="option-info"><strong>GB 50</strong><span>Mwezi</span></div>
                                     <div class="option-price">TSh 45,000</div>
                                 </div>
                             </button>
@@ -663,24 +614,24 @@ textarea.input {
                     </div>
                 </div>
 
-                <input type="hidden" name="amount" id="amountInput" value="">
-                <input type="hidden" name="price" id="priceInput" value="0">
+                <input type="hidden" name="amount" id="amountInput" value="{{ offer_amount or '' }}">
+                <input type="hidden" name="price" id="priceInput" value="{{ offer_price or '0' }}">
 
                 <div class="price-box">
                     <div>
                         <div class="price-label">Bei</div>
                         <div class="price-value">
                             <span class="price-currency">TSh</span>
-                            <span id="displayPrice">0</span>
+                            <span id="displayPrice">
+                                {% if offer_price %}{{ "{:,}".format(offer_price|int) if offer_price|string|replace(',','')|int is number else offer_price }}{% else %}0{% endif %}
+                            </span>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <!-- PAYMENT -->
             <section class="order-card">
                 <div class="section-title">Malipo</div>
-
                 <div class="input-group">
                     <label class="input-label">Namba ya kulipia</label>
                     <input
@@ -693,7 +644,6 @@ textarea.input {
                     >
                     <div class="hint">Unaweza kutumia namba yoyote (mtandao wowote)</div>
                 </div>
-
                 <div class="input-group">
                     <label class="input-label">Namba ya kuweka bando (Halotel tu)</label>
                     <input
@@ -706,17 +656,13 @@ textarea.input {
                     >
                     <div class="hint warning">Lazima iwe namba ya Halotel (061, 062 au 063)</div>
                 </div>
-
                 <div class="input-group">
                     <label class="input-label">Maelezo (Hiari)</label>
                     <textarea class="input" name="note" placeholder="Andika maelezo..."></textarea>
                 </div>
-
                 <button class="submit-btn" type="submit" id="submitBtn">
                     <span id="submitText">Lipa na Tuma Ombi</span>
                 </button>
-
-                <!-- HELP LINK -->
                 <div class="help-link-wrap">
                     <a href="javascript:void(0)" class="help-link" id="helpLink">
                         Help → Jinsi ya kulipa na kutuma ombi
@@ -727,7 +673,6 @@ textarea.input {
     </main>
 </div>
 
-<!-- ERROR MODAL -->
 <div class="modal-overlay" id="errorModal">
     <div class="modal-card">
         <div class="modal-icon">⚠️</div>
@@ -739,7 +684,6 @@ textarea.input {
     </div>
 </div>
 
-<!-- HELP MODAL -->
 <div class="modal-overlay" id="helpModal">
     <div class="modal-card">
         <div class="modal-icon">❓</div>
@@ -751,28 +695,19 @@ textarea.input {
                 <li>Chagua <strong>Wiki Mbili</strong> au <strong>Mwezi</strong>.</li>
                 <li>Chagua kiasi cha GB unachotaka.</li>
             </ol>
-
             <h4>2. Jaza Namba</h4>
             <ul>
-                <li><strong>Namba ya kulipia</strong> — Unaweza kutumia namba yoyote (Vodacom, Airtel, Tigo, Halotel, n.k.).</li>
-                <li><strong>Namba ya kuweka bando</strong> — Lazima iwe namba ya <strong>Halotel</strong> tu (061, 062 au 063).</li>
+                <li><strong>Namba ya kulipia</strong> — Unaweza kutumia namba yoyote.</li>
+                <li><strong>Namba ya kuweka bando</strong> — Lazima iwe <strong>Halotel</strong> (061, 062 au 063).</li>
             </ul>
-
             <h4>3. Lipa na Tuma Ombi</h4>
             <ol>
-                <li>Bonyeza button <strong>Lipa na Tuma Ombi</strong>.</li>
+                <li>Bonyeza <strong>Lipa na Tuma Ombi</strong>.</li>
                 <li>Utapata ujumbe wa malipo kwenye simu yako.</li>
                 <li>Thibitisha malipo kwa kuweka PIN yako.</li>
             </ol>
-
-            <h4>4. Baada ya Malipo</h4>
-            <ul>
-                <li>Malipo yakienda vizuri → Ombi litaenda kwenye <strong>Pending</strong> na bando litatumwa.</li>
-                <li>Malipo yashindwe kabisa → Ombi litaandikwa <strong>Failed</strong> pamoja na sababu fupi.</li>
-            </ul>
-
             <div class="note">
-                <strong>Muhimu:</strong> Hakikisha namba ya Halotel ni sahihi. Ukikosea namba, fedha hazitarejeshwa.
+                <strong>Muhimu:</strong> Hakikisha namba ya Halotel ni sahihi.
             </div>
         </div>
         <button type="button" class="modal-btn" id="helpCloseBtn">Nimeelewa</button>
@@ -790,7 +725,6 @@ const priceInput = document.getElementById("priceInput");
 const displayPrice = document.getElementById("displayPrice");
 const wikiList = document.getElementById("wikiList");
 const mweziList = document.getElementById("mweziList");
-
 const errorModal = document.getElementById("errorModal");
 const modalTitle = document.getElementById("modalTitle");
 const modalMessage = document.getElementById("modalMessage");
@@ -799,19 +733,49 @@ const targetPhone = document.getElementById("targetPhone");
 const orderForm = document.getElementById("orderForm");
 const submitBtn = document.getElementById("submitBtn");
 const submitText = document.getElementById("submitText");
-
 const helpLink = document.getElementById("helpLink");
 const helpModal = document.getElementById("helpModal");
 const helpCloseBtn = document.getElementById("helpCloseBtn");
 
-// Toggle dropdown
+// Prefill kutoka server (tangazo / deep link)
+const PREFILL = {
+    amount: {{ (offer_amount or '')|tojson }},
+    price: {{ (offer_price or '')|tojson }},
+    title: {{ (offer_title or '')|tojson }}
+};
+
+function applyPrefill(amount, price, title) {
+    if (!amount || !price) return;
+    amountInput.value = amount;
+    priceInput.value = String(price).replace(/,/g, '');
+    selectedName.innerText = amount + (title ? ' • ' + title : '');
+    selectedSmall.innerText = 'Kimejazwa kutoka tangazo';
+    displayPrice.innerText = Number(priceInput.value).toLocaleString();
+    bundleSelected.classList.add('locked');
+    var arrow = document.getElementById('dropdownArrow');
+    if (arrow) arrow.textContent = '✓';
+    var banner = document.getElementById('offerBanner');
+    if (banner) {
+        banner.classList.add('show');
+        var v = document.getElementById('offerBannerVal');
+        var p = document.getElementById('offerBannerPrice');
+        if (v) v.textContent = amount;
+        if (p) p.textContent = Number(priceInput.value).toLocaleString();
+    }
+}
+
+if (PREFILL.amount && PREFILL.price) {
+    applyPrefill(PREFILL.amount, PREFILL.price, PREFILL.title);
+}
+
+// Toggle dropdown — kama imefungwa (kutoka ofa), usifungue
 bundleSelected.addEventListener("click", function(e) {
     e.stopPropagation();
+    if (bundleSelected.classList.contains('locked')) return;
     bundleOptions.classList.toggle("show");
     bundleSelected.classList.toggle("active");
 });
 
-// Period selection
 document.querySelectorAll(".period-btn").forEach(function(btn) {
     btn.addEventListener("click", function(e) {
         e.stopPropagation();
@@ -819,35 +783,28 @@ document.querySelectorAll(".period-btn").forEach(function(btn) {
         this.classList.add("active");
         wikiList.classList.remove("show");
         mweziList.classList.remove("show");
-        const period = this.dataset.period;
-        if (period === "wiki") {
-            wikiList.classList.add("show");
-        } else {
-            mweziList.classList.add("show");
-        }
+        if (this.dataset.period === "wiki") wikiList.classList.add("show");
+        else mweziList.classList.add("show");
     });
 });
 
-// Bundle option selection
 document.querySelectorAll(".bundle-option").forEach(function(option) {
     option.addEventListener("click", function() {
         const amount = this.dataset.amount || "";
         const price = this.dataset.price || "0";
         const name = this.dataset.name || "";
         const amountDisplay = this.dataset.amountDisplay || "";
-
         amountInput.value = amount;
         priceInput.value = price;
         selectedName.innerText = name + " • " + amountDisplay;
         selectedSmall.innerText = "Kifurushi kimechaguliwa";
         displayPrice.innerText = Number(price).toLocaleString();
-
         bundleOptions.classList.remove("show");
         bundleSelected.classList.remove("active");
+        bundleSelected.classList.remove("locked");
     });
 });
 
-// Close dropdown when clicking outside
 document.addEventListener("click", function(e) {
     if (bundleSelector && !bundleSelector.contains(e.target)) {
         bundleOptions.classList.remove("show");
@@ -855,61 +812,39 @@ document.addEventListener("click", function(e) {
     }
 });
 
-// Show error modal
 function showError(title, message) {
     modalTitle.innerText = title;
     modalMessage.innerHTML = message;
     errorModal.classList.add("show");
 }
-
-// Close error modal
 modalCloseBtn.addEventListener("click", function() {
     errorModal.classList.remove("show");
     targetPhone.focus();
 });
 errorModal.addEventListener("click", function(e) {
-    if (e.target === errorModal) {
-        errorModal.classList.remove("show");
-    }
+    if (e.target === errorModal) errorModal.classList.remove("show");
 });
-
-// Help modal
-helpLink.addEventListener("click", function() {
-    helpModal.classList.add("show");
-});
-helpCloseBtn.addEventListener("click", function() {
-    helpModal.classList.remove("show");
-});
+helpLink.addEventListener("click", function() { helpModal.classList.add("show"); });
+helpCloseBtn.addEventListener("click", function() { helpModal.classList.remove("show"); });
 helpModal.addEventListener("click", function(e) {
-    if (e.target === helpModal) {
-        helpModal.classList.remove("show");
-    }
+    if (e.target === helpModal) helpModal.classList.remove("show");
 });
 
-// Form validation
 orderForm.addEventListener("submit", function(e) {
     const phone = targetPhone.value.replace(/\s+/g, "").replace(/^\+255/, "0");
-
     if (!amountInput.value || amountInput.value === "") {
         e.preventDefault();
-        showError(
-            "Chagua Kifurushi",
-            "Tafadhali <strong>chagua kifurushi</strong> kwanza kabla ya kuendelea."
-        );
+        showError("Chagua Kifurushi", "Tafadhali <strong>chagua kifurushi</strong> kwanza kabla ya kuendelea.");
         return;
     }
-
-    const isHalotel = /^(061|062|063)/.test(phone);
-    if (!isHalotel) {
+    if (!/^(061|062|063)/.test(phone)) {
         e.preventDefault();
         showError(
             "Namba Siyo Sahihi",
-            `Namba ya kuweka bando <strong>lazima iwe ya Halotel</strong>.<br><br>
-             Inabidi ianze na <strong>061, 062 au 063</strong> tu.`
+            "Namba ya kuweka bando <strong>lazima iwe ya Halotel</strong>.<br><br>Inabidi ianze na <strong>061, 062 au 063</strong> tu."
         );
         return;
     }
-
     submitBtn.classList.add("loading");
     submitText.innerHTML = '<span class="loading-spinner"></span>Inatuma...';
 });

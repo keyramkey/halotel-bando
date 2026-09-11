@@ -4,3 +4,4 @@ psycopg2-binary
 requests
 Werkzeug
 gunicorn
+pywebpush>=1.14.0

@@ -109,8 +109,9 @@
             transform: translateX(-50%);
             width: min(520px, 100%);
             height: 70px;
-            background: #fff;
-            border-top: 1px solid #eee;
+            background: linear-gradient(135deg, #ff8a00 0%, #f56b00 50%, #ed4d00 100%);
+            border-top: none;
+            box-shadow: 0 -4px 18px rgba(245, 107, 0, 0.35);
             display: flex;
             justify-content: space-around;
             align-items: center;
@@ -118,7 +119,7 @@
         }
         .nav-item {
             text-align: center;
-            color: #8a8a8a;
+            color: rgba(255,255,255,0.75);
             font-size: 11px;
             display: flex;
             flex-direction: column;
@@ -144,10 +145,10 @@
             stroke-linejoin: round;
         }
         .nav-item.active {
-            color: #f56b00;
+            color: #fff;
         }
         .nav-item.active svg {
-            stroke: #f56b00;
+            stroke: #fff;
         }
         .network-grid {
             display: grid;

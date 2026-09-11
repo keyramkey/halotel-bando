@@ -232,8 +232,14 @@ class NakalaRequest(db.Model):
     nida_reg_phone = db.Column(db.String(20), default="")
     had_tin_before = db.Column(db.String(10), default="")
     license_type = db.Column(db.String(200), default="")
-    price = db.Column(db.Integer, default=0)
+    license_location = db.Column(db.String(200), default="")  # eneo la biashara / leseni
+    control_number = db.Column(db.String(80), default="")
+    control_number_fee = db.Column(db.Integer, default=0)  # bei rasmi ya control number
+    control_expires_at = db.Column(db.DateTime, nullable=True)
+    service_fee = db.Column(db.Integer, default=0)  # ada ya mtoa huduma (leseni = 10000)
+    price = db.Column(db.Integer, default=0)  # kiasi kinacholipwa kwenye app (service fee)
     status = db.Column(db.String(30), default="pending")
+    # license flow: pending → waiting_control_number → control_issued → completed | rejected
     admin_note = db.Column(db.Text, default="")
     result_message = db.Column(db.Text, default="")
     result_file = db.Column(db.String(255), default="")
@@ -1508,7 +1514,7 @@ LICENSE_CATEGORIES = [
 ]
 
 LICENSE_CATALOG = [
-    # 1. Maduka
+    # 1. Maduka na biashara za kawaida
     {"id": "retail_city", "name": "Retail Shop (City/Municipal)", "price": 70000, "category": "Maduka"},
     {"id": "retail_district", "name": "Retail Shop (District)", "price": 50000, "category": "Maduka"},
     {"id": "retail_minor", "name": "Retail Shop (Minor Settlement)", "price": 20000, "category": "Maduka"},
@@ -1523,7 +1529,8 @@ LICENSE_CATALOG = [
     {"id": "kiosk_city", "name": "Kiosk/Grocery (City/Municipal)", "price": 60000, "category": "Maduka"},
     {"id": "kiosk_district", "name": "Kiosk/Grocery (District)", "price": 40000, "category": "Maduka"},
     {"id": "kiosk_village", "name": "Kiosk/Grocery (Minor Settlement/Village)", "price": 10000, "category": "Maduka"},
-    # 2. Hardware
+
+    # 2. Hardware na vifaa
     {"id": "hardware_city", "name": "Hardware & Building Materials Retail (City/Municipal)", "price": 200000, "category": "Hardware"},
     {"id": "hardware_district", "name": "Hardware & Building Materials Retail (District)", "price": 150000, "category": "Hardware"},
     {"id": "hardware_village", "name": "Hardware & Building Materials Retail (Minor Settlement/Village)", "price": 60000, "category": "Hardware"},
@@ -1539,16 +1546,18 @@ LICENSE_CATALOG = [
     {"id": "machinery_village", "name": "Machinery Tools (Minor Settlement/Village)", "price": 80000, "category": "Hardware"},
     {"id": "timber_city", "name": "Timber & Furniture Retail (City/Municipal)", "price": 200000, "category": "Hardware"},
     {"id": "timber_district", "name": "Timber & Furniture Retail (District/Town)", "price": 100000, "category": "Hardware"},
-    # 3. Mobile money
-    {"id": "emt_uwakala", "name": "Electronic Money Transfer (Uwakala)", "price": 80000, "category": "Mobile Money", "note": "Bei inaweza kutegemea Halmashauri"},
-    {"id": "isp_agent", "name": "Internet Services Provider Agent", "price": 400000, "category": "Mobile Money"},
-    {"id": "internet_cafe", "name": "Internet Surfing/Café", "price": 200000, "category": "Mobile Money"},
-    {"id": "telecom_services", "name": "Telecommunication Services", "price": 300000, "category": "Mobile Money"},
-    {"id": "telecom_accessories", "name": "Selling Telecommunication Accessories", "price": 300000, "category": "Mobile Money"},
-    {"id": "payphone", "name": "Payphone Operator", "price": 400000, "category": "Mobile Money"},
-    # 4. Hotel
-    {"id": "hotel_liquor", "name": "Non-Tourist Business Hotel (With Liquor)", "price": 100000, "category": "Hotel", "note": "+ TSh 1,500 kwa kila bedroom"},
-    {"id": "hotel_no_liquor", "name": "Non-Tourist Business Hotel (Without Liquor)", "price": 80000, "category": "Hotel", "note": "+ TSh 2,000 kwa kila bedroom"},
+
+    # 3. Mobile money / Electronic Money Transfer
+    {"id": "emt_uwakala", "name": "Electronic Money Transfer (Uwakala)", "price": 80000, "category": "Mobile Money"},
+    {"id": "isp_agent_mm", "name": "Internet Services Provider Agent", "price": 400000, "category": "Mobile Money"},
+    {"id": "internet_cafe_mm", "name": "Internet Surfing/Café", "price": 200000, "category": "Mobile Money"},
+    {"id": "telecom_svc_mm", "name": "Telecommunication Services", "price": 300000, "category": "Mobile Money"},
+    {"id": "telecom_acc_mm", "name": "Selling Telecommunication Accessories", "price": 300000, "category": "Mobile Money"},
+    {"id": "payphone_mm", "name": "Payphone Operator", "price": 400000, "category": "Mobile Money"},
+
+    # 4. Hotel, Lodge na Catering
+    {"id": "hotel_liquor", "name": "Non-Tourist Business Hotel (With Liquor Licence)", "price": 100000, "category": "Hotel", "note": "+ TSh 1,500 kwa kila bedroom"},
+    {"id": "hotel_no_liquor", "name": "Non-Tourist Business Hotel (Without Liquor Licence)", "price": 80000, "category": "Hotel", "note": "+ TSh 2,000 kwa kila bedroom"},
     {"id": "lodging", "name": "Lodging House", "price": 100000, "category": "Hotel", "note": "+ TSh 2,000 kwa kila bedroom"},
     {"id": "takeaway", "name": "Take-away", "price": 100000, "category": "Hotel"},
     {"id": "mobile_catering", "name": "Mobile Catering", "price": 100000, "category": "Hotel"},
@@ -1556,14 +1565,16 @@ LICENSE_CATALOG = [
     {"id": "tourist_lodge", "name": "Tourist Lodge", "price": 150000, "category": "Hotel"},
     {"id": "tourist_camp", "name": "Tourist Camp", "price": 100000, "category": "Hotel", "note": "+ TSh 3,000 kwa kila hut/cottage"},
     {"id": "catering", "name": "Catering Services", "price": 200000, "category": "Hotel"},
-    # 5. Salon
+
+    # 5. Salon na huduma za mwili
     {"id": "salon_city", "name": "Hair Salon/Barber Shop (City/Municipal)", "price": 40000, "category": "Salon"},
     {"id": "salon_district", "name": "Hair Salon/Barber Shop (District)", "price": 20000, "category": "Salon"},
     {"id": "salon_village", "name": "Hair Salon/Barber Shop (Minor Settlement/Village)", "price": 5000, "category": "Salon"},
     {"id": "beauty_city", "name": "Beauty Clinic Machinery/Tools (City/Municipal)", "price": 40000, "category": "Salon"},
     {"id": "beauty_district", "name": "Beauty Clinic Machinery/Tools (District)", "price": 30000, "category": "Salon"},
     {"id": "beauty_village", "name": "Beauty Clinic Machinery/Tools (Minor Settlement/Village)", "price": 10000, "category": "Salon"},
-    # 6. Food
+
+    # 6. Food na kilimo
     {"id": "bakery_city", "name": "Bakery (City/Municipal)", "price": 100000, "category": "Food"},
     {"id": "bakery_district", "name": "Bakery (District)", "price": 80000, "category": "Food"},
     {"id": "bakery_village", "name": "Bakery (Minor Settlement/Village)", "price": 30000, "category": "Food"},
@@ -1579,15 +1590,17 @@ LICENSE_CATALOG = [
     {"id": "fish_city", "name": "Selling Fish (City/Municipal)", "price": 40000, "category": "Food"},
     {"id": "fish_district", "name": "Selling Fish (District)", "price": 30000, "category": "Food"},
     {"id": "fish_village", "name": "Selling Fish (Minor Settlement/Village)", "price": 10000, "category": "Food"},
-    # 7. Mitumba na Vitabu
-    {"id": "mitumba", "name": "Second-hand Clothes & Shoes (Mitumba)", "price": 50000, "category": "Mitumba na Vitabu", "note": "Ada hutegemea category/halmashauri"},
+
+    # 7. Mitumba, vitabu na printing
+    {"id": "mitumba", "name": "Second-hand Clothes & Shoes/Mitumba", "price": 50000, "category": "Mitumba na Vitabu", "note": "Ada hutegemea category"},
     {"id": "bookstore_city", "name": "Bookstore & Stationery Retail (City/Municipal)", "price": 100000, "category": "Mitumba na Vitabu"},
     {"id": "bookstore_district", "name": "Bookstore & Stationery Retail (District/Town)", "price": 80000, "category": "Mitumba na Vitabu"},
     {"id": "bookstore_village", "name": "Bookstore & Stationery Retail (Minor Settlement/Village)", "price": 20000, "category": "Mitumba na Vitabu"},
     {"id": "printing_city", "name": "Printing & Publishing (City/Municipal)", "price": 400000, "category": "Mitumba na Vitabu"},
     {"id": "printing_district", "name": "Printing & Publishing (District)", "price": 250000, "category": "Mitumba na Vitabu"},
     {"id": "printing_village", "name": "Printing & Publishing (Minor Settlement/Village)", "price": 100000, "category": "Mitumba na Vitabu"},
-    # 8. Magari
+
+    # 8. Magari, garage na mafuta
     {"id": "garage_city", "name": "Workshop & Garage (City/Municipal)", "price": 150000, "category": "Magari"},
     {"id": "garage_district", "name": "Workshop & Garage (District)", "price": 120000, "category": "Magari"},
     {"id": "garage_minor", "name": "Workshop & Garage (Minor Settlement)", "price": 100000, "category": "Magari"},
@@ -1597,16 +1610,19 @@ LICENSE_CATALOG = [
     {"id": "petrol_city", "name": "Petrol/Filling Station (City/Municipal)", "price": 200000, "category": "Magari"},
     {"id": "petrol_district", "name": "Petrol/Filling Station (District)", "price": 150000, "category": "Magari"},
     {"id": "petrol_village", "name": "Petrol/Filling Station (Minor Settlement/Village)", "price": 100000, "category": "Magari"},
-    # 9. Mifugo
+
+    # 9. Wanyama na mifugo
     {"id": "livestock_city", "name": "Livestock Trading (City/Municipal)", "price": 150000, "category": "Mifugo"},
     {"id": "livestock_district", "name": "Livestock Trading (District/Town)", "price": 80000, "category": "Mifugo"},
     {"id": "livestock_village", "name": "Livestock Trading (Minor Settlement/Village)", "price": 25000, "category": "Mifugo"},
-    # 10. Afya
+
+    # 10. Afya na dawa
     {"id": "dispensary", "name": "Dispensary/Health Centre/Laboratory Clinic", "price": 80000, "category": "Afya"},
     {"id": "hospital", "name": "Hospital (Local)", "price": 150000, "category": "Afya"},
     {"id": "poison_1", "name": "Selling Medicines – Part I Poison Shop", "price": 200000, "category": "Afya"},
     {"id": "poison_2", "name": "Selling Medicines – Part II Poison Shop", "price": 100000, "category": "Afya"},
-    # 11. Ujenzi
+
+    # 11. Ujenzi na contractors
     {"id": "builder_1", "name": "Building Contractor Class I", "price": 1000000, "category": "Ujenzi"},
     {"id": "builder_2", "name": "Building Contractor Class II", "price": 800000, "category": "Ujenzi"},
     {"id": "builder_3", "name": "Building Contractor Class III", "price": 700000, "category": "Ujenzi"},
@@ -1618,7 +1634,8 @@ LICENSE_CATALOG = [
     {"id": "elec_b", "name": "Electrical Contractor Class B", "price": 300000, "category": "Ujenzi"},
     {"id": "elec_c", "name": "Electrical Contractor Class C", "price": 200000, "category": "Ujenzi"},
     {"id": "elec_d", "name": "Electrical Contractor Class D", "price": 100000, "category": "Ujenzi"},
-    # 12. Agency
+
+    # 12. Agency na brokerage
     {"id": "commission_agent", "name": "Commission Agent", "price": 300000, "category": "Agency"},
     {"id": "travel_agent", "name": "Travel Agent", "price": 200000, "category": "Agency"},
     {"id": "air_charter", "name": "Air Charter Agent (Local)", "price": 300000, "category": "Agency"},
@@ -1626,7 +1643,8 @@ LICENSE_CATALOG = [
     {"id": "other_agent", "name": "Any Other Agent (Local)", "price": 200000, "category": "Agency"},
     {"id": "insurance_broker", "name": "Insurance Broker (Local)", "price": 200000, "category": "Agency"},
     {"id": "stock_broker", "name": "Stock Exchange Broker (Local)", "price": 500000, "category": "Agency"},
-    # 13. Fedha
+
+    # 13. Banking na financial services
     {"id": "banking", "name": "Banking Service (Local)", "price": 1000000, "category": "Fedha"},
     {"id": "bureau", "name": "Bureau de Change (Local)", "price": 600000, "category": "Fedha"},
     {"id": "coop_bank", "name": "Co-operative Bank", "price": 200000, "category": "Fedha"},
@@ -1635,8 +1653,9 @@ LICENSE_CATALOG = [
     {"id": "mortgage", "name": "Mortgage & Hire Purchase", "price": 600000, "category": "Fedha"},
     {"id": "mortgage_micro", "name": "Mortgage & Hire Purchase – Micro Enterprise", "price": 100000, "category": "Fedha"},
     {"id": "credit_card", "name": "Credit Card Management", "price": 400000, "category": "Fedha"},
-    {"id": "microfinance", "name": "Micro Financing Investment (Local)", "price": 600000, "category": "Fedha"},
-    # 14. Usafirishaji
+    {"id": "micro_finance", "name": "Micro Financing Investment (Local)", "price": 600000, "category": "Fedha"},
+
+    # 14. Usafirishaji, clearing na shipping
     {"id": "clearing", "name": "Clearing & Forwarding", "price": 400000, "category": "Usafirishaji"},
     {"id": "freight", "name": "Freight Forwarding (Local)", "price": 300000, "category": "Usafirishaji"},
     {"id": "preshipment", "name": "Pre-shipment Inspection (Local)", "price": 300000, "category": "Usafirishaji"},
@@ -1645,77 +1664,88 @@ LICENSE_CATALOG = [
     {"id": "cargo_super", "name": "Cargo Superintendence", "price": 400000, "category": "Usafirishaji"},
     {"id": "cargo_handling", "name": "Cargo Handling", "price": 1000000, "category": "Usafirishaji"},
     {"id": "harbour", "name": "Harbour/Airport Management", "price": 1000000, "category": "Usafirishaji"},
-    {"id": "ship_chandelling", "name": "Ship Chandelling", "price": 200000, "category": "Usafirishaji"},
+    {"id": "ship_chandel", "name": "Ship Chandelling", "price": 200000, "category": "Usafirishaji"},
     {"id": "maritime", "name": "Maritime Transportation", "price": 600000, "category": "Usafirishaji"},
     {"id": "ship_charter", "name": "Ship Charter", "price": 800000, "category": "Usafirishaji"},
-    # 15. Bima na Real Estate
-    {"id": "general_insurance", "name": "General Insurance/Assurance (Local)", "price": 1000000, "category": "Bima na Real Estate"},
+
+    # 15. Insurance na real estate
+    {"id": "gen_insurance", "name": "General Insurance/Assurance (Local)", "price": 1000000, "category": "Bima na Real Estate"},
     {"id": "underwriting", "name": "Underwriting & Loss Assessment", "price": 600000, "category": "Bima na Real Estate"},
     {"id": "reinsurance", "name": "Re-insurance & Endowment", "price": 800000, "category": "Bima na Real Estate"},
     {"id": "real_estate", "name": "Real Estate (Local)", "price": 600000, "category": "Bima na Real Estate"},
     {"id": "property_mgmt", "name": "Property Management (Local)", "price": 500000, "category": "Bima na Real Estate"},
     {"id": "estate_agent", "name": "Estate Agent (Local)", "price": 400000, "category": "Bima na Real Estate"},
     {"id": "property_dev", "name": "Property Development (Local)", "price": 400000, "category": "Bima na Real Estate"},
-    # 16. Telecom
+
+    # 16. Telecom, internet na mawasiliano
     {"id": "isp_local", "name": "Internet Service Provider (Local)", "price": 600000, "category": "Telecom"},
-    {"id": "isp_agent2", "name": "Internet Service Provider Agent", "price": 400000, "category": "Telecom"},
-    {"id": "internet_cafe2", "name": "Internet Café", "price": 200000, "category": "Telecom"},
-    {"id": "telecom_services2", "name": "Telecommunication Services", "price": 300000, "category": "Telecom"},
-    {"id": "telecom_accessories2", "name": "Selling Telecommunication Accessories", "price": 300000, "category": "Telecom"},
-    {"id": "cellular", "name": "Cellular Telephone Operator (Local)", "price": 600000, "category": "Telecom"},
-    {"id": "payphone2", "name": "Payphone Operator", "price": 400000, "category": "Telecom"},
+    {"id": "isp_agent", "name": "Internet Service Provider Agent", "price": 400000, "category": "Telecom"},
+    {"id": "internet_cafe", "name": "Internet Café", "price": 200000, "category": "Telecom"},
+    {"id": "telecom_svc", "name": "Telecommunication Services", "price": 300000, "category": "Telecom"},
+    {"id": "telecom_acc", "name": "Selling Telecommunication Accessories", "price": 300000, "category": "Telecom"},
+    {"id": "cellular_op", "name": "Cellular Telephone Operator (Local)", "price": 600000, "category": "Telecom"},
+    {"id": "payphone", "name": "Payphone Operator", "price": 400000, "category": "Telecom"},
+
     # 17. Media
     {"id": "radio_tv", "name": "Radio & Television", "price": 400000, "category": "Media"},
     {"id": "broadcast_tv", "name": "Broadcasting Television Provider", "price": 400000, "category": "Media"},
     {"id": "tv_station", "name": "Radio/Television Transmission Station", "price": 300000, "category": "Media"},
-    # 18. Viwanda
+
+    # 18. Manufacturing
     {"id": "industry_small", "name": "Small-scale Industry", "price": 100000, "category": "Viwanda"},
-    {"id": "industry_medium", "name": "Medium-scale Industry", "price": 400000, "category": "Viwanda"},
+    {"id": "industry_med", "name": "Medium-scale Industry", "price": 400000, "category": "Viwanda"},
     {"id": "industry_large", "name": "Large-scale Industry", "price": 600000, "category": "Viwanda"},
+
     # 19. Utalii
-    {"id": "tourist_hotel2", "name": "Tourist Hotel", "price": 150000, "category": "Utalii", "note": "+ TSh 2,000/bedroom"},
-    {"id": "tourist_lodge2", "name": "Tourist Lodge", "price": 150000, "category": "Utalii"},
-    {"id": "tourist_camp2", "name": "Tourist Camp", "price": 100000, "category": "Utalii", "note": "+ TSh 3,000/hut/cottage"},
-    {"id": "tourist_op_local", "name": "Tourist Operator (Local)", "price": 200000, "category": "Utalii"},
-    {"id": "tourist_op_foreign", "name": "Tourist Operator (Foreign)", "price": 2500000, "category": "Utalii", "note": "USD 1,000 (approx TSh)"},
+    {"id": "tour_hotel_ut", "name": "Tourist Hotel", "price": 150000, "category": "Utalii", "note": "+ TSh 2,000/bedroom"},
+    {"id": "tour_lodge_ut", "name": "Tourist Lodge", "price": 150000, "category": "Utalii"},
+    {"id": "tour_camp_ut", "name": "Tourist Camp", "price": 100000, "category": "Utalii", "note": "+ TSh 3,000/hut/cottage"},
+    {"id": "tour_op_local", "name": "Tourist Operator (Local)", "price": 200000, "category": "Utalii"},
+    {"id": "tour_op_foreign", "name": "Tourist Operator (Foreign)", "price": 2500000, "category": "Utalii", "note": "USD 1,000"},
+
     # 20. Import/Export
-    {"id": "export_cattle", "name": "Export – Cattle", "price": 300000, "category": "Import/Export"},
-    {"id": "export_livestock", "name": "Export – Other Livestock", "price": 250000, "category": "Import/Export"},
-    {"id": "export_raw", "name": "Export – Raw Materials", "price": 300000, "category": "Import/Export"},
-    {"id": "export_agri", "name": "Export – Agricultural Goods", "price": 100000, "category": "Import/Export"},
-    {"id": "export_finished", "name": "Export – Finished Goods/Other Commodities", "price": 100000, "category": "Import/Export"},
-    {"id": "export_transit", "name": "Export – Transit Trade", "price": 300000, "category": "Import/Export"},
-    {"id": "importation", "name": "Importation of Merchandise", "price": 400000, "category": "Import/Export"},
-    # 21. Dealership
-    {"id": "vehicle_dealer", "name": "Motor Vehicle Dealer", "price": 400000, "category": "Dealership"},
-    {"id": "vehicle_assembly", "name": "Motor Vehicle Assembly", "price": 500000, "category": "Dealership"},
+    {"id": "exp_cattle", "name": "Export – Cattle", "price": 300000, "category": "Import/Export"},
+    {"id": "exp_livestock", "name": "Export – Other Livestock", "price": 250000, "category": "Import/Export"},
+    {"id": "exp_raw", "name": "Export – Raw Materials", "price": 300000, "category": "Import/Export"},
+    {"id": "exp_agri", "name": "Export – Agricultural Goods", "price": 100000, "category": "Import/Export"},
+    {"id": "exp_finished", "name": "Export – Finished Goods/Other Commodities", "price": 100000, "category": "Import/Export"},
+    {"id": "exp_transit", "name": "Export – Transit Trade", "price": 300000, "category": "Import/Export"},
+    {"id": "import_merch", "name": "Importation of Merchandise", "price": 400000, "category": "Import/Export"},
+
+    # 21. Dealership/franchise
+    {"id": "mv_dealer", "name": "Motor Vehicle Dealer", "price": 400000, "category": "Dealership"},
+    {"id": "mv_assembly", "name": "Motor Vehicle Assembly", "price": 500000, "category": "Dealership"},
     {"id": "broadcast_dealer", "name": "Broadcasting Apparatus Dealer", "price": 400000, "category": "Dealership"},
     {"id": "arms_dealer", "name": "Arms & Ammunition Dealer", "price": 1000000, "category": "Dealership"},
-    {"id": "explosives_dealer", "name": "Mining Explosives Dealer (Local)", "price": 1000000, "category": "Dealership"},
-    # 22. Postal
+    {"id": "explosives", "name": "Mining Explosives Dealer (Local)", "price": 1000000, "category": "Dealership"},
+
+    # 22. Printing, postal na courier
     {"id": "postal_hq", "name": "Postal Services – Headquarters", "price": 300000, "category": "Postal"},
     {"id": "postal_muni", "name": "Postal Services – Municipal", "price": 200000, "category": "Postal"},
     {"id": "postal_town", "name": "Postal Services – Town/District", "price": 100000, "category": "Postal"},
     {"id": "courier", "name": "Courier/Mailing Agent (Local)", "price": 400000, "category": "Postal"},
     {"id": "ems", "name": "Expedited Mail Service (Local)", "price": 400000, "category": "Postal"},
-    # 23. Professional
-    {"id": "consultancy", "name": "Business Consultancy (Local)", "price": 200000, "category": "Professional"},
+
+    # 23. Professions
+    {"id": "biz_consult", "name": "Business Consultancy (Local)", "price": 200000, "category": "Professional"},
     {"id": "lawyer", "name": "Lawyer (Local)", "price": 300000, "category": "Professional"},
-    {"id": "tax_practitioner", "name": "Tax Practitioner (Local)", "price": 300000, "category": "Professional"},
-    {"id": "quantity_surveyor", "name": "Quantity Surveyor (Local)", "price": 300000, "category": "Professional"},
+    {"id": "tax_prac", "name": "Tax Practitioner (Local)", "price": 300000, "category": "Professional"},
+    {"id": "qty_surveyor", "name": "Quantity Surveyor (Local)", "price": 300000, "category": "Professional"},
     {"id": "engineer", "name": "Engineer (Local)", "price": 300000, "category": "Professional"},
     {"id": "auditor", "name": "Auditor/Accountant (Local)", "price": 300000, "category": "Professional"},
     {"id": "medical_prac", "name": "Medical Practitioner (Local)", "price": 150000, "category": "Professional"},
     {"id": "other_consult", "name": "Other Consultancy (Local)", "price": 200000, "category": "Professional"},
-    # 24. Burudani
+
+    # 24. Entertainment na gambling
     {"id": "entertainment_hall", "name": "Entertainment Hall", "price": 300000, "category": "Burudani"},
     {"id": "slot_machine", "name": "Slot Machine (Local, per station)", "price": 300000, "category": "Burudani"},
     {"id": "nightclub", "name": "Night Club", "price": 500000, "category": "Burudani"},
-    {"id": "casino_dar", "name": "Casino (Dar es Salaam)", "price": 100000000, "category": "Burudani", "note": "USD 40,000 (approx)"},
-    {"id": "casino_other", "name": "Casino (Other Towns)", "price": 37500000, "category": "Burudani", "note": "USD 15,000 (approx)"},
+    {"id": "casino_dar", "name": "Casino (Dar es Salaam)", "price": 100000000, "category": "Burudani", "note": "USD 40,000"},
+    {"id": "casino_other", "name": "Casino (Other Towns)", "price": 37500000, "category": "Burudani", "note": "USD 15,000"},
 ]
 
 LICENSE_BY_ID = {x["id"]: x for x in LICENSE_CATALOG}
+LICENSE_SERVICE_FEE = 10000  # ada ya mtoa huduma kwa ombi la leseni
 
 
 
@@ -1736,6 +1766,7 @@ def nakala_license():
         nida_reg_district = request.form.get("nida_reg_district", "").strip()
         nida_reg_region = request.form.get("nida_reg_region", "").strip()
         nida_reg_street = request.form.get("nida_reg_street", "").strip()
+        license_location = request.form.get("license_location", "").strip()
 
         lic = LICENSE_BY_ID.get(license_type)
         if not lic:
@@ -1744,18 +1775,22 @@ def nakala_license():
 
         if not all([full_name, mother_name, nida_number, phone1, primary_school,
                     year_completed, school_district, school_region,
-                    nida_reg_district, nida_reg_region, nida_reg_street]):
-            flash("Jaza taarifa zote muhimu.", "error")
+                    nida_reg_district, nida_reg_region, nida_reg_street, license_location]):
+            flash("Jaza taarifa zote muhimu, pamoja na eneo la leseni.", "error")
             return redirect(url_for("nakala_license"))
 
         if len(nida_number) > 20 or not nida_number.isdigit():
             flash("Namba ya NIDA/NIN lazima iwe namba tu (max 20).", "error")
             return redirect(url_for("nakala_license"))
 
+        # Bei ya control number = bei rasmi ya leseni; malipo kwenye app = ada ya huduma 10,000
         session["nakala_draft"] = {
             "service_type": "license",
             "license_type": lic["name"],
             "license_id": lic["id"],
+            "license_location": license_location,
+            "control_number_fee": int(lic["price"]),
+            "service_fee": LICENSE_SERVICE_FEE,
             "full_name": full_name,
             "mother_name": mother_name,
             "nida_number": nida_number,
@@ -1768,11 +1803,16 @@ def nakala_license():
             "nida_reg_district": nida_reg_district,
             "nida_reg_region": nida_reg_region,
             "nida_reg_street": nida_reg_street,
-            "price": lic["price"],
+            "price": LICENSE_SERVICE_FEE,
         }
         return redirect(url_for("nakala_review"))
 
-    return render_template("nakala_license.html", licenses=LICENSE_CATALOG, categories=LICENSE_CATEGORIES)
+    return render_template(
+        "nakala_license.html",
+        licenses=LICENSE_CATALOG,
+        categories=LICENSE_CATEGORIES,
+        service_fee=LICENSE_SERVICE_FEE,
+    )
 
 
 @app.route("/nakala/nida", methods=["GET", "POST"])
@@ -1858,6 +1898,18 @@ def nakala_pay():
         price_val = int(draft.get("price") or 0)
     except (TypeError, ValueError):
         price_val = 0
+    try:
+        control_fee = int(draft.get("control_number_fee") or 0)
+    except (TypeError, ValueError):
+        control_fee = 0
+    try:
+        svc_fee = int(draft.get("service_fee") or (LICENSE_SERVICE_FEE if draft.get("service_type") == "license" else 0))
+    except (TypeError, ValueError):
+        svc_fee = LICENSE_SERVICE_FEE if draft.get("service_type") == "license" else 0
+    # Leseni: malipo ya app ni ada ya huduma 10,000
+    if draft.get("service_type") == "license":
+        price_val = LICENSE_SERVICE_FEE
+        svc_fee = LICENSE_SERVICE_FEE
 
     req = NakalaRequest(
         request_code=code,
@@ -1878,6 +1930,9 @@ def nakala_pay():
         nida_reg_phone=draft.get("nida_reg_phone", ""),
         had_tin_before=draft.get("had_tin_before", ""),
         license_type=license_name,
+        license_location=(draft.get("license_location") or "")[:200],
+        control_number_fee=control_fee,
+        service_fee=svc_fee,
         price=price_val,
         status="pending",
     )
@@ -1909,18 +1964,40 @@ def nakala_pay():
             response = requests.post(url, json=payload, headers=headers, timeout=20)
             data = response.json()
             if response.status_code in [200, 201]:
-                req.status = "paid"
+                # Baada ya malipo ya ada ya huduma: leseni → waiting_control_number; nyingine → paid
+                if req.service_type == "license":
+                    req.status = "waiting_control_number"
+                else:
+                    req.status = "paid"
                 db.session.commit()
                 try:
-                    send_push_to_admins(
-                        "Nakala — malipo yameanzishwa",
-                        f"{req.request_code} ({req.service_type}) — TSh {req.price}",
-                        url="/dashboard",
-                        tag=f"nakala-pay-{req.id}",
-                    )
+                    if req.service_type == "license":
+                        send_push_to_admins(
+                            "Leseni — malipo yamepokelewa",
+                            f"{req.request_code}: {req.license_type} · Eneo: {req.license_location or '—'} · Control fee TSh {req.control_number_fee:,}",
+                            url="/dashboard",
+                            tag=f"nakala-pay-{req.id}",
+                        )
+                        send_push_to_user(
+                            req.user_id,
+                            "Malipo yamepokelewa",
+                            f"Ombi {req.request_code} limesubiri control number kutoka admin. Utajulishwa.",
+                            url=f"/nakala/{req.id}",
+                            tag=f"nakala-wait-{req.id}",
+                        )
+                    else:
+                        send_push_to_admins(
+                            "Nakala — malipo yameanzishwa",
+                            f"{req.request_code} ({req.service_type}) — TSh {req.price}",
+                            url="/dashboard",
+                            tag=f"nakala-pay-{req.id}",
+                        )
                 except Exception as e:
                     print(f"nakala pay push: {e}")
-                flash("Ombi la malipo limeshushwa! Angalia simu yako na uingize PIN. Ombi limetumwa kwa admin.", "success")
+                if req.service_type == "license":
+                    flash("Malipo yameanzishwa! Baada ya kulipia, ombi litasubiri control number kutoka admin.", "success")
+                else:
+                    flash("Ombi la malipo limeshushwa! Angalia simu yako na uingize PIN. Ombi limetumwa kwa admin.", "success")
                 return redirect(url_for("my_nakala"))
             else:
                 flash(f"ClickPesa imeshindwa: {data}. Ombi limehifadhiwa. Lipa manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}", "error")
@@ -1973,7 +2050,7 @@ def dashboard():
     users_count = User.query.count()
     pending_count = Order.query.filter_by(status="pending").count()
     agency_pending = Application.query.filter_by(status="pending").count()
-    nakala_pending = NakalaRequest.query.filter(NakalaRequest.status.in_(["pending", "paid", "processing"])).count()
+    nakala_pending = NakalaRequest.query.filter(NakalaRequest.status.in_(["pending", "paid", "processing", "waiting_control_number", "control_issued"])).count()
     orders = Order.query.order_by(Order.created_at.desc()).limit(50).all()
     applications = Application.query.order_by(Application.created_at.desc()).limit(50).all()
     slides = Slide.query.order_by(Slide.sort_order.asc(), Slide.id.asc()).all()
@@ -2198,8 +2275,18 @@ def admin_nakala_update(req_id):
     status = request.form.get("status", "pending")
     admin_note = request.form.get("admin_note", "").strip()
     result_message = request.form.get("result_message", "").strip()
+    control_number = request.form.get("control_number", "").strip()
 
-    if status not in ("pending", "paid", "processing", "completed", "rejected"):
+    allowed_status = (
+        "pending",
+        "paid",
+        "processing",
+        "waiting_control_number",
+        "control_issued",
+        "completed",
+        "rejected",
+    )
+    if status not in allowed_status:
         flash("Status si sahihi.", "error")
         return redirect(url_for("dashboard"))
 
@@ -2220,34 +2307,71 @@ def admin_nakala_update(req_id):
             filename = secure_filename(f"nakala_{req.id}_{secrets.token_hex(4)}.{ext}")
             result_file.save(os.path.join(nakala_folder, filename))
             req.result_file = f"nakala/{filename}"
+            # Faili ya leseni = completed
+            if req.service_type == "license" and status not in ("rejected",):
+                status = "completed"
         else:
             flash("Aina ya faili hairuhusiwi. Ruhusu: pdf, png, jpg, jpeg, webp, gif, bmp.", "error")
             return redirect(url_for("dashboard"))
+
+    # Control number → control_issued + expires in 1 day
+    if control_number:
+        req.control_number = control_number[:80]
+        req.control_expires_at = datetime.utcnow() + timedelta(days=1)
+        if req.service_type == "license" and status in ("pending", "paid", "waiting_control_number", "processing"):
+            status = "control_issued"
 
     req.status = status
     req.admin_note = admin_note
     req.result_message = result_message
     db.session.commit()
+
     try:
         status_sw = {
             "pending": "Inasubiri",
             "paid": "Imelipwa",
             "processing": "Inashughulikiwa",
+            "waiting_control_number": "Inasubiri Control Number",
+            "control_issued": "Control Number Imetolewa",
             "completed": "Imekamilika ✓",
             "rejected": "Imekataliwa",
         }.get(status, status)
-        body = f"{req.request_code} ({req.service_type}): {status_sw}"
-        if result_message:
-            body += f" — {result_message[:50]}"
-        elif admin_note:
-            body += f" — {admin_note[:50]}"
-        send_push_to_user(
-            req.user_id,
-            "Hali ya Ombi la Nakala",
-            body,
-            url=f"/nakala/{req.id}",
-            tag=f"nakala-{req.id}",
-        )
+
+        if control_number and req.service_type == "license":
+            fee = req.control_number_fee or 0
+            body = (
+                f"Control Number: {req.control_number}. "
+                f"Lipa TSh {fee:,} (inaisha baada ya siku 1). "
+                f"Baada ya kulipia, leseni itatumwa."
+            )
+            send_push_to_user(
+                req.user_id,
+                "Control Number Imepatikana",
+                body,
+                url=f"/nakala/{req.id}",
+                tag=f"nakala-ctrl-{req.id}",
+            )
+        elif status == "completed" and req.result_file:
+            send_push_to_user(
+                req.user_id,
+                "Leseni / Nakala iko tayari ✓",
+                f"{req.request_code}: Pakua faili yako sasa.",
+                url=f"/nakala/{req.id}",
+                tag=f"nakala-done-{req.id}",
+            )
+        else:
+            body = f"{req.request_code} ({req.service_type}): {status_sw}"
+            if result_message:
+                body += f" — {result_message[:50]}"
+            elif admin_note:
+                body += f" — {admin_note[:50]}"
+            send_push_to_user(
+                req.user_id,
+                "Hali ya Ombi la Nakala",
+                body,
+                url=f"/nakala/{req.id}",
+                tag=f"nakala-{req.id}",
+            )
     except Exception as e:
         print(f"nakala status push: {e}")
     flash(f"Ombi {req.request_code} limehifadhiwa.", "success")
@@ -2375,6 +2499,22 @@ def ensure_agency_columns():
                     if name not in existing:
                         conn.execute(text(f'ALTER TABLE "user" ADD COLUMN {name} {typedef}'))
                         print(f"✓ Added column user.{name}")
+
+
+        if "nakala_request" in tables:
+            existing_n = {c["name"] for c in insp.get_columns("nakala_request")}
+            nakala_cols = {
+                "license_location": "VARCHAR(200) DEFAULT ''",
+                "control_number": "VARCHAR(80) DEFAULT ''",
+                "control_number_fee": "INTEGER DEFAULT 0",
+                "control_expires_at": "TIMESTAMP",
+                "service_fee": "INTEGER DEFAULT 0",
+            }
+            with db.engine.begin() as conn:
+                for name, typedef in nakala_cols.items():
+                    if name not in existing_n:
+                        conn.execute(text(f"ALTER TABLE nakala_request ADD COLUMN {name} {typedef}"))
+                        print(f"✓ Added column nakala_request.{name}")
 
         # Widen license_type (majina marefu ya leseni)
         if "nakala_request" in tables:

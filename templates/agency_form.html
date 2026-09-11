@@ -1,8 +1,57 @@
 {% extends "base.html" %}
-
 {% block title %}{{ network }} · {{ service_label }}{% endblock %}
-
 {% block content %}
+<style>
+    .af-field { margin-bottom: 14px; }
+    .af-label {
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 6px;
+        color: #333;
+    }
+    .af-label .req { color: #e53935; }
+    .af-input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 14px;
+        box-sizing: border-box;
+        background: #fff;
+        outline: none;
+    }
+    .af-input:focus { border-color: #f56b00; }
+    .af-file-box {
+        border: 1.5px dashed #ccc;
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+        background: #fafafa;
+    }
+    .af-file-box input[type=file] {
+        font-size: 13px;
+        width: 100%;
+    }
+    .af-hint {
+        font-size: 11px;
+        color: #888;
+        margin-top: 8px;
+        line-height: 1.4;
+    }
+    .af-submit {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        background: #f56b00;
+        color: #fff;
+        font-size: 15px;
+        font-weight: 700;
+        margin-top: 8px;
+        cursor: pointer;
+    }
+</style>
 
 <header class="topbar">
     <div>
@@ -23,27 +72,27 @@
         <input type="hidden" name="service_type" value="{{ service_type }}">
 
         {% for field in fields %}
-        <div style="margin-bottom:14px;">
-            <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">
+        <div class="af-field">
+            <label class="af-label">
                 {{ field.label }}
-                {% if field.required %}<span style="color:#e53935;">*</span>{% endif %}
+                {% if field.required %}<span class="req">*</span>{% endif %}
             </label>
 
             {% if field.type == 'text' or field.type == 'tel' %}
                 <input
+                    class="af-input"
                     type="{{ field.type }}"
                     name="{{ field.name }}"
                     value="{{ field.value or '' }}"
                     placeholder="{{ field.placeholder or '' }}"
                     {% if field.required %}required{% endif %}
-                    style="width:100%; padding:12px 14px; border:1px solid #e0e0e0; border-radius:12px; font-size:14px; box-sizing:border-box;"
                 >
 
             {% elif field.type == 'select' %}
                 <select
+                    class="af-input"
                     name="{{ field.name }}"
                     {% if field.required %}required{% endif %}
-                    style="width:100%; padding:12px 14px; border:1px solid #e0e0e0; border-radius:12px; font-size:14px; background:#fff; box-sizing:border-box;"
                 >
                     <option value="">-- Chagua --</option>
                     {% for opt in field.options %}
@@ -52,35 +101,30 @@
                 </select>
 
             {% elif field.type == 'file' %}
-                <div style="border:1.5px dashed #ccc; border-radius:12px; padding:14px; text-align:center; background:#fafafa;">
+                <div class="af-file-box">
+                    {# Hakuna capture=environment — user anaweza kuchagua picha kutoka gallery AU kamera #}
                     <input
                         type="file"
                         name="{{ field.name }}"
-                        accept="{{ field.accept or 'image/*,.pdf' }}"
+                        accept="{{ field.accept or 'image/*,.pdf,image/jpeg,image/png,image/webp,image/gif,image/bmp,application/pdf' }}"
                         {% if field.required %}required{% endif %}
-                        capture="environment"
-                        style="font-size:13px; width:100%;"
                     >
-                    <p class="muted" style="font-size:11px; margin-top:8px;">
-                        {{ field.hint or 'PDF au picha (JPG, PNG). Unaweza kupiga picha au kuchagua faili.' }}
+                    <p class="af-hint">
+                        {{ field.hint or 'Chagua picha kutoka gallery au PDF. Unaweza pia kupiga picha kisha uchague kutoka kwenye gallery.' }}
                     </p>
+                    <p class="af-hint" style="margin-top:4px;">Ukubwa hadi <strong>50 MB</strong>.</p>
                 </div>
             {% endif %}
 
             {% if field.help %}
-            <p class="muted" style="font-size:11px; margin-top:4px;">{{ field.help }}</p>
+            <p class="af-hint">{{ field.help }}</p>
             {% endif %}
         </div>
         {% endfor %}
 
-        <button type="submit" style="
-            width:100%; padding:14px; border:none; border-radius:12px;
-            background:#f56b00; color:#fff; font-size:15px; font-weight:700;
-            margin-top:8px; cursor:pointer;
-        ">
+        <button type="submit" class="af-submit">
             Next → Hakiki Taarifa
         </button>
     </form>
 </div>
-
 {% endblock %}

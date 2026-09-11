@@ -71,6 +71,9 @@ SMS_API_KEY = os.environ.get("SMS_API_KEY", "")
 SMS_API_SECRET = os.environ.get("SMS_API_SECRET", "")
 SMS_SENDER_ID = os.environ.get("SMS_SENDER_ID", "INFO")  # jina au namba; max 11. Si lazima Sender Name maalum
 
+# Automate Secret
+AUTOMATE_SECRET = os.environ.get("AUTOMATE_SECRET", "badilisha-siri-hii-sasa")
+
 # ---------------------------------------------------------------------------
 # Models
 # ---------------------------------------------------------------------------
@@ -372,6 +375,21 @@ def send_otp_sms(phone, otp):
         return False, data.get("message") or str(data)[:120] or f"HTTP {resp.status_code}"
     except Exception as e:
         return False, str(e)[:150]
+
+
+def gb_to_mb(amount_str):
+    """Convert '5 GB' → 5120 MB (1GB = 1024MB)"""
+    try:
+        text = str(amount_str).lower().replace(" ", "")
+        if "gb" in text:
+            num = float(text.replace("gb", ""))
+            return int(num * 1024)
+        elif "mb" in text:
+            return int(float(text.replace("mb", "")))
+        else:
+            return int(float(text))
+    except:
+        return 0
 
 
 # ---------------------------------------------------------------------------
@@ -723,6 +741,95 @@ def clickpesa_webhook():
         db.session.commit()
 
     return jsonify({"ok": True}), 200
+
+
+# ---------------------------------------------------------------------------
+# Automate API - Kugawa Halotel Data (Wiki & Mwezi tu)
+# ---------------------------------------------------------------------------
+@app.route("/api/automate/pending", methods=["GET"])
+def automate_pending():
+    secret = request.args.get("secret") or request.headers.get("X-Secret")
+    if secret != AUTOMATE_SECRET:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    order = (
+        Order.query
+        .filter(Order.status == "pending")
+        .order_by(Order.created_at.asc())
+        .first()
+    )
+
+    if not order:
+        return jsonify({"has_order": False})
+
+    phone = order.phone.strip().replace(" ", "")
+    if phone.startswith("255"):
+        phone = "0" + phone[3:]
+    elif phone.startswith("+255"):
+        phone = "0" + phone[4:]
+    elif not phone.startswith("0"):
+        phone = "0" + phone
+
+    note = (order.note or "").lower()
+    amount = (order.amount or "").lower()
+
+    if any(x in note for x in ["wiki", "week", "siku 7", "7 siku"]):
+        package_type = "weekly"
+        menu_choice = "2"
+    elif any(x in note for x in ["mwezi", "month", "siku 30", "30 siku"]):
+        package_type = "monthly"
+        menu_choice = "3"
+    else:
+        if "1 gb" in amount or "daily" in note:
+            return jsonify({"has_order": False, "reason": "Daily package skipped"})
+        else:
+            package_type = "monthly"
+            menu_choice = "3"
+
+    mb = gb_to_mb(order.amount)
+
+    if mb <= 0:
+        return jsonify({"has_order": False, "reason": "Invalid MB amount"})
+
+    return jsonify({
+        "has_order": True,
+        "order_id": order.id,
+        "phone": phone,
+        "mb": mb,
+        "package_type": package_type,
+        "menu_choice": menu_choice,
+        "amount_text": order.amount,
+        "reference": order.order_reference or ""
+    })
+
+
+@app.route("/api/automate/complete/<int:order_id>", methods=["POST"])
+def automate_complete(order_id):
+    secret = request.headers.get("X-Secret") or (request.json or {}).get("secret")
+    if secret != AUTOMATE_SECRET:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    order = Order.query.get_or_404(order_id)
+    if order.status != "pending":
+        return jsonify({"error": "Order si pending"}), 400
+
+    order.status = "completed"
+    db.session.commit()
+    return jsonify({"ok": True, "message": f"Order #{order_id} imekamilika"})
+
+
+@app.route("/api/automate/fail/<int:order_id>", methods=["POST"])
+def automate_fail(order_id):
+    secret = request.headers.get("X-Secret") or (request.json or {}).get("secret")
+    if secret != AUTOMATE_SECRET:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    order = Order.query.get_or_404(order_id)
+    reason = (request.json or {}).get("reason", "USSD imeshindwa")
+    order.status = "failed"
+    order.fail_reason = str(reason)[:200]
+    db.session.commit()
+    return jsonify({"ok": True})
 
 
 # ---------------------------------------------------------------------------
@@ -1321,9 +1428,9 @@ LICENSE_CATALOG = [
     {"id": "petrol_district", "name": "Petrol/Filling Station (District)", "price": 150000, "category": "Magari"},
     {"id": "petrol_village", "name": "Petrol/Filling Station (Minor Settlement/Village)", "price": 100000, "category": "Magari"},
     # 9. Mifugo
-    {"id": "livestock_city", "name": "Livestock Trading (City/Municipal)", "price": 150000, "category": "Mifugo"},
-    {"id": "livestock_district", "name": "Livestock Trading (District/Town)", "price": 80000, "category": "Mifugo"},
-    {"id": "livestock_village", "name": "Livestock Trading (Minor Settlement/Village)", "price": 25000, "category": "Mifugo"},
+    {"id": "livestock_city", "name": "Livestock Trading (City/Municipal)", "price": 150000, "category": "Magari"},
+    {"id": "livestock_district", "name": "Livestock Trading (District/Town)", "price": 80000, "category": "Magari"},
+    {"id": "livestock_village", "name": "Livestock Trading (Minor Settlement/Village)", "price": 25000, "category": "Magari"},
     # 10. Afya
     {"id": "dispensary", "name": "Dispensary/Health Centre/Laboratory Clinic", "price": 80000, "category": "Afya"},
     {"id": "hospital", "name": "Hospital (Local)", "price": 150000, "category": "Afya"},

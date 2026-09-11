@@ -5,8 +5,61 @@
     .form-section { margin-bottom: 18px; }
     .form-section h3 { font-size: 14px; margin-bottom: 10px; color: #333; }
     .req { color: #e74c3c; }
-    .radio-group { display: flex; gap: 16px; margin-top: 8px; }
-    .radio-group label { display: flex; align-items: center; gap: 6px; font-size: 14px; }
+    .radio-group { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+    .radio-group label {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 14px;
+        padding: 10px 14px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 12px;
+        background: #fafafa;
+        cursor: pointer;
+        min-width: 110px;
+    }
+    .radio-group label:has(input:checked) {
+        border-color: #f56b00;
+        background: #fff8f0;
+        color: #e65100;
+        font-weight: 700;
+    }
+    .step-block { display: none; }
+    .step-block.show { display: block; }
+    .contact-card {
+        background: #fff8f0;
+        border: 1px solid #ffe0c2;
+        border-radius: 14px;
+        padding: 16px;
+        margin-top: 12px;
+        line-height: 1.5;
+    }
+    .contact-card h3 {
+        font-size: 15px;
+        margin: 0 0 8px;
+        color: #e65100;
+    }
+    .contact-card .fee {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: #fff;
+        border: 1px dashed #f56b00;
+        font-weight: 800;
+        color: #e65100;
+        font-size: 14px;
+    }
+    .contact-row {
+        margin-top: 10px;
+        font-size: 13px;
+        color: #444;
+    }
+    .contact-row a {
+        color: #f56b00;
+        font-weight: 700;
+        text-decoration: none;
+    }
 </style>
 
 <header class="topbar">
@@ -22,82 +75,141 @@
         <strong>Muhimu:</strong> Jaza taarifa zako kwa usahihi kabisa kama zilivyo kwenye NIDA. Makosa yanaweza kuchelewesha ombi lako.
     </div>
 
-    <form method="POST" action="{{ url_for('nakala_tin') }}">
-        <div class="card">
-            <div class="form-section">
-                <label class="form-label">Ulishawahi kuwa na TIN Number? <span class="req">*</span></label>
-                <div class="radio-group">
-                    <label><input type="radio" name="had_tin_before" value="hapana" required checked> Hapana</label>
-                    <label><input type="radio" name="had_tin_before" value="ndiyo"> Ndiyo</label>
-                </div>
+    <!-- HATUA 1: Swali -->
+    <div class="card" id="stepQuestion">
+        <div class="form-section" style="margin-bottom:0;">
+            <label class="form-label" style="font-size:15px;">
+                Ulishawahi kuwa na TIN Number? <span class="req">*</span>
+            </label>
+            <div class="radio-group" style="margin-top:12px;">
+                <label>
+                    <input type="radio" name="had_tin_ui" value="hapana" onchange="onTinChoice(this.value)">
+                    Hapana
+                </label>
+                <label>
+                    <input type="radio" name="had_tin_ui" value="ndiyo" onchange="onTinChoice(this.value)">
+                    Ndiyo
+                </label>
             </div>
-
-            <div class="form-section">
-                <label class="form-label">Jina Kamili (Kwanza + Kati + Mwisho) <span class="req">*</span></label>
-                <input type="text" name="full_name" class="input" placeholder="Mfano: Juma Ally Hassan" required>
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Jina Kamili la Mama <span class="req">*</span></label>
-                <input type="text" name="mother_name" class="input" placeholder="Jina kamili la mama" required>
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Namba ya NIDA / NIN (namba 20 tu) <span class="req">*</span></label>
-                <input type="text" name="nida_number" class="input" maxlength="20" pattern="[0-9]{1,20}"
-                       placeholder="Namba za NIDA tu" required
-                       oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Namba ya Simu 1 <span class="req">*</span></label>
-                <input type="tel" name="phone1" class="input" placeholder="07XXXXXXXX" required>
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Namba ya Simu 2 (si lazima)</label>
-                <input type="tel" name="phone2" class="input" placeholder="07XXXXXXXX">
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Jina la Shule ya Msingi <span class="req">*</span></label>
-                <input type="text" name="primary_school" class="input" required>
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Mwaka wa Kuhitimu Darasa la Saba <span class="req">*</span></label>
-                <input type="text" name="year_completed" class="input" placeholder="Mfano: 2010" required>
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Wilaya uliyosomea Shule ya Msingi <span class="req">*</span></label>
-                <input type="text" name="school_district" class="input" required>
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Mkoa uliyosomea Shule ya Msingi <span class="req">*</span></label>
-                <input type="text" name="school_region" class="input" required>
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Wilaya uliyojiandikishia NIDA <span class="req">*</span></label>
-                <input type="text" name="nida_reg_district" class="input" required>
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Mkoa uliyojiandikishia NIDA <span class="req">*</span></label>
-                <input type="text" name="nida_reg_region" class="input" required>
-            </div>
-
-            <div class="form-section">
-                <label class="form-label">Mtaa / Kijiji ulipojiandikishia NIDA <span class="req">*</span></label>
-                <input type="text" name="nida_reg_street" class="input" required>
-            </div>
-
-            <button type="submit" class="btn orange" style="margin-top:16px;">
-                Endelea → Hakiki Taarifa
-            </button>
         </div>
-    </form>
+    </div>
+
+    <!-- HATUA 2A: Ndiyo — wasiliana na admin -->
+    <div class="card step-block" id="stepYes">
+        <div class="contact-card">
+            <h3>Je, unataka kureset au kufuatilia taarifa zako?</h3>
+            <p style="font-size:13px; color:#555; margin:0;">
+                Ikiwa tayari ulishakuwa na TIN Number, wasiliana na <strong>admin</strong>
+                kwa mawasiliano yaliyo hapa chini ili akusaidie kureset au kufuatilia taarifa zako.
+            </p>
+            <div class="fee">Ada: TSh 3,000 — si bure</div>
+            <div class="contact-row" style="margin-top:14px;">
+                <strong>Wasiliana na Admin:</strong><br>
+                {% if current_user and current_user.is_admin %}
+                (Wewe ni admin)
+                {% endif %}
+                Simu:
+                <a href="tel:{{ admin_phone|default('0700000000') }}">{{ admin_phone|default('0700000000') }}</a>
+                {% if admin_email %}
+                <br>Email: <a href="mailto:{{ admin_email }}">{{ admin_email }}</a>
+                {% endif %}
+            </div>
+            <p style="font-size:12px; color:#888; margin-top:12px; line-height:1.4;">
+                Kumbuka: huduma hii <strong>si bure</strong> — utatozwa <strong>TSh 3,000</strong>.
+            </p>
+        </div>
+        <button type="button" class="btn" style="margin-top:14px; background:#eee; color:#333;"
+                onclick="resetTinChoice()">
+            ← Rudi chagua tena
+        </button>
+    </div>
+
+    <!-- HATUA 2B: Hapana — fomu kamili -->
+    <div class="step-block" id="stepNo">
+        <form method="POST" action="{{ url_for('nakala_tin') }}">
+            <input type="hidden" name="had_tin_before" value="hapana">
+            <div class="card">
+                <div class="form-section">
+                    <label class="form-label">Jina Kamili (Kwanza + Kati + Mwisho) <span class="req">*</span></label>
+                    <input type="text" name="full_name" class="input" placeholder="Mfano: Juma Ally Hassan" required>
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Jina Kamili la Mama <span class="req">*</span></label>
+                    <input type="text" name="mother_name" class="input" placeholder="Jina kamili la mama" required>
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Namba ya NIDA / NIN (namba 20 tu) <span class="req">*</span></label>
+                    <input type="text" name="nida_number" class="input" maxlength="20" pattern="[0-9]{1,20}"
+                           placeholder="Namba za NIDA tu" required
+                           oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Namba ya Simu 1 <span class="req">*</span></label>
+                    <input type="tel" name="phone1" class="input" placeholder="07XXXXXXXX" required>
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Namba ya Simu 2 (si lazima)</label>
+                    <input type="tel" name="phone2" class="input" placeholder="07XXXXXXXX">
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Jina la Shule ya Msingi <span class="req">*</span></label>
+                    <input type="text" name="primary_school" class="input" required>
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Mwaka wa Kuhitimu Darasa la Saba <span class="req">*</span></label>
+                    <input type="text" name="year_completed" class="input" placeholder="Mfano: 2010" required>
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Wilaya uliyosomea Shule ya Msingi <span class="req">*</span></label>
+                    <input type="text" name="school_district" class="input" required>
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Mkoa uliyosomea Shule ya Msingi <span class="req">*</span></label>
+                    <input type="text" name="school_region" class="input" required>
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Wilaya uliyojiandikishia NIDA <span class="req">*</span></label>
+                    <input type="text" name="nida_reg_district" class="input" required>
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Mkoa uliyojiandikishia NIDA <span class="req">*</span></label>
+                    <input type="text" name="nida_reg_region" class="input" required>
+                </div>
+                <div class="form-section">
+                    <label class="form-label">Mtaa / Kijiji ulipojiandikishia NIDA <span class="req">*</span></label>
+                    <input type="text" name="nida_reg_street" class="input" required>
+                </div>
+                <button type="submit" class="btn orange" style="margin-top:16px;">
+                    Endelea → Hakiki Taarifa
+                </button>
+            </div>
+        </form>
+        <button type="button" class="btn" style="margin-top:10px; background:#eee; color:#333; width:100%;"
+                onclick="resetTinChoice()">
+            ← Rudi chagua tena
+        </button>
+    </div>
 </div>
+
+<script>
+function onTinChoice(val) {
+    var yes = document.getElementById('stepYes');
+    var no = document.getElementById('stepNo');
+    yes.classList.remove('show');
+    no.classList.remove('show');
+    if (val === 'ndiyo') {
+        yes.classList.add('show');
+        yes.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else if (val === 'hapana') {
+        no.classList.add('show');
+        no.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
+function resetTinChoice() {
+    document.getElementById('stepYes').classList.remove('show');
+    document.getElementById('stepNo').classList.remove('show');
+    document.querySelectorAll('input[name="had_tin_ui"]').forEach(function(r) { r.checked = false; });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
 {% endblock %}

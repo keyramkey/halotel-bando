@@ -378,9 +378,13 @@ def send_otp_sms(phone, otp):
 
 
 def gb_to_mb(amount_str):
-    """Convert '5 GB' → 5120 MB (1GB = 1024MB)"""
+    """Convert '5 GB', '5GB', '15 GB' → MB (1GB = 1024MB)"""
+    if not amount_str:
+        return 0
     try:
-        text = str(amount_str).lower().replace(" ", "")
+        text = str(amount_str).lower().strip()
+        text = text.replace(" ", "")          # "5 gb" → "5gb"
+        
         if "gb" in text:
             num = float(text.replace("gb", ""))
             return int(num * 1024)
@@ -388,7 +392,7 @@ def gb_to_mb(amount_str):
             return int(float(text.replace("mb", "")))
         else:
             return int(float(text))
-    except:
+    except Exception:
         return 0
 
 
@@ -773,10 +777,10 @@ def automate_pending():
     note = (order.note or "").lower()
     amount = (order.amount or "").lower()
 
-    if any(x in note for x in ["wiki", "week", "siku 7", "7 siku"]):
+    if any(x in note for x in ["wiki", "week", "siku 7", "7 siku"]) or "weekly" in amount:
         package_type = "weekly"
         menu_choice = "2"
-    elif any(x in note for x in ["mwezi", "month", "siku 30", "30 siku"]):
+    elif any(x in note for x in ["mwezi", "month", "siku 30", "30 siku"]) or "monthly" in amount:
         package_type = "monthly"
         menu_choice = "3"
     else:
@@ -789,7 +793,12 @@ def automate_pending():
     mb = gb_to_mb(order.amount)
 
     if mb <= 0:
-        return jsonify({"has_order": False, "reason": "Invalid MB amount"})
+        return jsonify({
+            "has_order": False,
+            "reason": "Invalid MB amount",
+            "debug_amount": order.amount,      # hii itatuonyesha amount halisi
+            "debug_note": order.note
+        })
 
     return jsonify({
         "has_order": True,
@@ -801,7 +810,6 @@ def automate_pending():
         "amount_text": order.amount,
         "reference": order.order_reference or ""
     })
-
 
 @app.route("/api/automate/complete/<int:order_id>", methods=["POST"])
 def automate_complete(order_id):

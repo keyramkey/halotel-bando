@@ -9,6 +9,7 @@ from flask import (
     Flask, render_template, request, redirect, url_for,
     flash, session, jsonify, send_from_directory
 )
+from werkzeug.exceptions import RequestEntityTooLarge
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -43,7 +44,7 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 _upload_root = os.environ.get("UPLOAD_ROOT") or os.path.join(basedir, "static", "uploads")
 app.config["UPLOAD_FOLDER"] = _upload_root
-app.config["MAX_CONTENT_LENGTH"] = 5 * 1024 * 1024  # 5 MB
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024  # 50 MB — picha/PDF kubwa
 
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 os.makedirs(os.path.join(app.config["UPLOAD_FOLDER"], "slide"), exist_ok=True)
@@ -54,6 +55,12 @@ os.makedirs(os.path.join(basedir, "instance"), exist_ok=True)
 _static_uploads = os.path.join(basedir, "static", "uploads")
 os.makedirs(_static_uploads, exist_ok=True)
 os.makedirs(os.path.join(_static_uploads, "slide"), exist_ok=True)
+
+
+@app.errorhandler(RequestEntityTooLarge)
+def handle_file_too_large(e):
+    flash("Faili ni kubwa mno. Tumia picha chini ya 50 MB au compress kidogo.", "error")
+    return redirect(request.referrer or url_for("home"))
 
 db = SQLAlchemy(app)
 

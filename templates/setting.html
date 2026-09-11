@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+{% block title %}Akaunti Yangu{% endblock %}
+{% block content %}
+
+<style>
+    /* ================================
+       SETTINGS PAGE
+    ================================= */
+
+    .set-wrap {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 4px 0 90px;
+    }
+
+    /* ---------- TOPBAR ---------- */
+
+    .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .brand {
+        font-size: 18px;
+        font-weight: 900;
+        letter-spacing: -0.3px;
+    }
+
+    .brand span {
+        color: #f5b942;
+    }
+
+    .muted {
+        font-size: 11px;
+        color: #8e9b95;
+        margin-top: 3px;
+    }
+
+    .icon-btn {
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #ffffff;
+        background: #10271e;
+        border: 1px solid rgba(255,255,255,.08);
+        box-shadow: 0 5px 15px rgba(0,0,0,.15);
+        font-size: 20px;
+        transition: .2s ease;
+    }
+
+    .icon-btn:active {
+        transform: scale(.94);
+    }
+
+    /* ---------- CARD ---------- */
+
+    .set-card {
+        position: relative;
+        background: linear-gradient(
+            145deg,
+            #112a20,
+            #0c2119
+        );
+        border: 1px solid rgba(255,255,255,.07);
+        border-radius: 17px;
+        padding: 15px;
+        margin-bottom: 12px;
+        box-shadow:
+            0 8px 22px rgba(0,0,0,.16),
+            inset 0 1px 0 rgba(255,255,255,.025);
+        overflow: hidden;
+    }
+
+    .set-card::before {
+        content: "";
+        position: absolute;
+        width: 90px;
+        height: 90px;
+        right: -45px;
+        top: -45px;
+        background: rgba(245,185,66,.06);
+        border-radius: 50%;
+        pointer-events: none;
+    }
+
+    /* ---------- SECTION TITLE ---------- */
+
+    .set-title {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-size: 14px;
+        font-weight: 800;
+        color: #ffffff;
+        margin: 0 0 13px;
+    }
+
+    .set-title span {
+        width: 29px;
+        height: 29px;
+        min-width: 29px;
+        border-radius: 9px;
+        display: grid;
+        place-items: center;
+
+        background: linear-gradient(
+            135deg,
+            rgba(245,185,66,.18),
+            rgba(245,185,66,.06)
+        );
+
+        border: 1px solid rgba(245,185,66,.18);
+        color: #f5b942;
+        font-size: 12px;
+        font-weight: 900;
+    }
+
+    /* ---------- FIELDS ---------- */
+
+    .set-field {
+        margin-bottom: 11px;
+    }
+
+    .set-field:last-child {
+        margin-bottom: 0;
+    }
+
+    .set-field label {
+        display: block;
+        font-size: 11px;
+        font-weight: 700;
+        color: #b8c5bf;
+        margin-bottom: 5px;
+    }
+
+    .set-field label span {
+        color: #718078 !important;
+        font-size: 10px;
+    }
+
+    .set-field .input {
+        width: 100%;
+        height: 43px;
+        margin-top: 0;
+
+        padding: 0 12px;
+
+        border-radius: 11px;
+        border: 1px solid rgba(255,255,255,.08);
+
+        background: #091b14;
+        color: #ffffff;
+
+        font-size: 13px;
+        outline: none;
+
+        transition:
+            border-color .2s ease,
+            box-shadow .2s ease,
+            background .2s ease;
+    }
+
+    .set-field .input::placeholder {
+        color: #53645d;
+    }
+
+    .set-field .input:focus {
+        background: #0b2118;
+        border-color: rgba(245,185,66,.55);
+
+        box-shadow:
+            0 0 0 3px rgba(245,185,66,.07);
+    }
+
+    /* ---------- HINT ---------- */
+
+    .set-hint {
+        font-size: 10px;
+        color: #718078;
+        margin-top: -3px;
+        margin-bottom: 11px !important;
+        line-height: 1.4;
+    }
+
+    /* ---------- SUBMIT ---------- */
+
+    .set-submit {
+        width: 100%;
+        min-height: 45px;
+
+        border: 0;
+        border-radius: 12px;
+
+        background: linear-gradient(
+            135deg,
+            #d9a62f,
+            #f5c04d
+        );
+
+        color: #101810;
+
+        font-size: 13px;
+        font-weight: 900;
+
+        cursor: pointer;
+
+        box-shadow:
+            0 7px 18px rgba(245,185,66,.15);
+
+        transition:
+            transform .15s ease,
+            box-shadow .15s ease,
+            filter .15s ease;
+    }
+
+    .set-submit:active {
+        transform: scale(.98);
+        box-shadow: 0 4px 12px rgba(245,185,66,.10);
+    }
+
+    .set-submit:hover {
+        filter: brightness(1.04);
+    }
+
+    /* ---------- MOBILE ---------- */
+
+    @media (max-width: 480px) {
+
+        .set-wrap {
+            max-width: 100%;
+            padding: 2px 0 85px;
+        }
+
+        .set-card {
+            border-radius: 15px;
+            padding: 13px;
+            margin-bottom: 10px;
+        }
+
+        .set-title {
+            font-size: 13px;
+            margin-bottom: 11px;
+        }
+
+        .set-title span {
+            width: 27px;
+            height: 27px;
+            min-width: 27px;
+            border-radius: 8px;
+        }
+
+        .set-field {
+            margin-bottom: 9px;
+        }
+
+        .set-field label {
+            font-size: 10px;
+            margin-bottom: 4px;
+        }
+
+        .set-field .input {
+            height: 41px;
+            border-radius: 10px;
+            font-size: 12px;
+            padding: 0 10px;
+        }
+
+        .set-hint {
+            font-size: 9px;
+            margin-bottom: 9px !important;
+        }
+
+        .set-submit {
+            min-height: 43px;
+            border-radius: 11px;
+            font-size: 12px;
+        }
+
+        .brand {
+            font-size: 16px;
+        }
+
+        .muted {
+            font-size: 10px;
+        }
+
+        .icon-btn {
+            width: 35px;
+            height: 35px;
+            min-width: 35px;
+            border-radius: 10px;
+            font-size: 18px;
+        }
+    }
+</style>
+
+<header class="topbar">
+    <div>
+        <div class="brand">Akaunti <span>Yangu</span></div>
+        <div class="muted">
+            {% if user.is_admin %}Admin{% else %}Mteja{% endif %} · Hariri taarifa
+        </div>
+    </div>
+
+    <a href="{{ url_for('dashboard') if user.is_admin else url_for('profile') }}"
+       class="icon-btn">
+        ←
+    </a>
+</header>
+
+<div class="page set-wrap">
+
+    <form method="POST" action="{{ url_for('settings') }}">
+
+        {% if user.is_admin %}
+        <input type="hidden" name="from_dashboard" value="1">
+        {% endif %}
+
+        <!-- BASIC INFORMATION -->
+        <div class="set-card">
+
+            <div class="set-title">
+                <span>1</span>
+                Taarifa za Msingi
+            </div>
+
+            <div class="set-field">
+                <label>Username</label>
+                <input
+                    class="input"
+                    type="text"
+                    name="username"
+                    value="{{ user.username }}"
+                    required
+                >
+            </div>
+
+            <div class="set-field">
+                <label>Namba ya Simu</label>
+                <input
+                    class="input"
+                    type="tel"
+                    name="phone"
+                    value="{{ user.phone }}"
+                    required
+                >
+            </div>
+
+            <div class="set-field">
+                <label>
+                    Email
+                    <span>(si lazima)</span>
+                </label>
+
+                <input
+                    class="input"
+                    type="email"
+                    name="email"
+                    value="{{ user.email or '' }}"
+                    placeholder="mfano@email.com"
+                >
+            </div>
+
+        </div>
+
+
+        <!-- PASSWORD -->
+        <div class="set-card">
+
+            <div class="set-title">
+                <span>2</span>
+                Badilisha Password
+            </div>
+
+            <p class="set-hint">
+                Acha tupu ikiwa hutaki kubadilisha password.
+            </p>
+
+            <div class="set-field">
+                <label>Password ya Sasa</label>
+
+                <input
+                    class="input"
+                    type="password"
+                    name="current_password"
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                >
+            </div>
+
+            <div class="set-field">
+                <label>Password Mpya</label>
+
+                <input
+                    class="input"
+                    type="password"
+                    name="new_password"
+                    placeholder="Angalau herufi 4"
+                    autocomplete="new-password"
+                >
+            </div>
+
+            <div class="set-field">
+                <label>Thibitisha Password Mpya</label>
+
+                <input
+                    class="input"
+                    type="password"
+                    name="new_password2"
+                    placeholder="Rudia password mpya"
+                    autocomplete="new-password"
+                >
+            </div>
+
+        </div>
+
+        <button type="submit" class="set-submit">
+            Hifadhi Mabadiliko
+        </button>
+
+    </form>
+
+</div>
+
+{% endblock %}

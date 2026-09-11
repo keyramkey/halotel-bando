@@ -732,9 +732,19 @@ def order():
     bundles = Bundle.query.filter_by(is_active=True).all()
     selected_bundle_id = request.args.get("bundle_id")
     selected_bundle = Bundle.query.get(selected_bundle_id) if selected_bundle_id else None
-    offer_title = request.args.get("offer_title")
-    offer_price = request.args.get("offer_price")
-    offer_amount = request.args.get("offer_amount")
+    # Deep-link kutoka tangazo/banner:
+    # /order?amount=10GB&price=5000
+    # /order?gb=10&price=5000
+    # /order?offer_amount=10GB&offer_price=5000&offer_title=Ofa
+    offer_title = request.args.get("offer_title") or request.args.get("title") or ""
+    offer_price = request.args.get("offer_price") or request.args.get("price") or ""
+    offer_amount = request.args.get("offer_amount") or request.args.get("amount") or ""
+    gb = request.args.get("gb") or request.args.get("GB") or ""
+    if gb and not offer_amount:
+        offer_amount = f"{gb}GB" if not str(gb).upper().endswith("GB") else str(gb)
+    if selected_bundle and not offer_amount:
+        offer_amount = selected_bundle.amount
+        offer_price = str(selected_bundle.price)
 
     if request.method == "POST":
         payment_phone = request.form.get("payment_phone", "").strip()

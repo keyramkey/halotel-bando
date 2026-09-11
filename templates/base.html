@@ -390,6 +390,165 @@
         .app-toast-btn:active {
             transform: scale(0.98);
         }
+
+        /* ===== TOP PUSH NOTIFICATION BANNER ===== */
+        #pushBannerStack {
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(520px, 100%);
+            z-index: 10050;
+            pointer-events: none;
+            padding: 10px 12px 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .push-banner {
+            pointer-events: auto;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a1a0a 50%, #1a1208 100%);
+            color: #fff;
+            border-radius: 16px;
+            padding: 14px 14px 14px 16px;
+            box-shadow:
+                0 12px 40px rgba(0,0,0,0.35),
+                0 0 0 1px rgba(245,107,0,0.35),
+                inset 0 1px 0 rgba(255,255,255,0.08);
+            transform: translateY(-120%);
+            opacity: 0;
+            transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.28s ease;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+        .push-banner::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(180deg, #ff8a00, #f56b00, #ed4d00);
+        }
+        .push-banner.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .push-banner.hide {
+            transform: translateY(-120%);
+            opacity: 0;
+        }
+        .push-banner-icon {
+            flex-shrink: 0;
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, #ff8a00, #f56b00);
+            display: grid;
+            place-items: center;
+            font-size: 20px;
+            box-shadow: 0 4px 14px rgba(245,107,0,0.45);
+        }
+        .push-banner-body {
+            flex: 1;
+            min-width: 0;
+            padding-top: 1px;
+        }
+        .push-banner-title {
+            font-size: 13.5px;
+            font-weight: 800;
+            letter-spacing: 0.2px;
+            margin-bottom: 3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .push-banner-msg {
+            font-size: 12.5px;
+            color: rgba(255,255,255,0.82);
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        .push-banner-close {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border: 0;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.75);
+            font-size: 16px;
+            cursor: pointer;
+            display: grid;
+            place-items: center;
+            margin-top: 2px;
+        }
+        .push-banner-close:active {
+            background: rgba(255,255,255,0.2);
+        }
+        .push-banner-progress {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ff8a00, #f56b00);
+            width: 100%;
+            transform-origin: left;
+            animation: pushProgress 5s linear forwards;
+        }
+        @keyframes pushProgress {
+            from { transform: scaleX(1); }
+            to { transform: scaleX(0); }
+        }
+
+        /* Enable notifications prompt (subtle) */
+        #enablePushBar {
+            display: none;
+            position: fixed;
+            bottom: 78px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: min(492px, calc(100% - 24px));
+            z-index: 200;
+            background: #fff;
+            border-radius: 16px;
+            padding: 12px 14px;
+            box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+            border: 1px solid #eee;
+            align-items: center;
+            gap: 10px;
+        }
+        #enablePushBar.show { display: flex; }
+        #enablePushBar p {
+            flex: 1;
+            font-size: 12px;
+            color: #333;
+            line-height: 1.35;
+        }
+        #enablePushBar button {
+            border: 0;
+            border-radius: 10px;
+            background: #f56b00;
+            color: #fff;
+            font-weight: 800;
+            font-size: 12px;
+            padding: 10px 12px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        #enablePushBar .dismiss-push {
+            background: #eee;
+            color: #555;
+        }
     </style>
 </head>
 <body>
@@ -422,6 +581,16 @@
     </nav>
 </div>
 
+<!-- TOP PUSH BANNERS -->
+<div id="pushBannerStack" aria-live="polite"></div>
+
+<!-- Enable notifications bar -->
+<div id="enablePushBar">
+    <p>Washa arifa ili upate taarifa za bando, chat na maombi haraka.</p>
+    <button type="button" id="enablePushBtn">Washa</button>
+    <button type="button" class="dismiss-push" id="dismissPushBtn">Baadaye</button>
+</div>
+
 <!-- APP TOAST MODAL -->
 <div class="app-toast-overlay" id="appToast">
     <div class="app-toast">
@@ -434,6 +603,7 @@
 
 <script>
 (function() {
+    // ---- Flash toast modal ----
     var overlay = document.getElementById('appToast');
     var iconEl = document.getElementById('toastIcon');
     var titleEl = document.getElementById('toastTitle');
@@ -457,7 +627,6 @@
         if (e.target === overlay) overlay.classList.remove('show');
     });
 
-    // Auto-show Flask flash messages as modal
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -465,6 +634,147 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
+
+    // ---- Top banner notifications ----
+    var stack = document.getElementById('pushBannerStack');
+
+    function showPushBanner(title, body, url) {
+        var el = document.createElement('div');
+        el.className = 'push-banner';
+        el.innerHTML =
+            '<div class="push-banner-icon">🔔</div>' +
+            '<div class="push-banner-body">' +
+                '<div class="push-banner-title"></div>' +
+                '<div class="push-banner-msg"></div>' +
+            '</div>' +
+            '<button type="button" class="push-banner-close" aria-label="Funga">×</button>' +
+            '<div class="push-banner-progress"></div>';
+        el.querySelector('.push-banner-title').textContent = title || 'MR. SULE';
+        el.querySelector('.push-banner-msg').textContent = body || '';
+        stack.appendChild(el);
+
+        requestAnimationFrame(function() {
+            el.classList.add('show');
+        });
+
+        function dismiss() {
+            el.classList.remove('show');
+            el.classList.add('hide');
+            setTimeout(function() {
+                if (el.parentNode) el.parentNode.removeChild(el);
+            }, 320);
+        }
+
+        el.querySelector('.push-banner-close').addEventListener('click', function(e) {
+            e.stopPropagation();
+            dismiss();
+        });
+        el.addEventListener('click', function() {
+            dismiss();
+            if (url) window.location.href = url;
+        });
+        setTimeout(dismiss, 5000);
+    }
+
+    // Listen for SW postMessage (when app is open)
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', function(event) {
+            var d = event.data || {};
+            if (d.type === 'PUSH_NOTIFICATION') {
+                showPushBanner(d.title, d.body, d.url);
+            } else if (d.type === 'NOTIFICATION_CLICK' && d.url) {
+                if (window.location.pathname !== d.url) {
+                    window.location.href = d.url;
+                }
+            }
+        });
+    }
+
+    // ---- Push subscription ----
+    var isLoggedIn = {{ 'true' if current_user else 'false' }};
+    var enableBar = document.getElementById('enablePushBar');
+    var enableBtn = document.getElementById('enablePushBtn');
+    var dismissBtn = document.getElementById('dismissPushBtn');
+
+    function urlBase64ToUint8Array(base64String) {
+        var padding = '='.repeat((4 - base64String.length % 4) % 4);
+        var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+        var rawData = window.atob(base64);
+        var outputArray = new Uint8Array(rawData.length);
+        for (var i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+
+    async function subscribePush() {
+        if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+        try {
+            var reg = await navigator.serviceWorker.ready;
+            var keyRes = await fetch('/api/push/vapid-public-key');
+            if (!keyRes.ok) return false;
+            var keyData = await keyRes.json();
+            if (!keyData.publicKey) return false;
+
+            var sub = await reg.pushManager.subscribe({
+                userVisibleOnly: true,
+                applicationServerKey: urlBase64ToUint8Array(keyData.publicKey)
+            });
+
+            var res = await fetch('/api/push/subscribe', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(sub.toJSON())
+            });
+            return res.ok;
+        } catch (err) {
+            console.warn('Push subscribe failed', err);
+            return false;
+        }
+    }
+
+    async function ensurePush() {
+        if (!isLoggedIn) return;
+        if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
+
+        if (Notification.permission === 'granted') {
+            await subscribePush();
+            return;
+        }
+        if (Notification.permission === 'denied') return;
+
+        // Show soft prompt if not dismissed recently
+        try {
+            if (localStorage.getItem('push_dismissed') === '1') return;
+        } catch (_) {}
+        enableBar.classList.add('show');
+    }
+
+    if (enableBtn) {
+        enableBtn.addEventListener('click', async function() {
+            enableBar.classList.remove('show');
+            var perm = await Notification.requestPermission();
+            if (perm === 'granted') {
+                var ok = await subscribePush();
+                if (ok) showPushBanner('Arifa zimewashwa', 'Utapata taarifa za bando, chat na maombi papo hapo.', '/');
+            }
+        });
+    }
+    if (dismissBtn) {
+        dismissBtn.addEventListener('click', function() {
+            enableBar.classList.remove('show');
+            try { localStorage.setItem('push_dismissed', '1'); } catch (_) {}
+        });
+    }
+
+    // Register SW
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function() {
+            navigator.serviceWorker.register('/sw.js').then(function() {
+                setTimeout(ensurePush, 1200);
+            }).catch(function() {});
+        });
+    }
 })();
 </script>
 </body>

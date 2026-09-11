@@ -390,6 +390,10 @@
                 </div>
                 <div class="empty-msg" id="emptyMsg">Hakuna leseni inayolingana.</div>
 
+                <button type="button" id="changeChoice" class="back-btn" style="display:none;margin-top:4px;" onclick="showLicenseListAgain()">
+                    ← Badilisha leseni
+                </button>
+
                 <div class="price-card" id="priceBox">
                     <div class="price-card-top">
                         <div class="lbl">Leseni uliyochagua</div>
@@ -538,7 +542,39 @@ function selectLicense(el) {
     document.getElementById('selectedPrice').textContent = 'TSh ' + selectedPrice.toLocaleString();
     document.getElementById('selectedNote').textContent = el.dataset.note || '';
     document.getElementById('priceBox').classList.add('show');
+
+    // Ficha orodha yote kabisa baada ya kuchagua
+    var hideIds = ['catScroll', 'licenseList', 'emptyMsg'];
+    hideIds.forEach(function(id) {
+        var n = document.getElementById(id);
+        if (n) n.style.display = 'none';
+    });
+    var sw = document.querySelector('.search-wrap');
+    if (sw) sw.style.display = 'none';
+
+    // Onyesha kitufe cha kubadilisha chaguo
+    var ch = document.getElementById('changeChoice');
+    if (ch) ch.style.display = 'block';
+
     document.getElementById('priceBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function showLicenseListAgain() {
+    document.getElementById('license_type').value = '';
+    selectedName = '';
+    selectedPrice = 0;
+    document.querySelectorAll('.license-item').forEach(i => i.classList.remove('selected'));
+    document.getElementById('priceBox').classList.remove('show');
+
+    var cat = document.getElementById('catScroll');
+    if (cat) cat.style.display = 'flex';
+    var sw = document.querySelector('.search-wrap');
+    if (sw) sw.style.display = 'block';
+    var list = document.getElementById('licenseList');
+    if (list) list.style.display = 'block';
+    var ch = document.getElementById('changeChoice');
+    if (ch) ch.style.display = 'none';
+    applyFilters();
 }
 
 function goStep2() {

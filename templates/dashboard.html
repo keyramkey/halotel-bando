@@ -21,6 +21,9 @@
         gap: 10px;
         margin-bottom: 20px;
     }
+    .nav-tabs.five {
+        grid-template-columns: 1fr 1fr;
+    }
     .nav-tab {
         padding: 14px 12px;
         border: 1.5px solid #eee;
@@ -161,6 +164,36 @@
         font-size: 32px;
         margin-bottom: 8px;
     }
+
+    .list-more-wrap {
+        position: relative;
+    }
+    .list-item-hidden {
+        display: none !important;
+    }
+    .see-more-btn {
+        width: 100%;
+        margin-top: 8px;
+        margin-bottom: 4px;
+        padding: 12px;
+        border: 1.5px dashed #ffc999;
+        border-radius: 12px;
+        background: #fff8f0;
+        color: #f56b00;
+        font-size: 13px;
+        font-weight: 800;
+        cursor: pointer;
+        text-align: center;
+    }
+    .see-more-btn:active {
+        transform: scale(0.98);
+    }
+    .see-more-btn.expanded {
+        background: #f5f5f5;
+        border-color: #ddd;
+        color: #666;
+    }
+
     .hint-box {
         background: #fff8f0;
         border: 1px solid #ffe0c2;
@@ -220,6 +253,9 @@
         <button type="button" class="nav-tab" data-tab="announcement">
             📢 Matangazo
         </button>
+        <button type="button" class="nav-tab" data-tab="account">
+            👤 Akaunti Yangu
+        </button>
     </div>
 
     <!-- ==================== ODA ZA BANDO ==================== -->
@@ -229,8 +265,9 @@
             <p class="dash-section-sub">Inaonyesha oda zilizolipwa (pending) na zilizoshindwa</p>
         </div>
 
+        <div class="list-more-wrap" data-list="orders" data-limit="3">
         {% for order in orders %}
-        <div class="application-card">
+        <div class="application-card list-item{% if loop.index > 3 %} list-item-hidden{% endif %}">
             <div class="application-top">
                 <div>
                     <div class="application-code">Oda #{{ order.id }} - {{ order.amount }}</div>
@@ -285,6 +322,10 @@
             <p class="muted">Hakuna oda za bando kwa sasa.</p>
         </div>
         {% endfor %}
+        <button type="button" class="see-more-btn" data-list="orders" style="display:none;" onclick="toggleSeeMore(this)">
+            See more
+        </button>
+        </div>
     </div>
 
     <!-- ==================== MAOMBI YA NAKALA ==================== -->
@@ -295,8 +336,9 @@
         </div>
 
         {% if nakala_list %}
+        <div class="list-more-wrap" data-list="nakala" data-limit="3">
         {% for req in nakala_list %}
-        <div class="application-card">
+        <div class="application-card list-item{% if loop.index > 3 %} list-item-hidden{% endif %}">
             <div class="application-top">
                 <div>
                     <div class="application-code">{{ req.request_code }}</div>
@@ -394,6 +436,10 @@
             </form>
         </div>
         {% endfor %}
+        <button type="button" class="see-more-btn" data-list="nakala" style="display:none;" onclick="toggleSeeMore(this)">
+            See more
+        </button>
+        </div>
         {% else %}
         <div class="card">
             <p class="muted">Hakuna maombi ya Nakala kwa sasa.</p>
@@ -407,8 +453,9 @@
             <h2 class="dash-section-title">Maombi ya Uwakala</h2>
         </div>
 
+        <div class="list-more-wrap" data-list="agency" data-limit="3">
         {% for application in applications %}
-        <div class="application-card">
+        <div class="application-card list-item{% if loop.index > 3 %} list-item-hidden{% endif %}">
             <div class="application-top">
                 <div>
                     <div class="application-code">{{ application.application_code }}</div>
@@ -467,6 +514,10 @@
             <p class="muted">Maombi ya usajili na uwakala yataonekana hapa.</p>
         </div>
         {% endfor %}
+        <button type="button" class="see-more-btn" data-list="agency" style="display:none;" onclick="toggleSeeMore(this)">
+            See more
+        </button>
+        </div>
     </div>
 
     <!-- ==================== MATANGAZO / BANNER ==================== -->
@@ -522,9 +573,9 @@
         </div>
 
         {% if slides %}
-        <div class="slide-list">
+        <div class="slide-list list-more-wrap" data-list="slides" data-limit="2">
             {% for slide in slides %}
-            <div class="slide-item-card">
+            <div class="slide-item-card list-item{% if loop.index > 2 %} list-item-hidden{% endif %}">
                 <div class="slide-item-preview">
                     <img src="{{ url_for('media_file', filename='slide/' + slide.image) }}"
                          alt="Banner {{ slide.id }}">
@@ -599,6 +650,9 @@
                 </div>
             </div>
             {% endfor %}
+            <button type="button" class="see-more-btn" data-list="slides" style="display:none;" onclick="toggleSeeMore(this)">
+                See more
+            </button>
         </div>
         {% else %}
         <div class="empty-slides">
@@ -611,27 +665,99 @@
         {% endif %}
     </div>
 
+
+    <!-- ==================== AKAUNTI YA ADMIN ==================== -->
+    <div class="tab-panel" id="panel-account">
+        <div style="margin:0 0 12px;">
+            <h2 class="dash-section-title">Akaunti Yangu</h2>
+            <p class="dash-section-sub">Hariri username, simu, email na password</p>
+        </div>
+        <div class="card">
+            <form method="POST" action="{{ url_for('settings') }}">
+                <input type="hidden" name="from_dashboard" value="1">
+                <label class="muted" style="font-size:12px;font-weight:700;">Username</label>
+                <input class="input" type="text" name="username" value="{{ current_user.username }}" required>
+                <label class="muted" style="font-size:12px;font-weight:700;margin-top:10px;display:block;">Namba ya Simu</label>
+                <input class="input" type="tel" name="phone" value="{{ current_user.phone }}" required>
+                <label class="muted" style="font-size:12px;font-weight:700;margin-top:10px;display:block;">Email</label>
+                <input class="input" type="email" name="email" value="{{ current_user.email or '' }}" placeholder="mfano@email.com">
+                <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
+                <p class="muted" style="font-size:12px;margin-bottom:8px;">Badilisha password (acha tupu ikiwa hutaki)</p>
+                <label class="muted" style="font-size:12px;font-weight:700;">Password ya Sasa</label>
+                <input class="input" type="password" name="current_password" placeholder="••••••••" autocomplete="current-password">
+                <label class="muted" style="font-size:12px;font-weight:700;margin-top:10px;display:block;">Password Mpya</label>
+                <input class="input" type="password" name="new_password" placeholder="Angalau herufi 4" autocomplete="new-password">
+                <label class="muted" style="font-size:12px;font-weight:700;margin-top:10px;display:block;">Thibitisha Password Mpya</label>
+                <input class="input" type="password" name="new_password2" placeholder="Rudia password mpya" autocomplete="new-password">
+                <button class="btn orange" type="submit" style="margin-top:14px;width:100%;">
+                    Hifadhi Taarifa za Akaunti
+                </button>
+            </form>
+            <p class="muted" style="font-size:11px;margin-top:12px;text-align:center;">
+                Au fungua ukurasa kamili: <a href="{{ url_for('settings') }}" style="color:#f56b00;font-weight:700;">/settings</a>
+            </p>
+        </div>
+    </div>
+
 </div>
 
 <script>
 // Tab switching
+function openDashTab(tab) {
+    document.querySelectorAll('.nav-tab').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.tab === tab);
+    });
+    document.querySelectorAll('.tab-panel').forEach(function(p) {
+        p.classList.toggle('active', p.id === 'panel-' + tab);
+    });
+}
 document.querySelectorAll('.nav-tab').forEach(function(btn) {
     btn.addEventListener('click', function() {
-        var tab = this.dataset.tab;
-
-        // Update buttons
-        document.querySelectorAll('.nav-tab').forEach(function(b) {
-            b.classList.remove('active');
-        });
-        this.classList.add('active');
-
-        // Update panels
-        document.querySelectorAll('.tab-panel').forEach(function(p) {
-            p.classList.remove('active');
-        });
-        document.getElementById('panel-' + tab).classList.add('active');
+        openDashTab(this.dataset.tab);
     });
 });
+if (window.location.hash === '#account') {
+    openDashTab('account');
+}
+
+
+function initSeeMore() {
+    document.querySelectorAll('.list-more-wrap').forEach(function(wrap) {
+        var items = wrap.querySelectorAll('.list-item');
+        var limit = parseInt(wrap.getAttribute('data-limit') || '3', 10);
+        var btn = wrap.querySelector('.see-more-btn');
+        if (!btn) return;
+        if (items.length > limit) {
+            btn.style.display = 'block';
+            btn.textContent = 'See more (' + (items.length - limit) + ' zaidi)';
+            btn.setAttribute('data-expanded', '0');
+        } else {
+            btn.style.display = 'none';
+        }
+    });
+}
+function toggleSeeMore(btn) {
+    var wrap = btn.closest('.list-more-wrap');
+    if (!wrap) return;
+    var items = wrap.querySelectorAll('.list-item');
+    var limit = parseInt(wrap.getAttribute('data-limit') || '3', 10);
+    var expanded = btn.getAttribute('data-expanded') === '1';
+    if (expanded) {
+        items.forEach(function(el, idx) {
+            if (idx >= limit) el.classList.add('list-item-hidden');
+        });
+        btn.setAttribute('data-expanded', '0');
+        btn.classList.remove('expanded');
+        btn.textContent = 'See more (' + (items.length - limit) + ' zaidi)';
+        wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        items.forEach(function(el) { el.classList.remove('list-item-hidden'); });
+        btn.setAttribute('data-expanded', '1');
+        btn.classList.add('expanded');
+        btn.textContent = 'See less ▲';
+    }
+}
+document.addEventListener('DOMContentLoaded', initSeeMore);
 
 function validateSlideAdd(form) {
     var img = form.querySelector('input[name="image"]');

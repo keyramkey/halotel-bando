@@ -288,14 +288,33 @@
         min-width: 0;
         margin: 0 !important;
         font-size: 15px !important;
-        padding: 14px 14px !important;
+        padding: 14px 16px !important;
         border-radius: 12px !important;
+        width: 100%;
     }
-    .user-search-bar .btn {
+    .user-search-bar .search-icon-btn {
         flex-shrink: 0;
-        padding: 0 18px;
+        width: 48px;
+        min-width: 48px;
+        height: auto;
+        padding: 0;
+        border: none;
         border-radius: 12px;
-        font-size: 14px;
+        background: linear-gradient(135deg, #ff7800, #ed4d00);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(237,77,0,0.2);
+    }
+    .user-search-bar .search-icon-btn:active {
+        transform: scale(0.96);
+    }
+    .user-search-bar .search-icon-btn svg {
+        width: 20px;
+        height: 20px;
+        display: block;
     }
     .users-table-wrap {
         background: #fff;
@@ -477,7 +496,7 @@
             {% if agency_pending %}<span class="count">{{ agency_pending }}</span>{% endif %}
         </button>
         <button type="button" class="nav-tab" data-tab="users">
-            👥 Users
+            Users
             {% if users_count %}<span class="count">{{ users_count }}</span>{% endif %}
         </button>
         <button type="button" class="nav-tab" data-tab="announcement">
@@ -924,17 +943,22 @@
     <!-- ==================== USERS ==================== -->
     <div class="tab-panel" id="panel-users">
         <div style="margin:0 0 10px;">
-            <h2 class="dash-section-title">👥 Users</h2>
+            <h2 class="dash-section-title">Users</h2>
         </div>
 
         <form method="GET" action="{{ url_for('dashboard') }}" class="user-search-bar" id="usersSearchForm">
             <input class="input" type="search" name="q" value="{{ users_search_q or '' }}"
-                   placeholder="Tafuta jina, simu, email au ID...">
-            <button class="btn orange" type="submit">Tafuta</button>
+                   placeholder="Jina, simu, email au ID...">
+            <button class="search-icon-btn" type="submit" aria-label="Tafuta" title="Tafuta">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                </svg>
+            </button>
         </form>
         {% if users_search_q %}
         <p style="font-size:12px;margin:-4px 0 10px;">
-            <a href="{{ url_for('dashboard') }}#users" style="color:#f56b00;font-weight:700;">✕ Ondoa filter</a>
+            <a href="{{ url_for('dashboard') }}#users" style="color:#f56b00;font-weight:700;">Ondoa filter</a>
         </p>
         {% endif %}
 
@@ -975,23 +999,23 @@
                                     {% if not u.is_admin and u.id != current_user.id %}
                                         {% if u.is_blocked %}
                                         <form method="POST" action="{{ url_for('admin_user_unblock', user_id=u.id) }}">
-                                            <button class="btn green" type="submit">✅ Fungua</button>
+                                            <button class="btn green" type="submit">Fungua</button>
                                         </form>
                                         {% else %}
                                         <form method="POST" action="{{ url_for('admin_user_block', user_id=u.id) }}"
                                               onsubmit="return confirm('Block {{ u.username }}?');">
-                                            <button class="btn" type="submit" style="background:#3a2a0a;color:#ffb86b;">🚫 Block</button>
+                                            <button class="btn" type="submit" style="background:#3a2a0a;color:#ffb86b;">Block</button>
                                         </form>
                                         {% endif %}
                                         <form method="POST" action="{{ url_for('admin_user_delete', user_id=u.id) }}"
                                               onsubmit="return confirm('FUTA {{ u.username }} kabisa?');">
-                                            <button class="btn btn-danger-soft" type="submit">🗑 Futa</button>
+                                            <button class="btn btn-danger-soft" type="submit">Futa</button>
                                         </form>
                                     {% endif %}
                                     <a href="{{ url_for('admin_chat', user_id=u.id) }}"
-                                       class="btn" style="background:#151515;text-align:center;">💬 Chat</a>
+                                       class="btn" style="background:#151515;text-align:center;">Chat</a>
                                     <a href="{{ url_for('admin_user_orders_csv', user_id=u.id) }}"
-                                       class="btn" style="background:#0a2a3a;color:#6bcfff;text-align:center;">⬇ CSV</a>
+                                       class="btn" style="background:#0a2a3a;color:#6bcfff;text-align:center;">CSV</a>
                                 </div>
 
                                 <div class="user-orders-box">

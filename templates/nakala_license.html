@@ -5,8 +5,60 @@
     .form-section { margin-bottom: 18px; }
     .form-section h3 { font-size: 14px; margin-bottom: 10px; color: #333; }
     .req { color: #e74c3c; }
-    .radio-group { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
-    .radio-group label { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 10px; background: #f9f9f9; border-radius: 10px; }
+    .license-search {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        font-size: 14px;
+        margin-bottom: 10px;
+        box-sizing: border-box;
+    }
+    .license-list {
+        max-height: 220px;
+        overflow-y: auto;
+        border: 1px solid #eee;
+        border-radius: 12px;
+        background: #fafafa;
+    }
+    .license-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-bottom: 1px solid #f0f0f0;
+        cursor: pointer;
+        font-size: 13px;
+    }
+    .license-item:last-child { border-bottom: none; }
+    .license-item:hover, .license-item.selected {
+        background: #fff3e8;
+    }
+    .license-item.selected {
+        border-left: 3px solid #f56b00;
+    }
+    .license-name { flex: 1; font-weight: 600; color: #333; }
+    .license-price { font-weight: 800; color: #f56b00; white-space: nowrap; font-size: 12px; }
+    .license-cat {
+        font-size: 10px;
+        color: #999;
+        display: block;
+        margin-top: 2px;
+        font-weight: 500;
+    }
+    .price-box {
+        margin-top: 12px;
+        padding: 14px;
+        background: #e8f5e9;
+        border: 1px solid #c8e6c9;
+        border-radius: 12px;
+        display: none;
+    }
+    .price-box.show { display: block; }
+    .price-box .label { font-size: 12px; color: #2e7d32; }
+    .price-box .amount { font-size: 20px; font-weight: 800; color: #1b5e20; margin-top: 4px; }
+    .price-box .selected-name { font-size: 13px; font-weight: 600; color: #333; margin-top: 4px; }
 </style>
 
 <header class="topbar">
@@ -19,16 +71,44 @@
 
 <div class="page">
     <div class="info-box">
-        <strong>Bei:</strong> TSh 10,000. Jaza taarifa zako kwa usahihi kabisa kama zilivyo kwenye NIDA.
+        <strong>Chagua leseni</strong> kutoka orodha, bei itaonekana moja kwa moja.
+        Jaza taarifa zako kama zilivyo kwenye NIDA.
     </div>
 
-    <form method="POST" action="{{ url_for('nakala_license') }}">
+    <form method="POST" action="{{ url_for('nakala_license') }}" id="licenseForm">
         <div class="card">
             <div class="form-section">
                 <label class="form-label">Aina ya Leseni <span class="req">*</span></label>
-                <div class="radio-group">
-                    <label><input type="radio" name="license_type" value="uwakala" required> Leseni ya Uwakala</label>
-                    <label><input type="radio" name="license_type" value="duka"> Leseni ya Duka</label>
+                <input type="hidden" name="license_type" id="license_type" required>
+                <input
+                    type="text"
+                    class="license-search"
+                    id="licenseSearch"
+                    placeholder="🔍 Tafuta leseni... mfano: uwakala, duka, salon"
+                    autocomplete="off"
+                >
+                <div class="license-list" id="licenseList">
+                    {% for lic in licenses %}
+                    <div
+                        class="license-item"
+                        data-id="{{ lic.id }}"
+                        data-name="{{ lic.name }}"
+                        data-price="{{ lic.price }}"
+                        data-search="{{ lic.name|lower }} {{ lic.category|lower }}"
+                        onclick="selectLicense(this)"
+                    >
+                        <div>
+                            <span class="license-name">{{ lic.name }}</span>
+                            <span class="license-cat">{{ lic.category }}</span>
+                        </div>
+                        <span class="license-price">TSh {{ "{:,}".format(lic.price) }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="price-box" id="priceBox">
+                    <div class="label">Bei ya leseni uliyochagua</div>
+                    <div class="selected-name" id="selectedName"></div>
+                    <div class="amount" id="selectedPrice"></div>
                 </div>
             </div>
 
@@ -94,10 +174,38 @@
                 <input type="text" name="nida_reg_street" class="input" required>
             </div>
 
-            <button type="submit" class="btn orange" style="margin-top:16px;">
+            <button type="submit" class="btn orange" style="margin-top:16px;" onclick="return validateLicense()">
                 Endelea → Hakiki Taarifa
             </button>
         </div>
     </form>
 </div>
+
+<script>
+function selectLicense(el) {
+    document.querySelectorAll('.license-item').forEach(i => i.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('license_type').value = el.dataset.id;
+    document.getElementById('selectedName').textContent = el.dataset.name;
+    const price = Number(el.dataset.price);
+    document.getElementById('selectedPrice').textContent = 'TSh ' + price.toLocaleString();
+    document.getElementById('priceBox').classList.add('show');
+}
+
+document.getElementById('licenseSearch').addEventListener('input', function () {
+    const q = this.value.toLowerCase().trim();
+    document.querySelectorAll('.license-item').forEach(item => {
+        const match = !q || item.dataset.search.includes(q);
+        item.style.display = match ? 'flex' : 'none';
+    });
+});
+
+function validateLicense() {
+    if (!document.getElementById('license_type').value) {
+        alert('Tafadhali chagua aina ya leseni kwenye orodha.');
+        return false;
+    }
+    return true;
+}
+</script>
 {% endblock %}

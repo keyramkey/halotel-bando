@@ -194,6 +194,38 @@
         color: #666;
     }
 
+
+    .tangazo-toggle-btn {
+        width: 100%;
+        padding: 14px 16px;
+        border: 1.5px dashed #ffc999;
+        border-radius: 14px;
+        background: #fff8f0;
+        color: #f56b00;
+        font-size: 14px;
+        font-weight: 800;
+        cursor: pointer;
+        text-align: center;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    .tangazo-toggle-btn:active { transform: scale(0.98); }
+    .tangazo-form-wrap {
+        display: none;
+        margin-bottom: 16px;
+    }
+    .tangazo-form-wrap.open {
+        display: block;
+        animation: fadeInForm 0.2s ease;
+    }
+    @keyframes fadeInForm {
+        from { opacity: 0; transform: translateY(-8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
     .hint-box {
         background: #fff8f0;
         border: 1px solid #ffe0c2;
@@ -542,6 +574,12 @@
             </span>
         </div>
 
+        <button type="button" class="tangazo-toggle-btn" id="tangazoToggleBtn" onclick="toggleTangazoForm()">
+            <span id="tangazoToggleIcon">＋</span>
+            <span id="tangazoToggleText">Ongeza Tangazo Jipya</span>
+        </button>
+
+        <div class="tangazo-form-wrap" id="tangazoFormWrap">
         <div class="slide-add-card">
             <h3>➕ Ongeza Tangazo Jipya</h3>
             <form method="POST"
@@ -577,6 +615,11 @@
                     Hifadhi Tangazo
                 </button>
             </form>
+            <button type="button" class="btn" style="width:100%;margin-top:8px;background:#eee;color:#444;"
+                    onclick="toggleTangazoForm()">
+                Funga fomu
+            </button>
+        </div>
         </div>
 
         {% if slides %}
@@ -765,6 +808,22 @@ function toggleSeeMore(btn) {
     }
 }
 document.addEventListener('DOMContentLoaded', initSeeMore);
+
+
+function toggleTangazoForm() {
+    var wrap = document.getElementById('tangazoFormWrap');
+    var btn = document.getElementById('tangazoToggleBtn');
+    var icon = document.getElementById('tangazoToggleIcon');
+    var text = document.getElementById('tangazoToggleText');
+    if (!wrap) return;
+    var open = wrap.classList.toggle('open');
+    if (btn) btn.style.display = open ? 'none' : 'flex';
+    if (icon) icon.textContent = open ? '−' : '＋';
+    if (text) text.textContent = open ? 'Funga fomu' : 'Ongeza Tangazo Jipya';
+    if (open) {
+        wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+}
 
 function validateSlideAdd(form) {
     var img = form.querySelector('input[name="image"]');

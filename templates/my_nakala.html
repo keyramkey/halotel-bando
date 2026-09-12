@@ -1,6 +1,40 @@
 {% extends "base.html" %}
 {% block title %}Maombi Yangu ya Nakala{% endblock %}
 {% block content %}
+<style>
+    .status.wait-pay {
+        background: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffcc80;
+    }
+    .status.pay-fail {
+        background: #fce4ec;
+        color: #c62828;
+        border: 1px solid #ef9a9a;
+    }
+    .status.paid {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #a5d6a7;
+    }
+    .nakala-card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        margin-bottom: 12px;
+    }
+    .nakala-card-link .application-card {
+        transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .nakala-card-link:active .application-card {
+        transform: scale(0.99);
+    }
+    .meta-time-sm {
+        font-size: 11px;
+        color: #999;
+        margin-top: 8px;
+    }
+</style>
 <header class="topbar">
     <div>
         <div class="brand">Nakala Zangu</div>
@@ -11,7 +45,7 @@
 <div class="page">
 {% if requests %}
     {% for req in requests %}
-    <a href="{{ url_for('nakala_detail', req_id=req.id) }}">
+    <a href="{{ url_for('nakala_detail', req_id=req.id) }}" class="nakala-card-link">
         <div class="application-card">
             <div class="application-top">
                 <div>
@@ -22,16 +56,24 @@
                         {% else %}NIDA Copy{% endif %}
                     </div>
                 </div>
-                {% if req.status == "pending" %}
+                {% if req.status == "awaiting_payment" %}
+                    <span class="status wait-pay">Inasubiri Malipo</span>
+                {% elif req.status == "payment_failed" %}
+                    <span class="status pay-fail">Malipo Yameshindwa</span>
+                {% elif req.status == "pending" %}
                     <span class="status pending">Inasubiri</span>
+                {% elif req.status == "paid" %}
+                    <span class="status paid">Imelipwa</span>
+                {% elif req.status == "processing" %}
+                    <span class="status processing">Inachakatwa</span>
                 {% elif req.status == "waiting_control_number" %}
-                    <span class="status processing">Control No.</span>
+                    <span class="status processing">Inasubiri Control</span>
                 {% elif req.status == "control_issued" %}
                     <span class="status pending">Control Imetolewa</span>
-                {% elif req.status in ["paid", "processing"] %}
-                    <span class="status processing">Inachakatwa</span>
                 {% elif req.status == "completed" %}
                     <span class="status completed">Imekamilika</span>
+                {% elif req.status == "rejected" %}
+                    <span class="status rejected">Imekataliwa</span>
                 {% else %}
                     <span class="status rejected">{{ req.status }}</span>
                 {% endif %}
@@ -43,6 +85,18 @@
             <div style="margin-top:8px;font-size:12px;font-weight:700;color:#e65100;">
                 Control: {{ req.control_number }}
             </div>
+            {% endif %}
+            {% if req.status == "payment_failed" %}
+            <div style="margin-top:8px;font-size:12px;color:#c62828;font-weight:600;">
+                Malipo hayakufanikiwa — fungua ombi ili ulipe tena.
+            </div>
+            {% elif req.status == "awaiting_payment" %}
+            <div style="margin-top:8px;font-size:12px;color:#e65100;font-weight:600;">
+                Angalia simu yako na uingize PIN ili ukamilishe malipo.
+            </div>
+            {% endif %}
+            {% if req.created_at %}
+            <div class="meta-time-sm">{{ to_dar_es_salaam(req.created_at) }}</div>
             {% endif %}
         </div>
     </a>

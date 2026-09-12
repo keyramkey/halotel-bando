@@ -12,46 +12,45 @@
     }
 
     /*
-      Chat card: SI full screen.
-      Inaacha nafasi ya bottom navigation (~64px).
-      Header + form static; messages zinascroll ndani.
+      Layout: header FIXED juu, form FIXED juu ya bottom nav,
+      messages katikati. Header HAIPOTEI keyboard ikifunguka.
     */
     .chat-page {
-        display: flex;
-        flex-direction: column;
+        position: relative;
         width: 100%;
         max-width: 480px;
         margin: 0 auto;
         background: #efeae2;
-        /* urefu = viewport - bottom nav */
-        height: calc(100dvh - 64px);
-        max-height: calc(100dvh - 64px);
-        overflow: hidden;
-        box-sizing: border-box;
-        border-radius: 0;
-    }
-    @supports not (height: 100dvh) {
-        .chat-page {
-            height: calc(100vh - 64px);
-            max-height: calc(100vh - 64px);
-        }
+        min-height: 100dvh;
     }
 
-    /* Header mfupi — static (haichezi) */
+    /* Header — fixed top, daima inaonekana */
     .chat-head {
-        flex: 0 0 auto;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 40;
+        max-width: 480px;
+        margin: 0 auto;
         background: #fff;
         border-bottom: 1px solid #ececec;
         padding: 10px 14px;
-        z-index: 2;
+        box-sizing: border-box;
     }
     .chat-head h1 { font-size: 15px; font-weight: 800; margin: 0 0 1px; color: #1a1a1a; }
     .chat-head p { color: #888; font-size: 11px; margin: 0; }
 
-    /* Messages — hii peke yake inascroll */
+    /* Messages — between header & form */
     .chat-body {
-        flex: 1 1 auto;
-        min-height: 0;
+        position: fixed;
+        top: 54px; /* urefu wa header */
+        bottom: calc(72px + 64px); /* bottom nav + form */
+        left: 0;
+        right: 0;
+        z-index: 10;
+        max-width: 480px;
+        margin: 0 auto;
         overflow-x: hidden;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
@@ -60,6 +59,8 @@
         display: flex;
         flex-direction: column;
         gap: 6px;
+        background: #efeae2;
+        box-sizing: border-box;
     }
     .message {
         max-width: 78%; padding: 8px 11px; border-radius: 14px;
@@ -141,29 +142,37 @@
     .message.admin .copy-btn { color: #555; }
     .copy-btn:active { opacity: 1; }
 
-    /* Form chini — static ndani ya card (haichezi) */
+    /* Form — fixed juu ya bottom nav (au juu ya keyboard) */
     .chat-form-wrapper {
-        flex: 0 0 auto;
-        background: #f0f0f0;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 72px; /* default: juu ya bottom nav */
+        z-index: 40;
+        max-width: 480px;
+        margin: 0 auto;
+        background: #f5f5f5;
         border-top: 1px solid #e5e5e5;
-        padding: 8px;
-        z-index: 2;
+        padding: 10px 10px 12px;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
+        box-sizing: border-box;
     }
-    .chat-row { display: flex; gap: 6px; align-items: center; }
+    .chat-row { display: flex; gap: 8px; align-items: center; }
     .attach-btn {
-        width: 36px; height: 36px; border-radius: 10px;
-        background: #f3f3f3; display: grid; place-items: center;
+        width: 40px; height: 40px; border-radius: 12px;
+        background: #fff; border: 1px solid #e5e5e5;
+        display: grid; place-items: center;
         font-size: 11px; font-weight: 700; color: #555;
         cursor: pointer; flex-shrink: 0;
     }
     .chat-input {
-        flex: 1; height: 38px; border: 1px solid #e5e5e5;
-        border-radius: 12px; padding: 0 12px; outline: none;
-        font-size: 13.5px; background: #fafafa; min-width: 0;
+        flex: 1; height: 42px; border: 1px solid #e5e5e5;
+        border-radius: 14px; padding: 0 14px; outline: none;
+        font-size: 14px; background: #fff; min-width: 0;
     }
     .chat-input:focus { border-color: #f56b00; background: #fff; }
     .send-btn {
-        height: 38px; padding: 0 14px; border: 0; border-radius: 12px;
+        height: 42px; padding: 0 16px; border: 0; border-radius: 14px;
         background: linear-gradient(135deg, #ff8a1f, #f56b00);
         color: #fff; font-weight: 700; font-size: 13px; cursor: pointer;
         flex-shrink: 0;
@@ -284,6 +293,38 @@
     });
     function scrollBottom() { body.scrollTop = body.scrollHeight; }
     scrollBottom();
+
+    /* ---- Keyboard: header ibaki juu, form juu ya keyboard ---- */
+    var formWrap = document.querySelector('.chat-form-wrapper');
+    var NAV_H = 72;
+    var FORM_H = 64;
+    function layoutForKeyboard() {
+        var vv = window.visualViewport;
+        if (!vv || !formWrap) return;
+        var kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+        if (kb > 80) {
+            /* Keyboard open — form juu ya keyboard, bottom nav imefichwa */
+            formWrap.style.bottom = kb + 'px';
+            body.style.bottom = (kb + FORM_H) + 'px';
+        } else {
+            formWrap.style.bottom = NAV_H + 'px';
+            body.style.bottom = (NAV_H + FORM_H) + 'px';
+        }
+    }
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', layoutForKeyboard);
+        window.visualViewport.addEventListener('scroll', layoutForKeyboard);
+    }
+    window.addEventListener('resize', layoutForKeyboard);
+    messageInput.addEventListener('focus', function () {
+        setTimeout(layoutForKeyboard, 50);
+        setTimeout(layoutForKeyboard, 300);
+        setTimeout(scrollBottom, 350);
+    });
+    messageInput.addEventListener('blur', function () {
+        setTimeout(layoutForKeyboard, 100);
+    });
+    layoutForKeyboard();
 
     /* ---- Attachment preview ---- */
     function formatSize(bytes) {

@@ -135,13 +135,11 @@
 </style>
 
 <div class="chat-page">
-    <!-- Header -->
     <div class="chat-head">
-        <h1>Chat na Muuzaji</h1>
-        <p>Uliza kuhusu bundle, bei au order yako</p>
+        <h1>Chat na Admin</h1>
+        <p>Uliza kuhusu bundle, bei, order au huduma</p>
     </div>
 
-    <!-- Messages -->
     <div class="chat-body" id="chatBody">
         {% if messages %}
             {% for msg in messages %}
@@ -150,11 +148,11 @@
                         <div>{{ msg.message }}</div>
                     {% endif %}
                     {% if msg.image %}
-                        <img src="{{ url_for('static', filename='uploads/' + msg.image) }}" alt="Image">
+                        <img src="{{ url_for('media_file', filename=msg.image) }}" alt="Picha">
                     {% endif %}
                     {% if msg.created_at %}
                         <span class="message-time">
-                            {{ msg.created_at.strftime('%d/%m/%Y %H:%M') }}
+                            {{ to_dar_es_salaam(msg.created_at) }}
                         </span>
                     {% endif %}
                 </div>
@@ -162,12 +160,11 @@
         {% else %}
             <div class="empty-chat">
                 Hakuna ujumbe bado.<br>
-                Andika ujumbe wako hapa chini.
+                Andika ujumbe wako hapa chini — admin atapata notification na ujumbe.
             </div>
         {% endif %}
     </div>
 
-    <!-- Form -->
     <div class="chat-form-wrapper">
         <form id="chatForm" enctype="multipart/form-data">
             <div class="chat-row">
@@ -191,7 +188,6 @@
 </div>
 
 <script>
-    // Auto scroll to bottom
     const chatBody = document.getElementById("chatBody");
     chatBody.scrollTop = chatBody.scrollHeight;
 
@@ -228,7 +224,7 @@
             if (result.success) {
                 location.reload();
             } else {
-                alert("Imeshindwa kutuma ujumbe.");
+                alert(result.error || "Imeshindwa kutuma ujumbe.");
                 sendBtn.disabled = false;
                 sendBtn.textContent = "Tuma";
             }

@@ -756,13 +756,19 @@
                 </select>
                 {% if req.service_type == 'license' %}
                 <div style="margin-top:10px;background:#fff8f0;border:1px solid #ffe0c2;border-radius:12px;padding:12px;">
-                    <label class="muted" style="font-size:12px;font-weight:700;">Control Number (leseni)</label>
+                    <label class="muted" style="font-size:12px;font-weight:700;">Bei ya Control Number — TSh</label>
+                    <input type="number" name="control_number_fee" class="input" min="0" step="1"
+                           value="{{ req.control_number_fee or 0 }}"
+                           placeholder="Mfano: 150000">
+                    <p class="muted" style="font-size:11px;margin-top:6px;line-height:1.4;">
+                        Hariri bei ya control number. Ukibadilisha, mteja atapata <strong>notification</strong> kwa bei mpya.
+                    </p>
+                    <label class="muted" style="font-size:12px;font-weight:700;margin-top:10px;display:block;">Control Number (leseni)</label>
                     <input type="text" name="control_number" class="input"
                            value="{{ req.control_number or '' }}"
                            placeholder="Weka control number hapa">
                     <p class="muted" style="font-size:11px;margin-top:6px;line-height:1.4;">
-                        Bei ya control number: <strong>TSh {{ "{:,}".format(req.control_number_fee or 0) }}</strong>
-                        · Itaisha baada ya <strong>siku 1</strong> baada ya kuiweka.
+                        Itaisha baada ya <strong>siku 1</strong> baada ya kuiweka.
                         {% if req.control_expires_at %}<br>Inaisha: {{ req.control_expires_at.strftime('%d/%m/%Y %H:%M') }} UTC{% endif %}
                     </p>
                 </div>
@@ -1397,6 +1403,9 @@ if (window.location.hash === '#orders' || (new URLSearchParams(window.location.s
 }
 if (window.location.hash === '#trash') {
     openDashTab('trash');
+}
+if (window.location.hash === '#nakala') {
+    openDashTab('nakala');
 }
 
 function toggleUserDetail(id) {

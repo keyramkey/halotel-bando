@@ -270,6 +270,14 @@ class PushSubscription(db.Model):
     user = db.relationship("User", backref=db.backref("push_subscriptions", lazy=True, cascade="all, delete-orphan"))
 
 
+class ChatPresence(db.Model):
+    """Mtu yupo kwenye chat page sasa hivi (kwa kuzuia notification zisizohitajika)."""
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False, index=True)
+    viewer_role = db.Column(db.String(20), nullable=False)  # customer | admin
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
+
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
@@ -293,6 +301,44 @@ def to_dar_es_salaam(dt):
     local = dt.astimezone(DAR_TZ)
     return local.strftime("%d/%m/%Y %H:%M")
 
+
+
+
+def touch_chat_presence(conversation_user_id, viewer_role):
+    """Sasisha kuwa viewer yupo kwenye chat ya conversation hii."""
+    try:
+        row = ChatPresence.query.filter_by(
+            conversation_user_id=conversation_user_id,
+            viewer_role=viewer_role,
+        ).first()
+        now = datetime.utcnow()
+        if row:
+            row.last_seen = now
+        else:
+            db.session.add(ChatPresence(
+                conversation_user_id=conversation_user_id,
+                viewer_role=viewer_role,
+                last_seen=now,
+            ))
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        print(f"presence touch: {e}")
+
+
+def is_viewing_chat(conversation_user_id, viewer_role, within_sec=25):
+    """True ikiwa viewer amekuwa kwenye chat page ndani ya sekunde chache."""
+    try:
+        row = ChatPresence.query.filter_by(
+            conversation_user_id=conversation_user_id,
+            viewer_role=viewer_role,
+        ).first()
+        if not row or not row.last_seen:
+            return False
+        delta = datetime.utcnow() - row.last_seen
+        return delta.total_seconds() <= within_sec
+    except Exception:
+        return False
 
 
 def message_to_dict(msg):
@@ -1241,13 +1287,15 @@ def send_message():
     db.session.add(msg)
     db.session.commit()
     try:
-        preview = (text or "Picha")[:80]
-        send_push_to_admins(
-            f"Ujumbe mpya: {user.username}",
-            preview,
-            url=f"/admin/chat/{user.id}",
-            tag=f"chat-user-{user.id}",
-        )
+        # Usitume notification ikiwa admin yupo kwenye chat hii sasa
+        if not is_viewing_chat(user.id, "admin"):
+            preview = (text or "Picha")[:80]
+            send_push_to_admins(
+                f"Ujumbe mpya: {user.username}",
+                preview,
+                url=f"/admin/chat/{user.id}",
+                tag=f"chat-user-{user.id}",
+            )
     except Exception as e:
         print(f"customer chat push: {e}")
     return jsonify({"success": True, "message": message_to_dict(msg)})
@@ -1305,6 +1353,7 @@ def admin_messages():
 def api_chat_poll():
     """Mteja: ujumbe mpya + mark admin messages delivered/read."""
     user = get_current_user()
+    touch_chat_presence(user.id, "customer")
     after_id = request.args.get("after_id", type=int) or 0
     # Admin messages → delivered + read (mteja yupo kwenye chat)
     pending = (
@@ -1341,6 +1390,7 @@ def api_chat_poll():
 def api_admin_chat_poll(user_id):
     """Admin: ujumbe mpya + mark customer messages delivered/read."""
     user = User.query.get_or_404(user_id)
+    touch_chat_presence(user.id, "admin")
     after_id = request.args.get("after_id", type=int) or 0
     pending = (
         Message.query.filter_by(user_id=user.id, sender="customer")
@@ -1402,14 +1452,16 @@ def admin_send_message(user_id):
     db.session.add(msg)
     db.session.commit()
     try:
-        preview = (text or "Picha")[:80]
-        send_push_to_user(
-            user.id,
-            "Jibu jipya kutoka Admin",
-            preview,
-            url="/chat",
-            tag=f"chat-admin-{user.id}",
-        )
+        # Usitume notification ikiwa mteja yupo kwenye chat sasa
+        if not is_viewing_chat(user.id, "customer"):
+            preview = (text or "Picha")[:80]
+            send_push_to_user(
+                user.id,
+                "Jibu jipya kutoka Admin",
+                preview,
+                url="/chat",
+                tag=f"chat-admin-{user.id}",
+            )
     except Exception as e:
         print(f"admin chat push: {e}")
     return jsonify({"success": True, "message": message_to_dict(msg)})

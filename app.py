@@ -320,6 +320,7 @@ def inject_globals():
         "PAYMENT_NETWORK": PAYMENT_NETWORK,
         "to_dar_es_salaam": to_dar_es_salaam,
         "status_label_sw": status_label_sw,
+        "clean_payment_error": clean_payment_error,
     }
 
 
@@ -407,6 +408,65 @@ def get_clickpesa_token():
         return data["token"]
     else:
         raise Exception(f"Imeshindwa kupata token: {data}")
+
+
+
+def clean_payment_error(data, fallback="Malipo yameshindwa. Jaribu tena."):
+    """Toa ujumbe safi wa kibinadamu kutoka ClickPesa / exception — si dict ghafi."""
+    msg = ""
+    if data is None:
+        msg = ""
+    elif isinstance(data, dict):
+        msg = (
+            data.get("message")
+            or data.get("error")
+            or data.get("msg")
+            or data.get("detail")
+            or ""
+        )
+        if not msg and data:
+            # chukua value ya kwanza ya string
+            for v in data.values():
+                if isinstance(v, str) and v.strip():
+                    msg = v
+                    break
+        if not msg:
+            msg = ""
+    else:
+        msg = str(data)
+
+    msg = (msg or "").strip()
+    # Ondoa mabano ya dict yaliyoandikwa kama string
+    if msg.startswith("{") and "message" in msg:
+        import re
+        m = re.search(r"['\"]message['\"]\s*:\s*['\"]([^'\"]+)['\"]", msg)
+        if m:
+            msg = m.group(1)
+        else:
+            msg = msg.replace("{", " ").replace("}", " ").replace("'", " ").replace('"', " ")
+            msg = " ".join(msg.split())
+
+    low = msg.lower()
+    # Tafsiri / ujumbe rafiki
+    if "insufficient funds" in low or "salio" in low or "top up" in low:
+        return "Salio halitoshi kwenye akaunti ya malipo. Ongeza salio kisha ujaribu tena."
+    if "timeout" in low or "timed out" in low:
+        return "Muda wa malipo umeisha (timeout). Jaribu tena."
+    if "invalid phone" in low or "phone number" in low:
+        return "Namba ya simu si sahihi. Hakikisha namba yenye pesa."
+    if "network" in low and ("error" in low or "fail" in low):
+        return "Tatizo la mtandao. Jaribu tena baada ya muda mfupi."
+    if "cancelled" in low or "canceled" in low or "user cancelled" in low:
+        return "Malipo yameghairiwa. Jaribu tena ukiwa tayari."
+    if "pin" in low and ("wrong" in low or "invalid" in low or "incorrect" in low):
+        return "PIN si sahihi. Jaribu tena."
+    if not msg or msg.upper() in ("FAILED", "ERROR", "NONE"):
+        return fallback
+    # Kata urefu, usiwe na mabano mengi
+    msg = msg.replace("{", "").replace("}", "").strip()
+    if len(msg) > 180:
+        msg = msg[:177] + "…"
+    return msg
 
 
 def normalize_phone(phone):
@@ -863,7 +923,7 @@ def order():
                     )
                     return redirect(url_for("profile"))
                 else:
-                    reason = data.get("message") or str(data)[:120]
+                    reason = clean_payment_error(data, "Malipo yameshindwa kuanzishwa.")
                     new_order.status = "failed"
                     new_order.fail_reason = reason
                     db.session.commit()
@@ -879,7 +939,7 @@ def order():
                     flash(f"Malipo yameshindwa kuanzishwa: {reason}", "error")
             except Exception as e:
                 new_order.status = "failed"
-                new_order.fail_reason = str(e)[:120]
+                new_order.fail_reason = clean_payment_error(str(e), "Hitilafu ya malipo.")
                 db.session.commit()
                 try:
                     send_push_to_admins(
@@ -1056,7 +1116,7 @@ def clickpesa_webhook():
         elif failed:
             if nakala_req.status in ("pending", "awaiting_payment"):
                 nakala_req.status = "payment_failed"
-                nakala_req.admin_note = f"Malipo yameshindwa: {message or 'FAILED'}"[:255]
+                nakala_req.admin_note = clean_payment_error(message, "Malipo yameshindwa. Jaribu tena.")[:255]
                 db.session.commit()
                 try:
                     send_push_to_admins(
@@ -1104,7 +1164,7 @@ def clickpesa_webhook():
                 print(f"webhook success push: {e}")
     elif failed:
         order.status = "failed"
-        order.fail_reason = (message or "Malipo yameshindwa")[:200]
+        order.fail_reason = clean_payment_error(message, "Malipo yameshindwa.")[:200]
         db.session.commit()
         try:
             send_push_to_admins(
@@ -2225,7 +2285,7 @@ def nakala_pay():
                 return redirect(url_for("my_nakala"))
             else:
                 req.status = "payment_failed"
-                req.admin_note = f"ClickPesa initiate fail: {str(data)[:120]}"
+                req.admin_note = clean_payment_error(data, "Malipo yameshindwa kuanzishwa. Jaribu tena.")
                 db.session.commit()
                 flash(
                     f"Malipo yameshindwa kuanzishwa. Jaribu tena (Repay) kwenye ombi lako. "
@@ -2234,7 +2294,7 @@ def nakala_pay():
                 )
         except Exception as e:
             req.status = "payment_failed"
-            req.admin_note = f"Hitilafu malipo: {str(e)[:120]}"
+            req.admin_note = clean_payment_error(str(e), "Hitilafu ya malipo. Jaribu tena.")
             try:
                 db.session.commit()
             except Exception:
@@ -2376,12 +2436,12 @@ def nakala_repay(req_id):
             )
             return redirect(url_for("nakala_detail", req_id=req.id))
         req.status = "payment_failed"
-        req.admin_note = f"Repay fail: {str(data)[:120]}"
+        req.admin_note = clean_payment_error(data, "Malipo yameshindwa. Jaribu tena.")
         db.session.commit()
-        flash(f"Malipo yameshindwa kuanzishwa tena: {str(data)[:80]}", "error")
+        flash(clean_payment_error(data, "Malipo yameshindwa. Jaribu tena."), "error")
     except Exception as e:
         req.status = "payment_failed"
-        req.admin_note = f"Repay error: {str(e)[:120]}"
+        req.admin_note = clean_payment_error(str(e), "Hitilafu ya malipo. Jaribu tena.")
         try:
             db.session.commit()
         except Exception:

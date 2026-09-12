@@ -2,43 +2,78 @@
 {% block title %}Chat{% endblock %}
 {% block content %}
 <style>
+    /* Funga scroll ya ukurasa mzima — scroll ni messages pekee (kama WhatsApp) */
+    html.chat-lock, body.chat-lock {
+        height: 100% !important;
+        overflow: hidden !important;
+        overscroll-behavior: none !important;
+        position: fixed !important;
+        width: 100% !important;
+        left: 0; right: 0; top: 0; bottom: 0;
+    }
+    /* Ficha nav / topbar ya base */
+    .bottom-nav, nav.bottom, .tabbar, footer.app-nav,
+    header.topbar, .topbar, .page > .topbar {
+        display: none !important;
+    }
 
     /* Ficha scrollbar, scroll inaendelea */
-    .achat-body, .chat-body {
-        scrollbar-width: none;          /* Firefox */
-        -ms-overflow-style: none;       /* IE/Edge legacy */
+    .chat-body {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
-    .achat-body::-webkit-scrollbar,
     .chat-body::-webkit-scrollbar {
-        width: 0;
-        height: 0;
-        display: none;                  /* Chrome, Safari, Android */
+        width: 0; height: 0; display: none;
     }
 
-    .bottom-nav, nav.bottom, .tabbar, footer.app-nav { display: none !important; }
+    /* Container fixed full screen */
     .chat-page {
-        display: flex; flex-direction: column;
-        height: 100dvh; max-height: 100dvh;
+        position: fixed;
+        inset: 0;
+        z-index: 50;
+        display: flex;
+        flex-direction: column;
         background: #efeae2;
-        max-width: 480px; margin: 0 auto;
+        max-width: 480px;
+        margin: 0 auto;
+        left: 0; right: 0;
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
+        max-height: 100dvh;
         overflow: hidden;
+        /* iOS safe areas */
+        padding-top: env(safe-area-inset-top, 0px);
+        box-sizing: border-box;
     }
     @supports not (height: 100dvh) {
         .chat-page { height: 100vh; max-height: 100vh; }
     }
 
-    /* Header STATIC */
+    /* Header FIXED — haichezi scroll */
     .chat-head {
-        background: #fff; border-bottom: 1px solid #ececec;
-        padding: 12px 16px; flex-shrink: 0;
-        position: sticky; top: 0; z-index: 10;
+        flex: 0 0 auto;
+        background: #fff;
+        border-bottom: 1px solid #ececec;
+        padding: 12px 16px;
+        z-index: 20;
+        box-shadow: 0 1px 0 rgba(0,0,0,0.04);
     }
     .chat-head h1 { font-size: 16px; font-weight: 800; margin: 0 0 2px; color: #1a1a1a; }
     .chat-head p { color: #888; font-size: 12px; margin: 0; }
 
+    /* Messages — hii peke yake inascroll */
     .chat-body {
-        flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
-        padding: 10px; display: flex; flex-direction: column; gap: 6px;
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
     }
     .message {
         max-width: 78%; padding: 8px 11px; border-radius: 14px;
@@ -120,11 +155,15 @@
     .message.admin .copy-btn { color: #555; }
     .copy-btn:active { opacity: 1; }
 
-    /* Footer STATIC */
+    /* Footer FIXED — haichezi scroll */
     .chat-form-wrapper {
-        background: #f0f0f0; border-top: 1px solid #e5e5e5;
-        padding: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom));
-        flex-shrink: 0; position: sticky; bottom: 0; z-index: 10;
+        flex: 0 0 auto;
+        background: #f0f0f0;
+        border-top: 1px solid #e5e5e5;
+        padding: 8px;
+        padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+        z-index: 20;
+        box-shadow: 0 -1px 0 rgba(0,0,0,0.04);
     }
     .chat-row { display: flex; gap: 6px; align-items: center; }
     .attach-btn {
@@ -183,6 +222,13 @@
         line-height: 1;
     }
 </style>
+<script>
+/* Lock body scroll mara ukurasa unapofunguka */
+(function () {
+    document.documentElement.classList.add('chat-lock');
+    document.body.classList.add('chat-lock');
+})();
+</script>
 
 <div class="chat-page">
     <div class="chat-head">

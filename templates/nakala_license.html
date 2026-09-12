@@ -7,36 +7,36 @@
     .lic-hero {
         background: linear-gradient(135deg, #f56b00 0%, #e85d04 50%, #dc2f02 100%);
         border-radius: 14px;
-        padding: 12px 14px;
+        padding: 14px 16px;
         color: #fff;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
         box-shadow: 0 4px 14px rgba(245, 107, 0, 0.22);
     }
     .lic-hero h1 {
-        font-size: 16px;
+        font-size: 17px;
         font-weight: 800;
-        margin: 0 0 3px;
+        margin: 0 0 4px;
         letter-spacing: -0.2px;
     }
     .lic-hero p {
-        font-size: 11.5px;
-        opacity: 0.92;
+        font-size: 12px;
+        opacity: 0.94;
         margin: 0;
-        line-height: 1.35;
+        line-height: 1.4;
     }
 
     .step-bar {
         display: flex;
         gap: 6px;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
     .step-pill {
         flex: 1;
         text-align: center;
-        padding: 6px 4px;
-        border-radius: 8px;
+        padding: 7px 4px;
+        border-radius: 9px;
         background: #f5f5f5;
-        font-size: 10.5px;
+        font-size: 11px;
         font-weight: 700;
         color: #999;
     }
@@ -49,22 +49,22 @@
         background: #fff;
         border-radius: 14px;
         border: 1px solid #eee;
-        padding: 12px;
-        margin-bottom: 10px;
+        padding: 14px;
+        margin-bottom: 12px;
         box-shadow: 0 1px 6px rgba(0,0,0,0.03);
     }
     .panel-title {
-        font-size: 13px;
+        font-size: 13.5px;
         font-weight: 800;
         color: #222;
-        margin: 0 0 8px;
+        margin: 0 0 10px;
         display: flex;
         align-items: center;
-        gap: 7px;
+        gap: 8px;
     }
     .panel-title .num {
-        width: 20px; height: 20px;
-        border-radius: 6px;
+        width: 22px; height: 22px;
+        border-radius: 7px;
         background: #fff3e8;
         color: #f56b00;
         display: grid;
@@ -78,19 +78,19 @@
         display: flex;
         gap: 6px;
         overflow-x: auto;
-        padding: 2px 2px 8px;
-        margin: 0 -2px 2px;
+        padding: 2px 2px 10px;
+        margin: 0 -2px 4px;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;
     }
     .cat-scroll::-webkit-scrollbar { display: none; }
     .cat-chip {
         flex-shrink: 0;
-        padding: 7px 11px;
+        padding: 7px 12px;
         border-radius: 999px;
         border: 1.5px solid #ebebeb;
         background: #fafafa;
-        font-size: 11px;
+        font-size: 11.5px;
         font-weight: 700;
         color: #555;
         cursor: pointer;
@@ -107,14 +107,14 @@
 
     .search-wrap {
         position: relative;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
     }
     .search-wrap input {
         width: 100%;
-        padding: 10px 12px 10px 36px;
+        padding: 11px 12px 11px 38px;
         border: 1.5px solid #e8e8e8;
         border-radius: 11px;
-        font-size: 13px;
+        font-size: 13.5px;
         background: #f9f9f9;
         box-sizing: border-box;
         outline: none;
@@ -125,7 +125,7 @@
     }
     .search-wrap .icon {
         position: absolute;
-        left: 12px;
+        left: 13px;
         top: 50%;
         transform: translateY(-50%);
         font-size: 14px;
@@ -134,7 +134,7 @@
     }
 
     .license-list {
-        max-height: 320px;
+        max-height: 340px;
         overflow-y: auto;
         border-radius: 12px;
         border: 1px solid #f0f0f0;
@@ -144,7 +144,7 @@
         display: none;
         align-items: flex-start;
         gap: 10px;
-        padding: 11px 12px;
+        padding: 12px 13px;
         border-bottom: 1px solid #f3f3f3;
         cursor: pointer;
         transition: background 0.12s;
@@ -178,94 +178,142 @@
     }
     .lic-body { flex: 1; min-width: 0; }
     .lic-name {
-        font-size: 12.5px;
+        font-size: 13px;
         font-weight: 700;
         color: #222;
-        line-height: 1.3;
+        line-height: 1.35;
     }
     .lic-meta {
         display: flex;
         flex-wrap: wrap;
         gap: 5px;
-        margin-top: 4px;
+        margin-top: 5px;
         align-items: center;
     }
     .lic-badge {
-        font-size: 9.5px;
+        font-size: 10px;
         font-weight: 700;
-        padding: 2px 7px;
+        padding: 2px 8px;
         border-radius: 5px;
         background: #f0f0f0;
         color: #666;
     }
     .lic-note {
-        font-size: 10.5px;
+        font-size: 11px;
         color: #888;
         font-style: italic;
         line-height: 1.25;
     }
-    .lic-price {
-        font-size: 10.5px;
+    .lic-action {
+        font-size: 11px;
         font-weight: 700;
-        color: #bbb;
+        color: #f56b00;
         white-space: nowrap;
         flex-shrink: 0;
+        opacity: 0.7;
+    }
+    .license-item.selected .lic-action {
+        opacity: 1;
+        color: #e65100;
     }
 
     .empty-msg {
-        padding: 22px 14px;
+        padding: 24px 14px;
         text-align: center;
         color: #aaa;
-        font-size: 12.5px;
+        font-size: 13px;
         display: none;
     }
 
-    .price-card {
+    .select-card {
         display: none;
-        margin-top: 10px;
+        margin-top: 12px;
         border-radius: 14px;
         overflow: hidden;
-        border: 1px solid #c8e6c9;
+        border: 1px solid #ffe0c2;
         background: #fff;
+        box-shadow: 0 2px 10px rgba(245, 107, 0, 0.08);
     }
-    .price-card.show { display: block; }
-    .price-card-top {
-        background: linear-gradient(135deg, #2e7d32, #43a047);
+    .select-card.show { display: block; }
+    .select-card-top {
+        background: linear-gradient(135deg, #f56b00, #e85d04);
         color: #fff;
-        padding: 10px 12px;
+        padding: 12px 14px;
     }
-    .price-card-top .lbl {
-        font-size: 10px;
+    .select-card-top .lbl {
+        font-size: 10.5px;
         opacity: 0.9;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.3px;
     }
-    .price-card-top .name {
-        font-size: 13px;
+    .select-card-top .name {
+        font-size: 14px;
         font-weight: 700;
-        margin-top: 3px;
+        margin-top: 4px;
+        line-height: 1.35;
+    }
+    .select-card-body {
+        padding: 12px 14px;
+        background: #fffaf5;
+    }
+    .range-box {
+        background: #fff;
+        border-radius: 10px;
+        padding: 11px 12px;
+        border: 1px solid #ffe0c2;
+        margin-bottom: 10px;
+    }
+    .range-box .range-lbl {
+        font-size: 10.5px;
+        color: #e65100;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+        margin-bottom: 4px;
+    }
+    .range-box .range-val {
+        font-size: 15px;
+        font-weight: 800;
+        color: #bf360c;
         line-height: 1.3;
     }
-    .price-card-bottom {
-        padding: 10px 12px;
-        background: #e8f5e9;
+    .range-box .range-hint {
+        font-size: 11px;
+        color: #888;
+        margin-top: 4px;
+        line-height: 1.35;
     }
-    .price-card-bottom .amt {
-        font-size: 18px;
+    .fee-box {
+        background: #fff;
+        border-radius: 10px;
+        padding: 11px 12px;
+        border: 1px dashed #a5d6a7;
+    }
+    .fee-box .fee-lbl {
+        font-size: 10.5px;
+        color: #2e7d32;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.2px;
+    }
+    .fee-box .fee-val {
+        font-size: 17px;
         font-weight: 800;
         color: #1b5e20;
+        margin-top: 2px;
     }
-    .price-card-bottom .hint {
-        font-size: 10.5px;
-        color: #558b2f;
-        line-height: 1.3;
+    .fee-box .fee-hint {
+        font-size: 11px;
+        color: #666;
+        margin-top: 4px;
+        line-height: 1.35;
     }
 
-    .field { margin-bottom: 12px; }
+    .field { margin-bottom: 13px; }
     .field label {
         display: block;
-        font-size: 12px;
+        font-size: 12.5px;
         font-weight: 700;
         color: #444;
         margin-bottom: 5px;
@@ -273,10 +321,10 @@
     .field label .req { color: #e53935; }
     .field .input {
         width: 100%;
-        padding: 11px 12px;
+        padding: 12px 13px;
         border: 1.5px solid #e8e8e8;
         border-radius: 11px;
-        font-size: 14px;
+        font-size: 14.5px;
         background: #fafafa;
         box-sizing: border-box;
         outline: none;
@@ -288,10 +336,10 @@
 
     .submit-btn, .next-btn, .back-btn {
         width: 100%;
-        padding: 13px;
+        padding: 14px;
         border: none;
         border-radius: 12px;
-        font-size: 14px;
+        font-size: 14.5px;
         font-weight: 800;
         cursor: pointer;
         margin-top: 6px;
@@ -305,7 +353,7 @@
     .back-btn {
         background: #f2f2f2;
         color: #444;
-        margin-bottom: 6px;
+        margin-bottom: 8px;
     }
 
     .step-panel { display: none; }
@@ -315,12 +363,16 @@
         background: #fff8f0;
         border: 1px solid #ffe0c2;
         border-radius: 12px;
-        padding: 10px 12px;
-        margin-bottom: 12px;
-        font-size: 12.5px;
-        line-height: 1.4;
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        font-size: 13px;
+        line-height: 1.45;
     }
     .selected-summary strong { color: #e65100; }
+    .selected-summary .sum-row {
+        margin-top: 4px;
+        color: #555;
+    }
 </style>
 
 <header class="topbar">
@@ -335,7 +387,7 @@
 
     <div class="lic-hero">
         <h1>Ombi la Leseni</h1>
-        <p>Chagua leseni → angalia bei → jaza taarifa. Ada ya huduma TSh {{ "{:,}".format(service_fee|default(10000)) }}.</p>
+        <p>Chagua leseni → jaza taarifa → lipa ada ya huduma. Bei ya control number inarangu kutoka TSh 7,000 hadi TSh 200,000 (kulingana na aina ya leseni).</p>
     </div>
 
     <div class="step-bar">
@@ -361,7 +413,7 @@
 
                 <div class="search-wrap">
                     <span class="icon">🔍</span>
-                    <input type="text" id="licenseSearch" placeholder="Tafuta... mfano: uwakala, duka, salon">
+                    <input type="text" id="licenseSearch" placeholder="Tafuta... mfano: uwakala, duka, salon, garage">
                 </div>
 
                 <div class="license-list" id="licenseList">
@@ -370,7 +422,6 @@
                         class="license-item visible"
                         data-id="{{ lic.id }}"
                         data-name="{{ lic.name }}"
-                        data-price="{{ lic.price }}"
                         data-cat="{{ lic.category }}"
                         data-note="{{ lic.note|default('', true) }}"
                         data-search="{{ lic.name|lower }} {{ lic.category|lower }} {{ lic.note|default('', true)|lower }}"
@@ -384,35 +435,31 @@
                                 {% if lic.note %}<span class="lic-note">{{ lic.note }}</span>{% endif %}
                             </div>
                         </div>
-                        <div class="lic-price">Chagua</div>
+                        <div class="lic-action">Chagua</div>
                     </div>
                     {% endfor %}
                 </div>
                 <div class="empty-msg" id="emptyMsg">Hakuna leseni inayolingana.</div>
 
-                <button type="button" id="changeChoice" class="back-btn" style="display:none;margin-top:4px;" onclick="showLicenseListAgain()">
+                <button type="button" id="changeChoice" class="back-btn" style="display:none;margin-top:6px;" onclick="showLicenseListAgain()">
                     ← Badilisha leseni
                 </button>
 
-                <div class="price-card" id="priceBox">
-                    <div class="price-card-top">
+                <div class="select-card" id="priceBox">
+                    <div class="select-card-top">
                         <div class="lbl">Leseni uliyochagua</div>
                         <div class="name" id="selectedName"></div>
                     </div>
-                    <div class="price-card-bottom">
-                        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px;">
-                            <div>
-                                <div style="font-size:10px;color:#558b2f;font-weight:700;">BEI YA CONTROL NUMBER</div>
-                                <div class="amt" id="selectedPrice"></div>
-                            </div>
-                            <div class="hint" id="selectedNote" style="text-align:right;max-width:48%;"></div>
+                    <div class="select-card-body">
+                        <div class="range-box">
+                            <div class="range-lbl">Bei ya Control Number</div>
+                            <div class="range-val">Inarangu kutoka TSh 7,000 – 200,000</div>
+                            <div class="range-hint">Bei halisi inategemea aina ya leseni. Admin atakutolea control number baada ya kulipa ada ya huduma.</div>
                         </div>
-                        <div style="background:#fff;border-radius:9px;padding:8px 10px;border:1px dashed #a5d6a7;">
-                            <div style="font-size:10px;color:#2e7d32;font-weight:700;">ADA YA HUDUMA (unayo lipa sasa)</div>
-                            <div style="font-size:16px;font-weight:800;color:#1b5e20;">TSh {{ "{:,}".format(service_fee|default(10000)) }}</div>
-                            <div style="font-size:10.5px;color:#666;margin-top:3px;line-height:1.3;">
-                                Baada ya malipo, admin atakutolea control number (inaisha siku 1).
-                            </div>
+                        <div class="fee-box">
+                            <div class="fee-lbl">Ada ya Huduma (unayo lipa sasa)</div>
+                            <div class="fee-val">TSh {{ "{:,}".format(service_fee|default(10000)) }}</div>
+                            <div class="fee-hint">Baada ya malipo, admin atakutolea control number (inaisha baada ya siku 1).</div>
                         </div>
                     </div>
                 </div>
@@ -428,9 +475,9 @@
             <button type="button" class="back-btn" onclick="goStep1()">← Rudi chagua leseni</button>
 
             <div class="selected-summary" id="summaryBox">
-                <strong id="sumName">—</strong><br>
-                Control Number: <span id="sumCtrl">—</span><br>
-                Ada ya huduma: <strong>TSh {{ "{:,}".format(service_fee|default(10000)) }}</strong>
+                <strong id="sumName">—</strong>
+                <div class="sum-row">Control Number: <strong>Inarangu TSh 7,000 – 200,000</strong></div>
+                <div class="sum-row">Ada ya huduma: <strong>TSh {{ "{:,}".format(service_fee|default(10000)) }}</strong></div>
             </div>
 
             <div class="panel">
@@ -507,7 +554,6 @@
 
 <script>
 let currentCat = 'all';
-let selectedPrice = 0;
 let selectedName = '';
 
 function filterCat(el) {
@@ -537,22 +583,17 @@ function selectLicense(el) {
     el.classList.add('selected');
     document.getElementById('license_type').value = el.dataset.id;
     selectedName = el.dataset.name;
-    selectedPrice = Number(el.dataset.price) || 0;
     document.getElementById('selectedName').textContent = selectedName;
-    document.getElementById('selectedPrice').textContent = 'TSh ' + selectedPrice.toLocaleString();
-    document.getElementById('selectedNote').textContent = el.dataset.note || '';
     document.getElementById('priceBox').classList.add('show');
 
-    // Ficha orodha yote kabisa baada ya kuchagua
-    var hideIds = ['catScroll', 'licenseList', 'emptyMsg'];
-    hideIds.forEach(function(id) {
+    // Ficha orodha baada ya kuchagua
+    ['catScroll', 'licenseList', 'emptyMsg'].forEach(function(id) {
         var n = document.getElementById(id);
         if (n) n.style.display = 'none';
     });
     var sw = document.querySelector('.search-wrap');
     if (sw) sw.style.display = 'none';
 
-    // Onyesha kitufe cha kubadilisha chaguo
     var ch = document.getElementById('changeChoice');
     if (ch) ch.style.display = 'block';
 
@@ -562,7 +603,6 @@ function selectLicense(el) {
 function showLicenseListAgain() {
     document.getElementById('license_type').value = '';
     selectedName = '';
-    selectedPrice = 0;
     document.querySelectorAll('.license-item').forEach(i => i.classList.remove('selected'));
     document.getElementById('priceBox').classList.remove('show');
 
@@ -584,7 +624,6 @@ function goStep2() {
         return;
     }
     document.getElementById('sumName').textContent = selectedName;
-    document.getElementById('sumCtrl').textContent = 'TSh ' + selectedPrice.toLocaleString();
 
     document.getElementById('step1').classList.remove('active');
     document.getElementById('step2').classList.add('active');

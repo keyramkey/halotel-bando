@@ -3423,6 +3423,90 @@ def init_db():
     print("Database ready.")
 
 
+# ---------------------------------------------------------------------------
+# Legal pages (Play Store readiness)
+# ---------------------------------------------------------------------------
+@app.route("/privacy")
+def privacy():
+    return render_template("privacy.html")
+
+
+@app.route("/terms")
+def terms():
+    return render_template("terms.html")
+
+
+@app.route("/refund-policy")
+def refund_policy():
+    return render_template("refund_policy.html")
+
+
+@app.route("/contact")
+def contact():
+    admin = User.query.filter_by(is_admin=True).first()
+    return render_template(
+        "contact.html",
+        admin_phone=(admin.phone if admin else None),
+    )
+
+
+@app.route("/delete-account", methods=["GET", "POST"])
+def delete_account_page():
+    """Ukurasa wa kuomba kufuta akaunti (Play Store requirement)."""
+    if request.method == "POST":
+        return redirect(url_for("delete_account_request"))
+    return render_template("delete_account.html")
+
+
+@app.route("/delete-account/request", methods=["POST"])
+@login_required
+def delete_account_request():
+    """Pokea ombi la kufuta akaunti — haifuti mara moja, inajulisha admin."""
+    user = get_current_user()
+    reason = (request.form.get("reason") or "").strip()
+    confirm = request.form.get("confirm")
+    if not confirm:
+        flash("Tafadhali thibitisha kuwa unataka kufuta akaunti.", "error")
+        return redirect(url_for("delete_account_page"))
+
+    # Tuma ujumbe kwa admin kupitia chat system
+    try:
+        msg_text = (
+            f"[OMBI LA KUFUTA AKAUNTI]\n"
+            f"User: {user.username} (ID {user.id})\n"
+            f"Simu: {user.phone}\n"
+            f"Sababu: {reason or '—'}"
+        )
+        msg = Message(
+            user_id=user.id,
+            sender="customer",
+            message=msg_text,
+            is_delivered=False,
+            is_read=False,
+        )
+        db.session.add(msg)
+        db.session.commit()
+        try:
+            send_push_to_admins(
+                "Ombi la Kufuta Akaunti",
+                f"{user.username} ({user.phone}) ameomba kufuta akaunti.",
+                url=f"/admin/chat/{user.id}",
+                tag=f"delete-acc-{user.id}",
+            )
+        except Exception as e:
+            print(f"delete account push: {e}")
+    except Exception as e:
+        db.session.rollback()
+        print(f"delete account request error: {e}")
+
+    flash(
+        "Ombi lako la kufuta akaunti limetumwa. Timu yetu itashughulikia ndani ya siku 7–14 za kazi. "
+        "Utapata taarifa kupitia chat.",
+        "success",
+    )
+    return redirect(url_for("profile"))
+
+
 @app.route('/sw.js')
 def service_worker():
     return send_from_directory('static', 'sw.js', mimetype='application/javascript')

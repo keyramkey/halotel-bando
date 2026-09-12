@@ -155,6 +155,8 @@ class Message(db.Model):
     message = db.Column(db.Text, default="")
     image = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_delivered = db.Column(db.Boolean, default=False)
+    is_read = db.Column(db.Boolean, default=False)
 
 
 class Network(db.Model):
@@ -290,6 +292,24 @@ def to_dar_es_salaam(dt):
         dt = dt.replace(tzinfo=timezone.utc)
     local = dt.astimezone(DAR_TZ)
     return local.strftime("%d/%m/%Y %H:%M")
+
+
+
+def message_to_dict(msg):
+    """JSON-safe message for live chat polling."""
+    img_url = ""
+    if msg.image:
+        img_url = "/media/" + msg.image
+    return {
+        "id": msg.id,
+        "sender": msg.sender,
+        "message": msg.message or "",
+        "image": msg.image or "",
+        "image_url": img_url,
+        "created_at": to_dar_es_salaam(msg.created_at),
+        "is_delivered": bool(getattr(msg, "is_delivered", False)),
+        "is_read": bool(getattr(msg, "is_read", False)),
+    }
 
 
 def status_label_sw(status):
@@ -1215,6 +1235,8 @@ def send_message():
         sender="customer",
         message=text,
         image=image_name,
+        is_delivered=False,
+        is_read=False,
     )
     db.session.add(msg)
     db.session.commit()
@@ -1228,7 +1250,7 @@ def send_message():
         )
     except Exception as e:
         print(f"customer chat push: {e}")
-    return jsonify({"success": True})
+    return jsonify({"success": True, "message": message_to_dict(msg)})
 
 
 @app.route("/admin/messages")
@@ -1277,6 +1299,77 @@ def admin_messages():
     return render_template("admin_messages.html", threads=threads)
 
 
+
+@app.route("/api/chat/poll")
+@login_required
+def api_chat_poll():
+    """Mteja: ujumbe mpya + mark admin messages delivered/read."""
+    user = get_current_user()
+    after_id = request.args.get("after_id", type=int) or 0
+    # Admin messages → delivered + read (mteja yupo kwenye chat)
+    pending = (
+        Message.query.filter_by(user_id=user.id, sender="admin")
+        .filter((Message.is_delivered.is_(False)) | (Message.is_read.is_(False)))
+        .all()
+    )
+    if pending:
+        for m in pending:
+            m.is_delivered = True
+            m.is_read = True
+        db.session.commit()
+    q = Message.query.filter_by(user_id=user.id)
+    if after_id:
+        q = q.filter(Message.id > after_id)
+    msgs = q.order_by(Message.created_at.asc()).all()
+    # Status ya ujumbe wa mteja mwenyewe (ticks)
+    own = (
+        Message.query.filter_by(user_id=user.id, sender="customer")
+        .order_by(Message.id.desc())
+        .limit(50)
+        .all()
+    )
+    statuses = {m.id: {"is_delivered": bool(m.is_delivered), "is_read": bool(m.is_read)} for m in own}
+    return jsonify({
+        "ok": True,
+        "messages": [message_to_dict(m) for m in msgs],
+        "statuses": statuses,
+    })
+
+
+@app.route("/api/admin/chat/<int:user_id>/poll")
+@admin_required
+def api_admin_chat_poll(user_id):
+    """Admin: ujumbe mpya + mark customer messages delivered/read."""
+    user = User.query.get_or_404(user_id)
+    after_id = request.args.get("after_id", type=int) or 0
+    pending = (
+        Message.query.filter_by(user_id=user.id, sender="customer")
+        .filter((Message.is_delivered.is_(False)) | (Message.is_read.is_(False)))
+        .all()
+    )
+    if pending:
+        for m in pending:
+            m.is_delivered = True
+            m.is_read = True
+        db.session.commit()
+    q = Message.query.filter_by(user_id=user.id)
+    if after_id:
+        q = q.filter(Message.id > after_id)
+    msgs = q.order_by(Message.created_at.asc()).all()
+    own = (
+        Message.query.filter_by(user_id=user.id, sender="admin")
+        .order_by(Message.id.desc())
+        .limit(50)
+        .all()
+    )
+    statuses = {m.id: {"is_delivered": bool(m.is_delivered), "is_read": bool(m.is_read)} for m in own}
+    return jsonify({
+        "ok": True,
+        "messages": [message_to_dict(m) for m in msgs],
+        "statuses": statuses,
+    })
+
+
 @app.route("/admin/chat/<int:user_id>")
 @admin_required
 def admin_chat(user_id):
@@ -1303,6 +1396,8 @@ def admin_send_message(user_id):
         sender="admin",
         message=text,
         image=image_name,
+        is_delivered=False,
+        is_read=False,
     )
     db.session.add(msg)
     db.session.commit()
@@ -1317,7 +1412,7 @@ def admin_send_message(user_id):
         )
     except Exception as e:
         print(f"admin chat push: {e}")
-    return jsonify({"success": True})
+    return jsonify({"success": True, "message": message_to_dict(msg)})
 
 
 
@@ -3161,6 +3256,18 @@ def ensure_agency_columns():
                     if name not in existing:
                         conn.execute(text(f"ALTER TABLE application ADD COLUMN {name} {typedef}"))
                         print(f"✓ Added column application.{name}")
+
+        if "message" in tables:
+            existing_m = {c["name"] for c in insp.get_columns("message")}
+            msg_cols = {
+                "is_delivered": "BOOLEAN DEFAULT FALSE",
+                "is_read": "BOOLEAN DEFAULT FALSE",
+            }
+            with db.engine.begin() as conn:
+                for name, typedef in msg_cols.items():
+                    if name not in existing_m:
+                        conn.execute(text(f"ALTER TABLE message ADD COLUMN {name} {typedef}"))
+                        print(f"✓ Added column message.{name}")
 
         if "user" in tables:
             existing = {c["name"] for c in insp.get_columns("user")}

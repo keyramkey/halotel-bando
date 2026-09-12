@@ -542,6 +542,10 @@
         <button type="button" class="nav-tab" data-tab="announcement">
             📢 Matangazo
         </button>
+        <button type="button" class="nav-tab" data-tab="trash">
+            🗑️ Trash
+            {% if trash_count %}<span class="count">{{ trash_count }}</span>{% endif %}
+        </button>
         <button type="button" class="nav-tab" data-tab="account">
             👤 Akaunti Yangu
         </button>
@@ -551,7 +555,7 @@
     <div class="tab-panel active" id="panel-orders">
         <div style="margin:0 0 12px;">
             <h2 class="dash-section-title">Oda za Bando</h2>
-            <p class="dash-section-sub">ClickPesa: Inasubiri Malipo · Imelipwa · Malipo Yameshindwa · Imekamilika — muda wa Dar es Salaam</p>
+            <p class="dash-section-sub">ClickPesa: Inasubiri Malipo · Imelipwa · Imekamilika — muda wa Dar. <strong>Malipo Yameshindwa</strong> yanaenda <a href="#trash" onclick="openDashTab('trash');return false;" style="color:#f56b00;">Trash</a>.</p>
         </div>
 
         <form method="GET" action="{{ url_for('dashboard') }}" class="user-search-bar" style="margin-bottom:14px;">
@@ -1209,6 +1213,126 @@
         {% endif %}
     </div>
 
+    <!-- ==================== TRASH (Malipo Yameshindwa) ==================== -->
+    <div class="tab-panel" id="panel-trash">
+        <div style="margin:0 0 12px;">
+            <h2 class="dash-section-title">🗑️ Trash — Malipo Yameshindwa</h2>
+            <p class="dash-section-sub">
+                Oda na Nakala zilizoshindwa malipo (ClickPesa). Hazionekani kwenye orodha kuu.
+                Unaweza kufuta moja moja au zote.
+            </p>
+        </div>
+
+        <!-- ODA FAILED -->
+        <div class="slide-add-card" style="margin-bottom:18px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+                <h3 style="margin:0;">📦 Oda za Bando ({{ trash_orders_count or 0 }})</h3>
+                {% if trash_orders %}
+                <form method="POST" action="{{ url_for('admin_order_trash_empty') }}"
+                      onsubmit="return confirm('Futa ODA ZOTE zilizo Malipo Yameshindwa? Huwezi kuzirejesha.');">
+                    <button class="btn btn-danger-soft" type="submit" style="width:auto;padding:10px 14px;">
+                        Futa oda zote kwenye trash
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            {% if trash_orders %}
+            <div class="list-more-wrap" data-list="trash-orders" data-limit="5">
+            {% for order in trash_orders %}
+            <div class="application-card list-item{% if loop.index > 5 %} list-item-hidden{% endif %}" style="border-color:#f5c6cb;">
+                <div class="application-top">
+                    <div>
+                        <div class="application-code">Oda #{{ order.id }} — {{ order.amount }}</div>
+                        <div class="application-network">TSh {{ "{:,}".format(order.price or 0) }}</div>
+                    </div>
+                    <span class="status pay-fail">Malipo Yameshindwa</span>
+                </div>
+                <div class="meta-time">
+                    <strong>Muda:</strong> {{ to_dar_es_salaam(order.created_at) }} (Dar)
+                </div>
+                <div style="margin-top:10px;font-size:13px;line-height:1.5;">
+                    <strong>Mteja:</strong>
+                    {{ order.user.username if order.user else '—' }}
+                    ({{ order.user.phone if order.user else order.phone }})
+                    <br>
+                    {% if order.order_reference %}<strong>Ref:</strong> {{ order.order_reference }}<br>{% endif %}
+                    {% if order.note %}<span style="color:#f56b00;">{{ order.note }}</span><br>{% endif %}
+                    {% if order.fail_reason %}
+                    <strong style="color:#c62828;">Sababu:</strong> {{ order.fail_reason }}
+                    {% endif %}
+                </div>
+                <form method="POST"
+                      action="{{ url_for('admin_order_delete', order_id=order.id) }}"
+                      style="margin-top:12px;"
+                      onsubmit="return confirm('Futa Oda #{{ order.id }} kabisa?');">
+                    <button class="btn btn-danger-soft" type="submit">🗑 Futa oda hii</button>
+                </form>
+            </div>
+            {% endfor %}
+            <button type="button" class="see-more-btn" data-list="trash-orders" style="display:none;" onclick="toggleSeeMore(this)">See more</button>
+            </div>
+            {% else %}
+            <p class="muted" style="margin:0;font-size:13px;">Hakuna oda kwenye trash.</p>
+            {% endif %}
+        </div>
+
+        <!-- NAKALA PAYMENT FAILED -->
+        <div class="slide-add-card">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">
+                <h3 style="margin:0;">📄 Nakala ({{ trash_nakala_count or 0 }})</h3>
+                {% if trash_nakala %}
+                <form method="POST" action="{{ url_for('admin_nakala_trash_empty') }}"
+                      onsubmit="return confirm('Futa NAKALA ZOTE zilizo Malipo Yameshindwa? Huwezi kuzirejesha.');">
+                    <button class="btn btn-danger-soft" type="submit" style="width:auto;padding:10px 14px;">
+                        Futa nakala zote kwenye trash
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+
+            {% if trash_nakala %}
+            <div class="list-more-wrap" data-list="trash-nakala" data-limit="5">
+            {% for req in trash_nakala %}
+            <div class="application-card list-item{% if loop.index > 5 %} list-item-hidden{% endif %}" style="border-color:#f5c6cb;">
+                <div class="application-top">
+                    <div>
+                        <div class="application-code">{{ req.request_code }}</div>
+                        <div class="application-network">
+                            {% if req.service_type == 'tin' %}TIN
+                            {% elif req.service_type == 'license' %}Leseni · {{ req.license_type }}
+                            {% else %}NIDA Copy{% endif %}
+                            · Ada TSh {{ "{:,}".format(req.price or 0) }}
+                        </div>
+                    </div>
+                    <span class="status pay-fail">Malipo Yameshindwa</span>
+                </div>
+                <div class="meta-time">
+                    <strong>Muda:</strong> {{ to_dar_es_salaam(req.created_at) }} (Dar)
+                </div>
+                <div style="margin-top:10px;font-size:13px;line-height:1.5;">
+                    <strong>{{ req.full_name }}</strong><br>
+                    <span class="muted">{{ req.phone1 }}{% if req.phone2 %} / {{ req.phone2 }}{% endif %}</span>
+                    {% if req.admin_note %}
+                    <br><strong style="color:#c62828;">Sababu:</strong> {{ req.admin_note }}
+                    {% endif %}
+                </div>
+                <form method="POST"
+                      action="{{ url_for('admin_nakala_delete', req_id=req.id) }}"
+                      style="margin-top:12px;"
+                      onsubmit="return confirm('Futa {{ req.request_code }} kabisa?');">
+                    <button class="btn btn-danger-soft" type="submit">🗑 Futa nakala hii</button>
+                </form>
+            </div>
+            {% endfor %}
+            <button type="button" class="see-more-btn" data-list="trash-nakala" style="display:none;" onclick="toggleSeeMore(this)">See more</button>
+            </div>
+            {% else %}
+            <p class="muted" style="margin:0;font-size:13px;">Hakuna nakala kwenye trash.</p>
+            {% endif %}
+        </div>
+    </div>
+
     <!-- ==================== AKAUNTI YA ADMIN ==================== -->
     <div class="tab-panel" id="panel-account">
         <div style="margin:0 0 12px;">
@@ -1270,6 +1394,9 @@ if (window.location.hash === '#messages' || window.location.hash === '#chat') {
 }
 if (window.location.hash === '#orders' || (new URLSearchParams(window.location.search)).has('ref')) {
     openDashTab('orders');
+}
+if (window.location.hash === '#trash') {
+    openDashTab('trash');
 }
 
 function toggleUserDetail(id) {

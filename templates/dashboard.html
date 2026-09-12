@@ -487,6 +487,10 @@
             📦 Oda za Bando
             {% if pending_count %}<span class="count">{{ pending_count }}</span>{% endif %}
         </button>
+        <button type="button" class="nav-tab" data-tab="messages">
+            💬 Ujumbe
+            {% if chat_unread %}<span class="count">{{ chat_unread }}</span>{% elif chat_threads %}<span class="count">{{ chat_threads|length }}</span>{% endif %}
+        </button>
         <button type="button" class="nav-tab" data-tab="nakala">
             📄 Nakala
             {% if nakala_pending %}<span class="count">{{ nakala_pending }}</span>{% endif %}
@@ -513,6 +517,24 @@
             <h2 class="dash-section-title">Oda za Bando</h2>
             <p class="dash-section-sub">Inaonyesha oda zilizolipwa (pending) na zilizoshindwa</p>
         </div>
+
+        <!-- Search by reference -->
+        <form method="GET" action="{{ url_for('dashboard') }}" class="user-search-bar" id="ordersRefForm" style="margin-bottom:14px;">
+            <input class="input" type="search" name="ref" value="{{ orders_ref_q or '' }}"
+                   placeholder="Tafuta Ref / Oda ID / simu / GB..." autocomplete="off">
+            <button class="search-icon-btn" type="submit" aria-label="Tafuta Ref" title="Tafuta">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="11" cy="11" r="7"></circle>
+                    <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
+                </svg>
+            </button>
+        </form>
+        {% if orders_ref_q %}
+        <p style="font-size:12px;margin:-6px 0 12px;">
+            Matokeo ya: <strong>{{ orders_ref_q }}</strong>
+            · <a href="{{ url_for('dashboard') }}#orders" style="color:#f56b00;font-weight:700;">Ondoa filter</a>
+        </p>
+        {% endif %}
 
         <div class="list-more-wrap" data-list="orders" data-limit="3">
         {% for order in orders %}
@@ -1057,6 +1079,58 @@
     </div>
 
 
+    <!-- ==================== UJUMBE / CHAT ==================== -->
+    <div class="tab-panel" id="panel-messages">
+        <div style="margin:0 0 12px;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+            <div>
+                <h2 class="dash-section-title">💬 Ujumbe / Chat</h2>
+                <p class="dash-section-sub">Mazungumzo na wateja — gusa ili ufungue</p>
+            </div>
+            <a href="{{ url_for('admin_messages') }}" class="btn" style="background:#151515;font-size:12px;padding:10px 12px;white-space:nowrap;">
+                Orodha kamili →
+            </a>
+        </div>
+
+        {% if chat_threads %}
+        <div class="list-more-wrap" data-list="chats" data-limit="8">
+            {% for t in chat_threads %}
+            <a href="{{ url_for('admin_chat', user_id=t.user.id) }}"
+               class="application-card list-item{% if loop.index > 8 %} list-item-hidden{% endif %}"
+               style="display:block;text-decoration:none;color:inherit;{% if t.unread_from_customer %}border-color:#ffd0b0;box-shadow:inset 3px 0 0 #f56b00;{% endif %}">
+                <div class="application-top">
+                    <div>
+                        <div class="application-code">
+                            {{ t.user.username }}
+                            {% if t.unread_from_customer %}
+                            <span class="status pending" style="font-size:10px;margin-left:4px;">Mpya</span>
+                            {% endif %}
+                        </div>
+                        <div class="application-network">{{ t.user.phone or '—' }}</div>
+                    </div>
+                    <span class="muted" style="font-size:11px;">{{ to_dar_es_salaam(t.last_at) }}</span>
+                </div>
+                <div style="margin-top:8px;font-size:13px;color:#555;line-height:1.4;">
+                    {% if t.last_sender == 'customer' %}
+                    <strong style="color:#f56b00;">Mteja:</strong>
+                    {% else %}
+                    <strong style="color:#888;">Wewe:</strong>
+                    {% endif %}
+                    {{ t.last_message }}
+                </div>
+            </a>
+            {% endfor %}
+            <button type="button" class="see-more-btn" data-list="chats" style="display:none;" onclick="toggleSeeMore(this)">
+                See more
+            </button>
+        </div>
+        {% else %}
+        <div class="card">
+            <p class="muted" style="margin:0;">Hakuna ujumbe bado. Wateja wakituma, wataonekana hapa.</p>
+        </div>
+        {% endif %}
+    </div>
+
+
     <!-- ==================== AKAUNTI YA ADMIN ==================== -->
     <div class="tab-panel" id="panel-account">
         <div style="margin:0 0 12px;">
@@ -1112,6 +1186,12 @@ if (window.location.hash === '#account') {
 }
 if (window.location.hash === '#users' || (new URLSearchParams(window.location.search)).has('q')) {
     openDashTab('users');
+}
+if (window.location.hash === '#messages' || window.location.hash === '#chat') {
+    openDashTab('messages');
+}
+if (window.location.hash === '#orders' || (new URLSearchParams(window.location.search)).has('ref')) {
+    openDashTab('orders');
 }
 
 function toggleUserDetail(id) {

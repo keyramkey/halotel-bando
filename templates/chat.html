@@ -26,12 +26,16 @@
     @supports not (height: 100dvh) {
         .chat-page { height: 100vh; max-height: 100vh; }
     }
+
+    /* Header STATIC */
     .chat-head {
         background: #fff; border-bottom: 1px solid #ececec;
         padding: 12px 16px; flex-shrink: 0;
+        position: sticky; top: 0; z-index: 10;
     }
     .chat-head h1 { font-size: 16px; font-weight: 800; margin: 0 0 2px; color: #1a1a1a; }
     .chat-head p { color: #888; font-size: 12px; margin: 0; }
+
     .chat-body {
         flex: 1 1 auto; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
         padding: 10px; display: flex; flex-direction: column; gap: 6px;
@@ -40,6 +44,7 @@
         max-width: 78%; padding: 8px 11px; border-radius: 14px;
         font-size: 13.5px; line-height: 1.4; word-wrap: break-word;
         box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        user-select: text; -webkit-user-select: text;
     }
     .message.customer {
         align-self: flex-end;
@@ -68,9 +73,58 @@
         text-align: center; color: #999; margin: auto;
         font-size: 13px; line-height: 1.5; padding: 24px;
     }
+
+    /* Long message collapse */
+    .txt-wrap { position: relative; }
+    .txt-collapsed {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        word-break: break-word;
+    }
+    .txt-collapsed.lines-5 { -webkit-line-clamp: 5; }
+    .txt-collapsed.lines-25 { -webkit-line-clamp: 25; }
+    .txt-collapsed.lines-45 { -webkit-line-clamp: 45; }
+    .txt-collapsed.lines-65 { -webkit-line-clamp: 65; }
+    .txt-collapsed.lines-85 { -webkit-line-clamp: 85; }
+    .txt-collapsed.lines-105 { -webkit-line-clamp: 105; }
+    .see-more-btn {
+        display: inline-block;
+        margin-top: 4px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        text-decoration: underline;
+        opacity: 0.9;
+    }
+    .message.customer .see-more-btn { color: #fff; }
+    .message.admin .see-more-btn { color: #f56b00; }
+    .copy-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+        margin-top: 4px;
+        margin-left: 8px;
+        font-size: 11px;
+        font-weight: 600;
+        cursor: pointer;
+        background: none;
+        border: none;
+        padding: 0;
+        opacity: 0.8;
+    }
+    .message.customer .copy-btn { color: rgba(255,255,255,0.95); }
+    .message.admin .copy-btn { color: #555; }
+    .copy-btn:active { opacity: 1; }
+
+    /* Footer STATIC */
     .chat-form-wrapper {
         background: #f0f0f0; border-top: 1px solid #e5e5e5;
-        padding: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom)); flex-shrink: 0;
+        padding: 8px; padding-bottom: max(8px, env(safe-area-inset-bottom));
+        flex-shrink: 0; position: sticky; bottom: 0; z-index: 10;
     }
     .chat-row { display: flex; gap: 6px; align-items: center; }
     .attach-btn {
@@ -92,6 +146,42 @@
         flex-shrink: 0;
     }
     .send-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    /* Attachment preview */
+    .attach-preview {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 10px;
+        background: #fff;
+        border: 1px solid #e5e5e5;
+        border-radius: 12px;
+        margin-bottom: 8px;
+        position: relative;
+    }
+    .attach-preview.show { display: flex; }
+    .attach-preview img {
+        width: 56px; height: 56px;
+        object-fit: cover;
+        border-radius: 8px;
+        flex-shrink: 0;
+    }
+    .attach-preview .ap-info {
+        flex: 1; min-width: 0;
+        font-size: 12px; color: #555;
+    }
+    .attach-preview .ap-info strong {
+        display: block;
+        font-size: 13px; color: #111;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .attach-preview .ap-remove {
+        width: 28px; height: 28px; border-radius: 50%;
+        background: #fee2e2; color: #dc2626;
+        border: none; display: grid; place-items: center;
+        cursor: pointer; flex-shrink: 0; font-size: 16px; font-weight: 700;
+        line-height: 1;
+    }
 </style>
 
 <div class="chat-page">
@@ -104,7 +194,11 @@
         {% if messages %}
             {% for msg in messages %}
             <div class="message {{ msg.sender }}" data-id="{{ msg.id }}">
-                {% if msg.message %}<div class="txt">{{ msg.message }}</div>{% endif %}
+                {% if msg.message %}
+                <div class="txt-wrap">
+                    <div class="txt" data-full="{{ msg.message|e }}">{{ msg.message }}</div>
+                </div>
+                {% endif %}
                 {% if msg.image %}
                 <img src="{{ url_for('media_file', filename=msg.image) }}" alt="Picha">
                 {% endif %}
@@ -128,6 +222,14 @@
     </div>
 
     <div class="chat-form-wrapper">
+        <div class="attach-preview" id="attachPreview">
+            <img id="previewImg" src="" alt="Preview">
+            <div class="ap-info">
+                <strong id="previewName">Picha</strong>
+                <span id="previewSize"></span>
+            </div>
+            <button type="button" class="ap-remove" id="removePreview" title="Ondoa">×</button>
+        </div>
         <form id="chatForm" enctype="multipart/form-data">
             <div class="chat-row">
                 <label class="attach-btn">File
@@ -147,6 +249,11 @@
     var sendBtn = document.getElementById('sendBtn');
     var messageInput = document.getElementById('messageInput');
     var imageInput = document.getElementById('imageInput');
+    var attachPreview = document.getElementById('attachPreview');
+    var previewImg = document.getElementById('previewImg');
+    var previewName = document.getElementById('previewName');
+    var previewSize = document.getElementById('previewSize');
+    var removePreview = document.getElementById('removePreview');
     var lastId = 0;
     body.querySelectorAll('.message[data-id]').forEach(function (el) {
         var id = parseInt(el.getAttribute('data-id'), 10);
@@ -154,6 +261,131 @@
     });
     function scrollBottom() { body.scrollTop = body.scrollHeight; }
     scrollBottom();
+
+    /* ---- Attachment preview ---- */
+    function formatSize(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(1) + ' MB';
+    }
+    function clearPreview() {
+        imageInput.value = '';
+        previewImg.src = '';
+        attachPreview.classList.remove('show');
+        if (window._previewUrl) {
+            URL.revokeObjectURL(window._previewUrl);
+            window._previewUrl = null;
+        }
+    }
+    imageInput.addEventListener('change', function () {
+        var file = imageInput.files && imageInput.files[0];
+        if (!file) { clearPreview(); return; }
+        if (window._previewUrl) URL.revokeObjectURL(window._previewUrl);
+        window._previewUrl = URL.createObjectURL(file);
+        previewImg.src = window._previewUrl;
+        previewName.textContent = file.name || 'Picha';
+        previewSize.textContent = formatSize(file.size);
+        attachPreview.classList.add('show');
+    });
+    removePreview.addEventListener('click', clearPreview);
+
+    /* ---- Long message: 5 lines then +20 each "See more", copyable ---- */
+    var LINE_STEPS = [5, 25, 45, 65, 85, 105];
+
+    function setupLongText(txtEl) {
+        if (!txtEl || txtEl.dataset.setup) return;
+        txtEl.dataset.setup = '1';
+        var full = txtEl.getAttribute('data-full') || txtEl.textContent || '';
+        if (!full || full.length < 180) return;
+
+        var clone = document.createElement('div');
+        clone.style.cssText = 'position:absolute;visibility:hidden;width:' + Math.max(txtEl.offsetWidth || 180, 160) + 'px;font-size:13.5px;line-height:1.4;word-break:break-word;white-space:pre-wrap;';
+        clone.textContent = full;
+        document.body.appendChild(clone);
+        var lineH = parseFloat(getComputedStyle(clone).lineHeight) || 19;
+        var totalLines = Math.ceil(clone.offsetHeight / lineH);
+        document.body.removeChild(clone);
+
+        if (totalLines <= 5) return;
+
+        var wrap = txtEl.parentElement;
+        if (!wrap || !wrap.classList.contains('txt-wrap')) {
+            wrap = document.createElement('div');
+            wrap.className = 'txt-wrap';
+            txtEl.parentNode.insertBefore(wrap, txtEl);
+            wrap.appendChild(txtEl);
+        }
+
+        var stepIdx = 0;
+        txtEl.classList.add('txt-collapsed', 'lines-5');
+        txtEl.textContent = full;
+
+        var seeBtn = document.createElement('button');
+        seeBtn.type = 'button';
+        seeBtn.className = 'see-more-btn';
+        seeBtn.textContent = 'See more';
+
+        var copyBtn = document.createElement('button');
+        copyBtn.type = 'button';
+        copyBtn.className = 'copy-btn';
+        copyBtn.textContent = '📋 Copy';
+        copyBtn.title = 'Nakili ujumbe';
+
+        function updateClamp() {
+            var lines = LINE_STEPS[stepIdx] || 9999;
+            txtEl.className = 'txt txt-collapsed lines-' + (lines <= 105 ? lines : 'full');
+            if (lines > 105 || stepIdx >= LINE_STEPS.length - 1) {
+                txtEl.classList.remove('txt-collapsed');
+                txtEl.style.webkitLineClamp = 'unset';
+                seeBtn.style.display = 'none';
+            } else {
+                seeBtn.textContent = 'See more';
+                seeBtn.style.display = '';
+            }
+        }
+        updateClamp();
+
+        seeBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            stepIdx++;
+            updateClamp();
+        });
+
+        copyBtn.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(full).then(function () {
+                    copyBtn.textContent = '✓ Imenakiliwa';
+                    setTimeout(function () { copyBtn.textContent = '📋 Copy'; }, 1500);
+                }).catch(function () {
+                    fallbackCopy(full, copyBtn);
+                });
+            } else {
+                fallbackCopy(full, copyBtn);
+            }
+        });
+
+        wrap.appendChild(seeBtn);
+        wrap.appendChild(copyBtn);
+    }
+
+    function fallbackCopy(text, btn) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;left:-9999px;';
+        document.body.appendChild(ta);
+        ta.select();
+        try {
+            document.execCommand('copy');
+            btn.textContent = '✓ Imenakiliwa';
+            setTimeout(function () { btn.textContent = '📋 Copy'; }, 1500);
+        } catch (err) {}
+        document.body.removeChild(ta);
+    }
+
+    body.querySelectorAll('.txt').forEach(setupLongText);
 
     function ticksHtml(m) {
         var cls = m.is_read ? 'read' : (m.is_delivered ? 'delivered' : 'sent');
@@ -172,13 +404,20 @@
         div.className = 'message ' + m.sender;
         div.setAttribute('data-id', m.id);
         var html = '';
-        if (m.message) html += '<div class="txt"></div>';
+        if (m.message) {
+            html += '<div class="txt-wrap"><div class="txt" data-full=""></div></div>';
+        }
         if (m.image_url) html += '<img src="' + m.image_url + '" alt="Picha">';
         html += '<div class="meta-line"><span class="message-time">' + (m.created_at || '') + '</span>';
         if (m.sender === 'customer') html += ticksHtml(m);
         html += '</div>';
         div.innerHTML = html;
-        if (m.message) div.querySelector('.txt').textContent = m.message;
+        if (m.message) {
+            var txtEl = div.querySelector('.txt');
+            txtEl.setAttribute('data-full', m.message);
+            txtEl.textContent = m.message;
+            setupLongText(txtEl);
+        }
         body.appendChild(div);
         if (m.id > lastId) lastId = m.id;
         scrollBottom();
@@ -223,7 +462,7 @@
             if (data.success && data.message) {
                 appendMsg(data.message);
                 messageInput.value = '';
-                imageInput.value = '';
+                clearPreview();
             } else if (!data.success) alert(data.error || 'Imeshindwa.');
         } catch (err) {
             alert('Hitilafu ya mtandao.');

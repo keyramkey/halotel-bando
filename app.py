@@ -3430,14 +3430,26 @@ def service_worker():
 
 @app.route("/media/<path:filename>")
 def media_file(filename):
+    """Serve uploads. ?download=1 → Content-Disposition: attachment (pakua kwenye simu)."""
+    force_dl = request.args.get("download") in ("1", "true", "yes")
+    # Jina la faili la kupakua (salama)
+    base_name = os.path.basename(filename) or "faili"
     folder = app.config["UPLOAD_FOLDER"]
     full = os.path.join(folder, filename)
     if os.path.isfile(full):
-        return send_from_directory(folder, filename)
+        return send_from_directory(
+            folder, filename,
+            as_attachment=force_dl,
+            download_name=base_name if force_dl else None,
+        )
     static_fallback = os.path.join(basedir, "static", "uploads")
     full2 = os.path.join(static_fallback, filename)
     if os.path.isfile(full2):
-        return send_from_directory(static_fallback, filename)
+        return send_from_directory(
+            static_fallback, filename,
+            as_attachment=force_dl,
+            download_name=base_name if force_dl else None,
+        )
     return f"File not found: {filename}\nLooked in: {folder}\nand: {static_fallback}", 404
 
 

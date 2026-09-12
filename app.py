@@ -1177,6 +1177,75 @@ def send_message():
     return jsonify({"success": True})
 
 
+@app.route("/admin/messages")
+@admin_required
+def admin_messages():
+    """Orodha ya mazungumzo (users wenye ujumbe) kwa admin."""
+    from sqlalchemy import func, desc
+    subq = (
+        db.session.query(
+            Message.user_id,
+            func.max(Message.created_at).label("last_at"),
+            func.count(Message.id).label("msg_count"),
+        )
+        .group_by(Message.user_id)
+        .subquery()
+    )
+    rows = (
+        db.session.query(User, subq.c.last_at, subq.c.msg_count)
+        .join(subq, User.id == subq.c.user_id)
+        .order_by(desc(subq.c.last_at))
+        .limit(200)
+        .all()
+    )
+    conversations = []
+    for user, last_at, msg_count in rows:
+        last_msg = (
+            Message.query.filter_by(user_id=user.id)
+            .order_by(Message.created_at.desc())
+            .first()
+        )
+        conversations.append({
+            "user": user,
+            "last_at": last_at,
+            "msg_count": msg_count,
+            "last_msg": last_msg,
+        })
+    try:
+        return render_template("admin_messages.html", conversations=conversations)
+    except Exception:
+        items = []
+        for c in conversations:
+            u = c["user"]
+            lm = c["last_msg"]
+            if lm:
+                preview = (lm.message or ("[Picha]" if lm.image else "-"))[:80]
+            else:
+                preview = "-"
+            when = to_dar_es_salaam(c["last_at"]) if c.get("last_at") else "-"
+            items.append(
+                f'<a href="/admin/chat/{u.id}" class="block p-4 border-b border-slate-100 hover:bg-slate-50">'
+                f'<div class="flex justify-between gap-2"><span class="font-semibold text-slate-800">{u.username}</span>'
+                f'<span class="text-xs text-slate-400">{when}</span></div>'
+                f'<div class="text-sm text-slate-500 mt-1">{preview}</div>'
+                f'<div class="text-xs text-slate-400 mt-1">{u.phone} · {c["msg_count"]} ujumbe</div></a>'
+            )
+        body = "".join(items) or '<p class="p-6 text-slate-500 text-center">Hakuna mazungumzo bado.</p>'
+        return (
+            '<!DOCTYPE html><html lang="sw"><head><meta charset="UTF-8">'
+            '<meta name="viewport" content="width=device-width,initial-scale=1">'
+            '<title>Ujumbe | Admin</title>'
+            '<script src="https://cdn.tailwindcss.com"></script></head>'
+            '<body class="bg-slate-50 min-h-screen">'
+            '<div class="max-w-lg mx-auto bg-white min-h-screen shadow">'
+            '<div class="sticky top-0 bg-white border-b border-slate-200 px-4 py-3 flex items-center gap-3">'
+            '<a href="/dashboard" class="text-slate-600 text-sm">&larr; Dashboard</a>'
+            '<h1 class="font-bold text-slate-800">Mazungumzo</h1></div>'
+            + body +
+            '</div></body></html>'
+        )
+
+
 @app.route("/admin/chat/<int:user_id>")
 @admin_required
 def admin_chat(user_id):

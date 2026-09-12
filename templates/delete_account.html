@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kufuta Akaunti · Kijiji Tanzania</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <header class="bg-orange-500 text-white px-4 py-4 sticky top-0 z-10 shadow">
+    <div class="max-w-3xl mx-auto flex items-center gap-3">
+      <a href="/" class="text-white/90 hover:text-white text-sm">← Nyumbani</a>
+      <h1 class="font-bold text-lg">Kufuta Akaunti</h1>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-8">
+    <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 text-sm text-amber-900">
+      <strong>Onyo:</strong> Kufuta akaunti ni hatua ya kudumu. Data yako (oda, maombi, ujumbe) itafutwa
+      au kufanywa isiyoweza kutambulika kulingana na sera yetu na sheria.
+    </div>
+
+    <h2 class="text-xl font-bold text-slate-900 mb-3">Jinsi ya kuomba kufuta akaunti</h2>
+    <p class="mb-4">
+      Kulingana na mahitaji ya Google Play, tunatoa njia wazi ya kuomba kufuta akaunti yako.
+    </p>
+
+    <ol class="list-decimal pl-5 space-y-2 mb-6">
+      <li>Hakikisha umeingia kwenye akaunti yako.</li>
+      <li>Jaza fomu hapa chini au tuma ombi kupitia Chat / Mawasiliano.</li>
+      <li>Tutathibitisha ombi lako na kufuta akaunti ndani ya siku 7–14 za kazi
+          (isipokuwa pale sheria inavyotutaka kuhifadhi baadhi ya rekodi).</li>
+    </ol>
+
+    {% if current_user %}
+    <div class="bg-white rounded-2xl shadow border border-slate-200 p-6">
+      <h3 class="font-bold text-slate-800 mb-4">Ombi la Kufuta Akaunti</h3>
+      <form method="POST" action="{{ url_for('delete_account_request') }}">
+        <p class="text-sm text-slate-600 mb-3">
+          Akaunti: <strong>{{ current_user.username }}</strong>
+          ({{ current_user.phone }})
+        </p>
+        <label class="block text-sm font-medium text-slate-700 mb-1">Sababu (si lazima)</label>
+        <textarea name="reason" rows="3" placeholder="Mfano: Sitaki tena kutumia huduma..."
+          class="w-full border border-slate-200 rounded-xl px-3 py-2 text-sm mb-4 focus:ring-2 focus:ring-orange-400 outline-none"></textarea>
+
+        <label class="flex items-start gap-2 mb-4 text-sm">
+          <input type="checkbox" name="confirm" value="1" required class="mt-1">
+          <span>Ninathibitisha kuwa ninataka kufuta akaunti yangu na ninaelewa hatua hii haiwezi kurekebishwa kirahisi.</span>
+        </label>
+
+        <button type="submit"
+          class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl">
+          Tuma Ombi la Kufuta Akaunti
+        </button>
+      </form>
+    </div>
+    {% else %}
+    <div class="bg-white rounded-2xl shadow border border-slate-200 p-6 text-center">
+      <p class="text-slate-600 mb-4">Tafadhali ingia kwenye akaunti yako ili kuomba kufuta.</p>
+      <a href="{{ url_for('login') }}"
+        class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-bold px-6 py-3 rounded-xl">
+        Ingia
+      </a>
+    </div>
+    {% endif %}
+
+    <div class="mt-8 text-sm text-slate-600">
+      <p class="font-semibold mb-2">Unaweza pia:</p>
+      <ul class="list-disc pl-5 space-y-1">
+        <li>Kutuma ujumbe kwenye <a href="/chat" class="text-orange-600 underline">Chat</a></li>
+        <li>Kutumia ukurasa wa <a href="/contact" class="text-orange-600 underline">Mawasiliano</a></li>
+        <li>Kutuma barua pepe: keyaramadhan0@gmail.com (weka somo: "Ombi la Kufuta Akaunti")</li>
+      </ul>
+    </div>
+
+    <div class="mt-10 pt-6 border-t border-slate-200 text-sm text-slate-500">
+      <a href="/privacy" class="text-orange-600 underline">Sera ya Faragha</a> ·
+      <a href="/terms" class="text-orange-600 underline">Vigezo na Masharti</a>
+    </div>
+  </main>
+</body>
+</html>

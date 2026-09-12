@@ -3122,6 +3122,23 @@ def admin_nakala_update(req_id):
         flash("Status si sahihi.", "error")
         return redirect(url_for("dashboard"))
 
+    # Admin anaweza kuhariri bei ya control number pekee (leseni)
+    old_control_fee = int(req.control_number_fee or 0)
+    price_changed = False
+    new_control_fee = old_control_fee
+
+    if req.service_type == "license":
+        fee_raw = (request.form.get("control_number_fee") or "").strip().replace(",", "")
+        if fee_raw != "":
+            try:
+                new_control_fee = max(0, int(fee_raw))
+                if new_control_fee != old_control_fee:
+                    req.control_number_fee = new_control_fee
+                    price_changed = True
+            except (TypeError, ValueError):
+                flash("Bei ya control number si sahihi (weka namba tu).", "error")
+                return redirect(url_for("dashboard") + "#nakala")
+
     result_file = request.files.get("result_file")
     if result_file and result_file.filename:
         allowed_ext = {"pdf", "png", "jpg", "jpeg", "webp", "gif", "bmp"}
@@ -3171,6 +3188,20 @@ def admin_nakala_update(req_id):
             "rejected": "Imekataliwa",
         }.get(status, status)
 
+        # Notification: bei ya control number imebadilishwa
+        if price_changed and req.service_type == "license":
+            body = (
+                f"{req.request_code}: Bei ya control number sasa ni TSh {new_control_fee:,}. "
+                f"Fungua ombi lako kwa maelezo."
+            )
+            send_push_to_user(
+                req.user_id,
+                "Bei ya Control Number Imesasishwa",
+                body[:180],
+                url=f"/nakala/{req.id}",
+                tag=f"nakala-price-{req.id}",
+            )
+
         if control_number and req.service_type == "license":
             fee = req.control_number_fee or 0
             body = (
@@ -3193,7 +3224,7 @@ def admin_nakala_update(req_id):
                 url=f"/nakala/{req.id}",
                 tag=f"nakala-done-{req.id}",
             )
-        else:
+        elif not price_changed:
             body = f"{req.request_code} ({req.service_type}): {status_sw}"
             if result_message:
                 body += f" — {result_message[:50]}"
@@ -3209,7 +3240,7 @@ def admin_nakala_update(req_id):
     except Exception as e:
         print(f"nakala status push: {e}")
     flash(f"Ombi {req.request_code} limehifadhiwa.", "success")
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("dashboard") + "#nakala")
 
 
 # ---------------------------------------------------------------------------

@@ -449,6 +449,42 @@
         font-weight: 800;
         vertical-align: middle;
     }
+    /* Payment / ClickPesa statuses */
+    .status.awaiting_payment,
+    .status.wait-pay {
+        background: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffcc80;
+    }
+    .status.paid,
+    .status.payment-ok {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #a5d6a7;
+    }
+    .status.payment-failed,
+    .status.pay-fail {
+        background: #fce4ec;
+        color: #c62828;
+        border: 1px solid #ef9a9a;
+    }
+    .meta-time {
+        font-size: 11px;
+        color: #999;
+        margin-top: 6px;
+        line-height: 1.4;
+    }
+    .meta-time strong {
+        color: #666;
+        font-weight: 700;
+    }
+    .pay-badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        align-items: center;
+        margin-top: 8px;
+    }
 </style>
 
 <header class="topbar">
@@ -515,7 +551,7 @@
     <div class="tab-panel active" id="panel-orders">
         <div style="margin:0 0 12px;">
             <h2 class="dash-section-title">Oda za Bando</h2>
-            <p class="dash-section-sub">Inaonyesha oda zilizolipwa (pending) na zilizoshindwa</p>
+            <p class="dash-section-sub">ClickPesa: Inasubiri Malipo · Imelipwa · Malipo Yameshindwa · Imekamilika — muda wa Dar es Salaam</p>
         </div>
 
         <form method="GET" action="{{ url_for('dashboard') }}" class="user-search-bar" style="margin-bottom:14px;">
@@ -544,17 +580,23 @@
                     <div class="application-network">TSh {{ "{:,}".format(order.price) }}</div>
                 </div>
 
-                {% if order.status == "pending" %}
-                    <span class="status pending">Inasubiri</span>
+                {% if order.status == "awaiting_payment" %}
+                    <span class="status wait-pay">Inasubiri Malipo</span>
+                {% elif order.status == "pending" %}
+                    <span class="status paid">Imelipwa · Inashughulikiwa</span>
                 {% elif order.status == "completed" %}
                     <span class="status completed">Imekamilika</span>
                 {% elif order.status == "failed" %}
-                    <span class="status rejected">Imeshindwa</span>
-                {% elif order.status == "awaiting_payment" %}
-                    <span class="status processing">Inasubiri Malipo</span>
-                {% else %}
+                    <span class="status pay-fail">Malipo Yameshindwa</span>
+                {% elif order.status == "rejected" %}
                     <span class="status rejected">Imekataliwa</span>
+                {% else %}
+                    <span class="status rejected">{{ order.status }}</span>
                 {% endif %}
+            </div>
+
+            <div class="meta-time">
+                <strong>Muda:</strong> {{ to_dar_es_salaam(order.created_at) }} (Dar)
             </div>
 
             <div style="margin-top:12px; font-size:13px; line-height:1.5;">
@@ -567,22 +609,35 @@
 
                 {% if order.order_reference %}
                 <br>
-                <strong>Ref:</strong> {{ order.order_reference }}
+                <strong>Ref (ClickPesa):</strong> {{ order.order_reference }}
                 {% endif %}
 
                 {% if order.status == "failed" and order.fail_reason %}
                 <br>
-                <strong style="color:#e74c3c;">Sababu:</strong> {{ order.fail_reason }}
+                <strong style="color:#e74c3c;">Sababu ya kushindwa:</strong> {{ order.fail_reason }}
                 {% endif %}
             </div>
 
             {% if order.status == "pending" %}
             <form method="POST"
                   action="{{ url_for('update_order_status', order_id=order.id) }}"
-                  style="margin-top:14px; display:flex; gap:8px;">
+                  style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
                 <input type="hidden" name="status" value="completed">
                 <button class="btn green" type="submit">
                     Weka DONE
+                </button>
+            </form>
+            {% elif order.status == "awaiting_payment" %}
+            <p class="meta-time" style="margin-top:10px;color:#e65100;">
+                ClickPesa: bado haijathibitisha malipo (USSD PIN / timeout).
+            </p>
+            {% elif order.status == "failed" %}
+            <form method="POST"
+                  action="{{ url_for('update_order_status', order_id=order.id) }}"
+                  style="margin-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+                <input type="hidden" name="status" value="pending">
+                <button class="btn orange" type="submit" title="Ikiwa umethibitisha malipo manual">
+                    Weka Imelipwa (manual)
                 </button>
             </form>
             {% endif %}
@@ -619,10 +674,14 @@
                         · Ada TSh {{ "{:,}".format(req.price) }}
                     </div>
                 </div>
-                {% if req.status == "pending" %}
+                {% if req.status == "awaiting_payment" %}
+                    <span class="status wait-pay">Inasubiri Malipo</span>
+                {% elif req.status == "payment_failed" %}
+                    <span class="status pay-fail">Malipo Yameshindwa</span>
+                {% elif req.status == "pending" %}
                     <span class="status pending">Inasubiri</span>
                 {% elif req.status == "paid" %}
-                    <span class="status processing">Imelipwa</span>
+                    <span class="status paid">Imelipwa</span>
                 {% elif req.status == "processing" %}
                     <span class="status processing">Inachakatwa</span>
                 {% elif req.status == "waiting_control_number" %}
@@ -631,14 +690,28 @@
                     <span class="status pending">Control Imetolewa</span>
                 {% elif req.status == "completed" %}
                     <span class="status completed">Imekamilika</span>
-                {% else %}
+                {% elif req.status == "rejected" %}
                     <span class="status rejected">Imekataliwa</span>
+                {% else %}
+                    <span class="status rejected">{{ req.status }}</span>
+                {% endif %}
+            </div>
+
+            <div class="meta-time">
+                <strong>Muda:</strong> {{ to_dar_es_salaam(req.created_at) }} (Dar)
+                {% if req.control_expires_at %}
+                · <strong>Control inaisha:</strong> {{ to_dar_es_salaam(req.control_expires_at) }}
                 {% endif %}
             </div>
 
             <div style="margin-top:12px; font-size:13px; line-height:1.5;">
                 <strong>{{ req.full_name }}</strong><br>
                 <span class="muted">{{ req.phone1 }}{% if req.phone2 %} / {{ req.phone2 }}{% endif %}</span>
+                {% if req.status in ("awaiting_payment", "payment_failed") %}
+                <div class="pay-badge-row">
+                    <span class="muted" style="font-size:12px;">ClickPesa · Ada TSh {{ "{:,}".format(req.price or 0) }}</span>
+                </div>
+                {% endif %}
             </div>
 
             <div style="margin-top:12px; background:#f8f8f8; border-radius:12px; padding:12px; font-size:12px; line-height:1.6;" id="copy-box-{{ req.id }}">
@@ -668,6 +741,8 @@
                   style="margin-top:14px;">
                 <select class="input" name="status">
                     <option value="pending" {% if req.status == "pending" %}selected{% endif %}>Inasubiri (pending)</option>
+                    <option value="awaiting_payment" {% if req.status == "awaiting_payment" %}selected{% endif %}>Inasubiri Malipo (ClickPesa)</option>
+                    <option value="payment_failed" {% if req.status == "payment_failed" %}selected{% endif %}>Malipo Yameshindwa</option>
                     <option value="paid" {% if req.status == "paid" %}selected{% endif %}>Imelipwa</option>
                     <option value="processing" {% if req.status == "processing" %}selected{% endif %}>Inachakatwa</option>
                     <option value="waiting_control_number" {% if req.status == "waiting_control_number" %}selected{% endif %}>Inasubiri Control Number</option>
@@ -740,9 +815,15 @@
                     <span class="status processing">Inachakatwa</span>
                 {% elif application.status == "completed" %}
                     <span class="status completed">Imekamilika</span>
-                {% else %}
+                {% elif application.status == "rejected" %}
                     <span class="status rejected">Imekataliwa</span>
+                {% else %}
+                    <span class="status rejected">{{ application.status }}</span>
                 {% endif %}
+            </div>
+
+            <div class="meta-time">
+                <strong>Muda:</strong> {{ to_dar_es_salaam(application.created_at) }} (Dar)
             </div>
 
             <div style="margin-top:12px; font-size:13px;">
@@ -881,6 +962,9 @@
                                 <span class="muted">Hakuna link</span>
                             {% endif %}
                         </div>
+                        {% if slide.created_at %}
+                        <div class="meta-time" style="margin-top:4px;">Imeongezwa: {{ to_dar_es_salaam(slide.created_at) }}</div>
+                        {% endif %}
                     </div>
                     {% if slide.is_active %}
                         <span class="status completed">Active</span>
@@ -1046,10 +1130,11 @@
                                         <div class="user-order-row">
                                             <strong>#{{ o.id }}</strong> · {{ o.amount }} · TSh {{ "{:,}".format(o.price or 0) }}
                                             ·
-                                            {% if o.status == "pending" %}<span class="status pending">pending</span>
-                                            {% elif o.status == "completed" %}<span class="status completed">done</span>
-                                            {% elif o.status == "failed" %}<span class="status rejected">failed</span>
-                                            {% elif o.status == "awaiting_payment" %}<span class="status processing">awaiting</span>
+                                            {% if o.status == "awaiting_payment" %}<span class="status wait-pay">Inasubiri Malipo</span>
+                                            {% elif o.status == "pending" %}<span class="status paid">Imelipwa</span>
+                                            {% elif o.status == "completed" %}<span class="status completed">Imekamilika</span>
+                                            {% elif o.status == "failed" %}<span class="status pay-fail">Malipo Yameshindwa</span>
+                                            {% elif o.status == "rejected" %}<span class="status rejected">Imekataliwa</span>
                                             {% else %}<span class="status rejected">{{ o.status }}</span>{% endif %}
                                             <br>
                                             <span class="muted">{{ o.phone }} · {{ to_dar_es_salaam(o.created_at) }}</span>

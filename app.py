@@ -20,16 +20,30 @@ from werkzeug.utils import secure_filename
 # App setup
 # ---------------------------------------------------------------------------
 app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "kijiji-tanzania-secret-key-change-me")
+# SECRET_KEY lazima iwe kutoka env production — default dhaifu inaruhusiwa development tu
+_secret = os.environ.get("SECRET_KEY", "").strip()
+if not _secret:
+    if os.environ.get("FLASK_ENV") == "development" or not os.environ.get("DATABASE_URL"):
+        _secret = "dev-only-change-me-" + secrets.token_hex(16)
+    else:
+        # Production bila SECRET_KEY → tengeneza random (session zitabadilika kila restart)
+        _secret = secrets.token_hex(32)
+        print("⚠ SECRET_KEY haipo env — using random key (weka SECRET_KEY kwenye Railway)")
+app.config["SECRET_KEY"] = _secret
 
-# Session inabaki muda mrefu (mwaka 1) mpaka user atoke mwenyewe
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=365)
+# Session: siku 30 (si mwaka 1) — salama zaidi
+app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(days=30)
 app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 # Railway hutumia HTTPS — cookie salama
 app.config["SESSION_COOKIE_SECURE"] = os.environ.get("FLASK_ENV") != "development"
 # Refresh cookie kila request ili isimalize
 app.config["SESSION_REFRESH_EACH_REQUEST"] = True
+
+# Security: password min length + login rate limit
+MIN_PASSWORD_LENGTH = 8
+MAX_LOGIN_ATTEMPTS = 5
+LOGIN_LOCKOUT_MINUTES = 15
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -557,6 +571,43 @@ def push_unsubscribe():
 # ---------------------------------------------------------------------------
 # Auth routes
 # ---------------------------------------------------------------------------
+def _password_ok(password):
+    """Angalia nguvu ya password: angalau MIN_PASSWORD_LENGTH herufi."""
+    if not password or len(password) < MIN_PASSWORD_LENGTH:
+        return False, f"Password iwe angalau herufi {MIN_PASSWORD_LENGTH}."
+    return True, ""
+
+
+def _login_locked():
+    """Rudisha True ikiwa IP/session imefungwa baada ya majaribio mengi."""
+    fails = session.get("login_fails", 0)
+    locked_until = session.get("login_locked_until")
+    if locked_until:
+        try:
+            until = datetime.fromisoformat(locked_until)
+            if datetime.utcnow() < until:
+                return True, max(1, int((until - datetime.utcnow()).total_seconds() / 60))
+            session.pop("login_locked_until", None)
+            session["login_fails"] = 0
+        except Exception:
+            session.pop("login_locked_until", None)
+    return fails >= MAX_LOGIN_ATTEMPTS, 0
+
+
+def _record_login_fail():
+    fails = int(session.get("login_fails", 0)) + 1
+    session["login_fails"] = fails
+    if fails >= MAX_LOGIN_ATTEMPTS:
+        until = datetime.utcnow() + timedelta(minutes=LOGIN_LOCKOUT_MINUTES)
+        session["login_locked_until"] = until.isoformat()
+    session.modified = True
+
+
+def _clear_login_fails():
+    session.pop("login_fails", None)
+    session.pop("login_locked_until", None)
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if get_current_user():
@@ -569,13 +620,18 @@ def register():
         if not username or not phone or not password:
             flash("Jaza taarifa zote muhimu.", "error")
             return redirect(url_for("register"))
+        ok, msg = _password_ok(password)
+        if not ok:
+            flash(msg, "error")
+            return redirect(url_for("register"))
         if User.query.filter((User.username == username) | (User.phone == phone)).first():
             flash("Username au namba ya simu tayari inatumika.", "error")
             return redirect(url_for("register"))
         if email and User.query.filter_by(email=email).first():
             flash("Email tayari inatumika.", "error")
             return redirect(url_for("register"))
-        user = User(username=username, phone=phone, email=email)
+        # Hakuna is_admin kutoka form — admin mmoja tu kutoka seed
+        user = User(username=username, phone=phone, email=email, is_admin=False)
         user.set_password(password)
         db.session.add(user)
         db.session.commit()
@@ -591,6 +647,14 @@ def login():
     if get_current_user():
         return redirect(url_for("home"))
     if request.method == "POST":
+        locked, mins = _login_locked()
+        if locked:
+            flash(
+                f"Umejaribu mara nyingi. Subiri dakika {mins or LOGIN_LOCKOUT_MINUTES} kisha jaribu tena.",
+                "error",
+            )
+            return redirect(url_for("login"))
+
         identity = request.form.get("identity", "").strip()
         password = request.form.get("password", "")
         user = User.query.filter(
@@ -602,6 +666,7 @@ def login():
             if getattr(user, "is_blocked", False):
                 flash("Akaunti yako imefungwa. Wasiliana na admin.", "error")
                 return redirect(url_for("login"))
+            _clear_login_fails()
             session.permanent = True
             session["user_id"] = user.id
             flash("Umefanikiwa kuingia.", "success")
@@ -609,7 +674,15 @@ def login():
             if next_url and next_url.startswith("/") and not next_url.startswith("//"):
                 return redirect(next_url)
             return redirect(url_for("home"))
-        flash("Username/namba/email au password si sahihi.", "error")
+        _record_login_fail()
+        left = MAX_LOGIN_ATTEMPTS - int(session.get("login_fails", 0))
+        if left > 0:
+            flash(f"Username/namba/email au password si sahihi. Jaribio {left} zimebaki.", "error")
+        else:
+            flash(
+                f"Umejaribu mara nyingi. Akaunti imefungwa kwa dakika {LOGIN_LOCKOUT_MINUTES}.",
+                "error",
+            )
         return redirect(url_for("login"))
     return render_template("login.html")
 
@@ -623,7 +696,10 @@ def logout():
 
 @app.route("/forgot-password", methods=["GET", "POST"])
 def forgot_password():
-    """Bure + otomatiki: namba/username + password mpya. Hakuna SMS."""
+    """
+    Reset password — ADMIN HAWEZI kutumia fomu hii (security).
+    User wa kawaida: identity + password mpya (angalau herufi 8).
+    """
     if get_current_user():
         return redirect(url_for("home"))
 
@@ -638,8 +714,9 @@ def forgot_password():
         if password != password2:
             flash("Password hazifanani.", "error")
             return redirect(url_for("forgot_password"))
-        if len(password) < 4:
-            flash("Password iwe angalau herufi 4.", "error")
+        ok, msg = _password_ok(password)
+        if not ok:
+            flash(msg, "error")
             return redirect(url_for("forgot_password"))
 
         user = User.query.filter(
@@ -648,8 +725,18 @@ def forgot_password():
             | (User.email == identity)
         ).first()
 
+        # Usifichue kama user yupo — ujumbe sawa
         if not user:
-            flash("Akaunti haijapatikana. Hakikisha namba/username ni sahihi.", "error")
+            flash("Ikiwa akaunti ipo, password imebadilishwa. Ingia sasa.", "success")
+            return redirect(url_for("login"))
+
+        # ADMIN HAWEZI reset kwa fomu hii — lazima abadilishe kupitia settings akiwa ameingia
+        if user.is_admin:
+            flash(
+                "Akaunti ya admin haiwezi kubadilisha password hapa. "
+                "Ingia kwenye dashboard → Settings, au wasiliana na msimamizi wa system.",
+                "error",
+            )
             return redirect(url_for("forgot_password"))
 
         user.set_password(password)
@@ -734,8 +821,9 @@ def settings():
             if not user.check_password(current_password):
                 flash("Password ya sasa si sahihi.", "error")
                 return redirect(url_for("settings"))
-            if len(new_password) < 4:
-                flash("Password mpya iwe angalau herufi 4.", "error")
+            ok, msg = _password_ok(new_password)
+            if not ok:
+                flash(msg, "error")
                 return redirect(url_for("settings"))
             if new_password != new_password2:
                 flash("Password mpya hazifanani.", "error")
@@ -2578,26 +2666,51 @@ def admin_nakala_update(req_id):
 # ---------------------------------------------------------------------------
 # Seed data
 # ---------------------------------------------------------------------------
+def ensure_single_admin():
+    """Hakikisha kuna admin MMOJA tu. Wengine wote wanaondolewa is_admin."""
+    admins = User.query.filter_by(is_admin=True).order_by(User.id.asc()).all()
+    if len(admins) <= 1:
+        return
+    # Weka wa kwanza (id ndogo) kama admin pekee
+    keep = admins[0]
+    for a in admins[1:]:
+        a.is_admin = False
+        print(f"⚠ Demoted extra admin: {a.username} (id={a.id})")
+    db.session.commit()
+    print(f"✓ Admin pekee: {keep.username} (id={keep.id})")
+
+
 def seed_data():
-    """Idempotent seed — safe to run even if some data already exists."""
-    # Admin
-    if not User.query.filter_by(username="admin").first():
+    """Idempotent seed — admin MMOJA tu, password kutoka env."""
+    # --- Admin mmoja tu ---
+    admin = User.query.filter_by(username="admin").first()
+    if not admin:
+        # Password kutoka env (lazima production); default salama zaidi ya admin123
+        admin_pw = os.environ.get("ADMIN_PASSWORD", "").strip()
+        if not admin_pw or len(admin_pw) < MIN_PASSWORD_LENGTH:
+            admin_pw = os.environ.get("ADMIN_PASSWORD") or ("Admin@" + secrets.token_hex(4))
+            print(f"⚠ ADMIN_PASSWORD haipo au fupi — generated temporary password (weka ADMIN_PASSWORD env)")
+            print(f"   Temporary admin password: {admin_pw}")
         admin = User(
             username="admin",
-            phone="0700000000",
-            email="admin@kijiji.tz",
+            phone=os.environ.get("ADMIN_PHONE", "0700000000"),
+            email=os.environ.get("ADMIN_EMAIL", "admin@kijiji.tz"),
             is_admin=True,
         )
-        admin.set_password("admin123")
+        admin.set_password(admin_pw)
         db.session.add(admin)
+        db.session.flush()
+        print("✓ Admin created (username: admin)")
+    else:
+        # Hakikisha ni admin
+        if not admin.is_admin:
+            admin.is_admin = True
+            db.session.flush()
 
-    # Demo user
-    if not User.query.filter_by(username="demo").first():
-        demo = User(username="demo", phone="0712345678", email="demo@kijiji.tz")
-        demo.set_password("demo123")
-        db.session.add(demo)
+    # Ondoa is_admin kwa user wengine wote
+    ensure_single_admin()
 
-    # Bundles (only if none exist)
+    # Bundles
     if Bundle.query.count() == 0:
         bundles = [
             Bundle(name="Daily", amount="1 GB", price=1000, validity="Siku 1"),
@@ -2611,16 +2724,12 @@ def seed_data():
 
     # Offers
     if Offer.query.count() == 0:
-        offers = [
-            Offer(
-                title="Offer ya Leo",
-                amount="10 GB",
-                price=8000,
-                description="Ofa maalum – lipa na upate haraka!",
-            ),
-        ]
-        for o in offers:
-            db.session.add(o)
+        db.session.add(Offer(
+            title="Offer ya Leo",
+            amount="10 GB",
+            price=8000,
+            description="Ofa maalum – lipa na upate haraka!",
+        ))
 
     networks_data = {
         "Vodacom": [
@@ -2656,21 +2765,18 @@ def seed_data():
             db.session.add(net)
             db.session.flush()
         for icon, title, desc in services:
-            exists = AgencyService.query.filter_by(
-                network_id=net.id, title=title
-            ).first()
+            exists = AgencyService.query.filter_by(network_id=net.id, title=title).first()
             if not exists:
-                svc = AgencyService(
+                db.session.add(AgencyService(
                     network_id=net.id,
                     network=net_name,
                     title=title,
                     description=desc,
                     icon=icon,
-                )
-                db.session.add(svc)
+                ))
 
     db.session.commit()
-    print("✓ Seed data ready (admin/admin123, demo/demo123)")
+    print("✓ Seed data ready (admin mmoja tu)")
 
 
 def ensure_agency_columns():

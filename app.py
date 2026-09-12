@@ -292,6 +292,25 @@ def to_dar_es_salaam(dt):
     return local.strftime("%d/%m/%Y %H:%M")
 
 
+def status_label_sw(status):
+    """Jina la status kwa Kiswahili (ClickPesa + workflow)."""
+    if not status:
+        return "—"
+    mapping = {
+        "awaiting_payment": "Inasubiri Malipo",
+        "payment_failed": "Malipo Yameshindwa",
+        "failed": "Malipo Yameshindwa",
+        "pending": "Inasubiri",
+        "paid": "Imelipwa",
+        "processing": "Inachakatwa",
+        "waiting_control_number": "Inasubiri Control Number",
+        "control_issued": "Control Number Imetolewa",
+        "completed": "Imekamilika",
+        "rejected": "Imekataliwa",
+    }
+    return mapping.get(str(status).strip(), str(status))
+
+
 @app.context_processor
 def inject_globals():
     return {
@@ -300,6 +319,7 @@ def inject_globals():
         "PAYMENT_NAME": PAYMENT_NAME,
         "PAYMENT_NETWORK": PAYMENT_NETWORK,
         "to_dar_es_salaam": to_dar_es_salaam,
+        "status_label_sw": status_label_sw,
     }
 
 

@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Ujumbe · Admin{% endblock %}
+{% block content %}
+<style>
+.msg-page { max-width: 640px; margin: 0 auto; padding: 12px 14px 40px; }
+.msg-hero {
+    background: linear-gradient(135deg, #f56b00, #e85d04);
+    color: #fff;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+}
+.msg-hero h1 { font-size: 17px; font-weight: 800; margin: 0 0 4px; }
+.msg-hero p { font-size: 12px; opacity: 0.92; margin: 0; }
+.thread-list { display: flex; flex-direction: column; gap: 8px; }
+.thread-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 14px;
+    padding: 12px 14px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.thread-card:active { background: #fff8f3; }
+.thread-card.unread {
+    border-color: #ffd0b0;
+    background: #fffaf5;
+    box-shadow: inset 3px 0 0 #f56b00;
+}
+.thread-avatar {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    background: #fff1e8;
+    color: #f56b00;
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+.thread-body { flex: 1; min-width: 0; }
+.thread-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 3px;
+}
+.thread-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: #222;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.thread-time {
+    font-size: 11px;
+    color: #999;
+    flex-shrink: 0;
+}
+.thread-preview {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.35;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.thread-preview .from {
+    font-weight: 700;
+    color: #f56b00;
+}
+.badge-new {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    background: #f56b00;
+    color: #fff;
+    padding: 2px 7px;
+    border-radius: 999px;
+    margin-left: 6px;
+}
+.empty {
+    text-align: center;
+    padding: 40px 16px;
+    color: #999;
+    font-size: 14px;
+}
+.back-row { margin-bottom: 12px; }
+.back-row a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #f56b00;
+    text-decoration: none;
+}
+</style>
+
+<header class="topbar">
+    <div>
+        <div class="brand">Ujumbe</div>
+        <div class="muted">Mazungumzo na wateja</div>
+    </div>
+    <a href="{{ url_for('dashboard') }}" class="icon-btn">←</a>
+</header>
+
+<div class="page msg-page">
+    <div class="msg-hero">
+        <h1>📬 Ujumbe / Chat</h1>
+        <p>Gusa mazungumzo ili uone ujumbe wote na ujibu.</p>
+    </div>
+
+    {% if threads %}
+    <div class="thread-list">
+        {% for t in threads %}
+        <a href="{{ url_for('admin_chat', user_id=t.user.id) }}"
+           class="thread-card{% if t.unread_from_customer %} unread{% endif %}">
+            <div class="thread-avatar">
+                {{ (t.user.username or '?')[0]|upper }}
+            </div>
+            <div class="thread-body">
+                <div class="thread-top">
+                    <div class="thread-name">
+                        {{ t.user.username }}
+                        {% if t.unread_from_customer %}
+                        <span class="badge-new">Mpya</span>
+                        {% endif %}
+                    </div>
+                    <div class="thread-time">{{ to_dar_es_salaam(t.last_at) }}</div>
+                </div>
+                <div class="thread-preview">
+                    {% if t.last_sender == 'customer' %}
+                    <span class="from">Mteja:</span>
+                    {% else %}
+                    <span class="from">Wewe:</span>
+                    {% endif %}
+                    {{ t.last_message }}
+                </div>
+                <div style="font-size:11px;color:#aaa;margin-top:2px;">
+                    {{ t.user.phone or '' }}
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty">
+        Hakuna ujumbe bado.<br>
+        Ukipata notification, itakuja hapa.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

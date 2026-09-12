@@ -1,111 +1,128 @@
 {% extends "base.html" %}
-
 {% block title %}Settings{% endblock %}
-
 {% block content %}
-
 <style>
     .settings-head {
         background: #151515;
         color: white;
         padding: 24px 18px;
     }
-
     .settings-head h1 {
         font-size: 27px;
     }
-
     .settings-page {
         padding: 15px;
     }
-
     .field {
         margin-bottom: 15px;
     }
-
     .field label {
         display: block;
         font-size: 13px;
         font-weight: bold;
         margin-bottom: 7px;
     }
+    .legal-links {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 4px;
+    }
+    .legal-links a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 14px;
+        background: #f8f8f8;
+        border-radius: 12px;
+        color: #333;
+        text-decoration: none;
+        font-size: 14px;
+        border: 1px solid #eee;
+    }
+    .legal-links a:hover {
+        background: #fff1e7;
+        border-color: #ffd4b0;
+        color: #ed4800;
+    }
+    .legal-links a span.arrow {
+        color: #f56b00;
+        font-size: 16px;
+    }
 </style>
-
-
 <div class="settings-head">
-
     <h1>Settings</h1>
-
 </div>
-
-
 <div class="settings-page">
-
     <form method="POST" class="card">
-
         <div class="field">
-
             <label>Username</label>
-
             <input
                 class="input"
                 name="username"
                 value="{{ current_user.username }}"
                 required
             >
-
         </div>
-
-
         <div class="field">
-
             <label>Namba ya simu</label>
-
             <input
                 class="input"
                 name="phone"
                 value="{{ current_user.phone }}"
                 required
             >
-
         </div>
-
-
         <div class="field">
-
             <label>Email</label>
-
             <input
                 class="input"
                 value="{{ current_user.email or '' }}"
                 disabled
             >
-
         </div>
-
-
         <button class="btn orange">
             Hifadhi Mabadiliko
         </button>
-
     </form>
 
-
     <div class="card">
-
         <h3 style="margin-bottom:8px;">
             Kuhusu
         </h3>
-
         <p class="muted">
             MR. SULE DIGITAL SERVICES BUSINESS — bando, usajili & uwakala.
         </p>
         <p class="muted" style="margin-top:10px;">
             <strong>Malipo:</strong> Vodacom {{ PAYMENT_NUMBER }} ({{ PAYMENT_NAME }})
         </p>
-
     </div>
 
+    <!-- Legal & Account -->
+    <div class="card">
+        <h3 style="margin-bottom:10px;">Sheria na Akaunti</h3>
+        <div class="legal-links">
+            <a href="{{ url_for('privacy') }}">
+                Sera ya Faragha
+                <span class="arrow">→</span>
+            </a>
+            <a href="{{ url_for('terms') }}">
+                Vigezo na Masharti
+                <span class="arrow">→</span>
+            </a>
+            <a href="{{ url_for('refund_policy') }}">
+                Sera ya Marejesho
+                <span class="arrow">→</span>
+            </a>
+            <a href="{{ url_for('contact') }}">
+                Mawasiliano / Support
+                <span class="arrow">→</span>
+            </a>
+            <a href="{{ url_for('delete_account_page') }}" style="color:#c0392b;">
+                Kufuta Akaunti
+                <span class="arrow" style="color:#c0392b;">→</span>
+            </a>
+        </div>
+    </div>
 </div>
-
 {% endblock %}

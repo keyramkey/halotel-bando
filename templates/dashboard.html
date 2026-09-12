@@ -518,11 +518,10 @@
             <p class="dash-section-sub">Inaonyesha oda zilizolipwa (pending) na zilizoshindwa</p>
         </div>
 
-        <!-- Search by reference -->
-        <form method="GET" action="{{ url_for('dashboard') }}" class="user-search-bar" id="ordersRefForm" style="margin-bottom:14px;">
+        <form method="GET" action="{{ url_for('dashboard') }}" class="user-search-bar" style="margin-bottom:14px;">
             <input class="input" type="search" name="ref" value="{{ orders_ref_q or '' }}"
                    placeholder="Tafuta Ref / Oda ID / simu / GB..." autocomplete="off">
-            <button class="search-icon-btn" type="submit" aria-label="Tafuta Ref" title="Tafuta">
+            <button class="search-icon-btn" type="submit" aria-label="Tafuta" title="Tafuta">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                     <circle cx="11" cy="11" r="7"></circle>
                     <line x1="16.5" y1="16.5" x2="21" y2="21"></line>
@@ -1090,7 +1089,6 @@
                 Orodha kamili →
             </a>
         </div>
-
         {% if chat_threads %}
         <div class="list-more-wrap" data-list="chats" data-limit="8">
             {% for t in chat_threads %}
@@ -1119,17 +1117,12 @@
                 </div>
             </a>
             {% endfor %}
-            <button type="button" class="see-more-btn" data-list="chats" style="display:none;" onclick="toggleSeeMore(this)">
-                See more
-            </button>
+            <button type="button" class="see-more-btn" data-list="chats" style="display:none;" onclick="toggleSeeMore(this)">See more</button>
         </div>
         {% else %}
-        <div class="card">
-            <p class="muted" style="margin:0;">Hakuna ujumbe bado. Wateja wakituma, wataonekana hapa.</p>
-        </div>
+        <div class="card"><p class="muted" style="margin:0;">Hakuna ujumbe bado.</p></div>
         {% endif %}
     </div>
-
 
     <!-- ==================== AKAUNTI YA ADMIN ==================== -->
     <div class="tab-panel" id="panel-account">

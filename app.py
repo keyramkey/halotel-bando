@@ -2544,6 +2544,51 @@ def dashboard():
             filters.append(User.id == int(q))
         users_query = users_query.filter(or_(*filters))
     all_users = users_query.limit(300).all()
+
+    # Chat threads kwa tab ya Ujumbe kwenye dashboard
+    from sqlalchemy import func, desc
+    chat_subq = (
+        db.session.query(
+            Message.user_id,
+            func.max(Message.created_at).label("last_at"),
+            func.count(Message.id).label("msg_count"),
+        )
+        .group_by(Message.user_id)
+        .subquery()
+    )
+    chat_rows = (
+        db.session.query(User, chat_subq.c.last_at, chat_subq.c.msg_count)
+        .join(chat_subq, User.id == chat_subq.c.user_id)
+        .order_by(desc(chat_subq.c.last_at))
+        .limit(50)
+        .all()
+    )
+    chat_threads = []
+    chat_unread = 0
+    for u, last_at, msg_count in chat_rows:
+        last_msg = (
+            Message.query.filter_by(user_id=u.id)
+            .order_by(Message.created_at.desc())
+            .first()
+        )
+        last_text = ""
+        last_sender = ""
+        unread = False
+        if last_msg:
+            last_text = (last_msg.message or ("[Picha]" if last_msg.image else "—"))[:100]
+            last_sender = last_msg.sender or ""
+            unread = last_sender == "customer"
+            if unread:
+                chat_unread += 1
+        chat_threads.append({
+            "user": u,
+            "last_at": last_at,
+            "msg_count": msg_count,
+            "last_message": last_text,
+            "last_sender": last_sender,
+            "unread_from_customer": unread,
+        })
+
     return render_template(
         "dashboard.html",
         users_count=users_count,
@@ -2563,6 +2608,8 @@ def dashboard():
         trash_orders_count=trash_orders_count,
         trash_nakala_count=trash_nakala_count,
         trash_count=trash_count,
+        chat_threads=chat_threads,
+        chat_unread=chat_unread,
     )
 
 

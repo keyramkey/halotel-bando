@@ -836,8 +836,12 @@ def order():
                 data = response.json()
 
                 if response.status_code in [200, 201]:
-                    flash("Ombi la malipo limeshushwa! Angalia simu yako na uingize PIN.", "success")
-                    return redirect(url_for("asante"))
+                    flash(
+                        "Asante! Ombi la malipo limeshushwa. Angalia simu yako na uingize PIN. "
+                        "Unaweza kufuatilia hali ya oda yako hapa chini.",
+                        "success",
+                    )
+                    return redirect(url_for("profile"))
                 else:
                     reason = data.get("message") or str(data)[:120]
                     new_order.status = "failed"
@@ -946,36 +950,6 @@ def update_order_status(order_id):
     else:
         flash("Status si sahihi.", "error")
     return redirect(url_for("dashboard"))
-
-
-@app.route("/asante")
-def asante():
-    return """
-    <!DOCTYPE html>
-    <html lang="sw">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Asante | Malipo</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-    </head>
-    <body class="bg-slate-50 min-h-screen flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-xl p-8 max-w-md w-full text-center">
-            <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                <span class="text-3xl text-green-600">✓</span>
-            </div>
-            <h1 class="text-2xl font-bold text-slate-800 mb-2">Ombi la Pesa Limeshushwa!</h1>
-            <p class="text-slate-500 text-sm mb-6">
-                Angalia simu yako sasa. Ujumbe wa PIN utajitokeza.<br>
-                Ingiza namba yako ya siri kukamilisha malipo.
-            </p>
-            <a href="/" class="inline-block bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-xl">
-                Rudi Nyumbani
-            </a>
-        </div>
-    </body>
-    </html>
-    """
 
 
 # ---------------------------------------------------------------------------

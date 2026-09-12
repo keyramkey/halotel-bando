@@ -170,7 +170,9 @@
     {% if req.result_file %}
     <div class="nd-card">
         <div class="nd-title">Faili / Leseni</div>
-        <a class="file-btn" href="{{ url_for('media_file', filename=req.result_file) }}" target="_blank">
+        <a class="file-btn"
+           href="{{ url_for('media_file', filename=req.result_file, download=1) }}"
+           download="{{ req.request_code }}_{{ req.result_file.split('/')[-1] }}">
             📄 Pakua Leseni / Faili
         </a>
     </div>

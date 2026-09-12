@@ -2579,42 +2579,48 @@ def admin_nakala_update(req_id):
 # Seed data
 # ---------------------------------------------------------------------------
 def seed_data():
-    if User.query.filter_by(username="admin").first():
-        return
+    """Idempotent seed — safe to run even if some data already exists."""
+    # Admin
+    if not User.query.filter_by(username="admin").first():
+        admin = User(
+            username="admin",
+            phone="0700000000",
+            email="admin@kijiji.tz",
+            is_admin=True,
+        )
+        admin.set_password("admin123")
+        db.session.add(admin)
 
-    admin = User(
-        username="admin",
-        phone="0700000000",
-        email="admin@kijiji.tz",
-        is_admin=True,
-    )
-    admin.set_password("admin123")
-    db.session.add(admin)
+    # Demo user
+    if not User.query.filter_by(username="demo").first():
+        demo = User(username="demo", phone="0712345678", email="demo@kijiji.tz")
+        demo.set_password("demo123")
+        db.session.add(demo)
 
-    demo = User(username="demo", phone="0712345678", email="demo@kijiji.tz")
-    demo.set_password("demo123")
-    db.session.add(demo)
+    # Bundles (only if none exist)
+    if Bundle.query.count() == 0:
+        bundles = [
+            Bundle(name="Daily", amount="1 GB", price=1000, validity="Siku 1"),
+            Bundle(name="Weekly", amount="5 GB", price=5000, validity="Siku 7"),
+            Bundle(name="Monthly", amount="15 GB", price=15000, validity="Siku 30"),
+            Bundle(name="Monthly+", amount="30 GB", price=25000, validity="Siku 30"),
+            Bundle(name="Mega", amount="50 GB", price=40000, validity="Siku 30"),
+        ]
+        for b in bundles:
+            db.session.add(b)
 
-    bundles = [
-        Bundle(name="Daily", amount="1 GB", price=1000, validity="Siku 1"),
-        Bundle(name="Weekly", amount="5 GB", price=5000, validity="Siku 7"),
-        Bundle(name="Monthly", amount="15 GB", price=15000, validity="Siku 30"),
-        Bundle(name="Monthly+", amount="30 GB", price=25000, validity="Siku 30"),
-        Bundle(name="Mega", amount="50 GB", price=40000, validity="Siku 30"),
-    ]
-    for b in bundles:
-        db.session.add(b)
-
-    offers = [
-        Offer(
-            title="Offer ya Leo",
-            amount="10 GB",
-            price=8000,
-            description="Ofa maalum – lipa na upate haraka!",
-        ),
-    ]
-    for o in offers:
-        db.session.add(o)
+    # Offers
+    if Offer.query.count() == 0:
+        offers = [
+            Offer(
+                title="Offer ya Leo",
+                amount="10 GB",
+                price=8000,
+                description="Ofa maalum – lipa na upate haraka!",
+            ),
+        ]
+        for o in offers:
+            db.session.add(o)
 
     networks_data = {
         "Vodacom": [
@@ -2644,21 +2650,27 @@ def seed_data():
         ],
     }
     for net_name, services in networks_data.items():
-        net = Network(network=net_name)
-        db.session.add(net)
-        db.session.flush()
+        net = Network.query.filter_by(network=net_name).first()
+        if not net:
+            net = Network(network=net_name)
+            db.session.add(net)
+            db.session.flush()
         for icon, title, desc in services:
-            svc = AgencyService(
-                network_id=net.id,
-                network=net_name,
-                title=title,
-                description=desc,
-                icon=icon,
-            )
-            db.session.add(svc)
+            exists = AgencyService.query.filter_by(
+                network_id=net.id, title=title
+            ).first()
+            if not exists:
+                svc = AgencyService(
+                    network_id=net.id,
+                    network=net_name,
+                    title=title,
+                    description=desc,
+                    icon=icon,
+                )
+                db.session.add(svc)
 
     db.session.commit()
-    print("✓ Seed data created (admin/admin123, demo/demo123)")
+    print("✓ Seed data ready (admin/admin123, demo/demo123)")
 
 
 def ensure_agency_columns():

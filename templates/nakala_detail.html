@@ -72,7 +72,7 @@
     {% if req.status == 'payment_failed' %}
     <div class="nd-alert fail">
         <strong>Malipo yameshindwa.</strong>
-        {% if req.admin_note %} {{ req.admin_note }}{% else %} Unaweza kujaribu kulipa tena.{% endif %}
+        {% if req.admin_note %} {{ clean_payment_error(req.admin_note) if clean_payment_error is defined else req.admin_note }}{% else %} Unaweza kujaribu kulipa tena.{% endif %}
     </div>
     {% elif req.status == 'awaiting_payment' %}
     <div class="nd-alert wait">
@@ -156,7 +156,7 @@
     {% if req.admin_note %}
     <div class="nd-card">
         <div class="nd-title">Ujumbe wa Admin</div>
-        <p style="font-size:13px;line-height:1.5;color:#333;margin:0;">{{ req.admin_note }}</p>
+        <p style="font-size:13px;line-height:1.5;color:#333;margin:0;">{{ clean_payment_error(req.admin_note) if clean_payment_error is defined else req.admin_note }}</p>
     </div>
     {% endif %}
 

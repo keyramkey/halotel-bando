@@ -467,7 +467,6 @@ textarea.input {
     margin-top: 12px;
 }
 </style>
-
 <div class="order-page">
     <header class="order-header">
         <div class="header-inner">
@@ -480,7 +479,6 @@ textarea.input {
             <a href="{{ url_for('home') }}" class="back-btn">←</a>
         </div>
     </header>
-
     <main class="order-container">
         {# Banner inayoonekana ikiwa imetoka tangazo #}
         <div class="offer-banner{% if offer_amount and offer_price %} show{% endif %}" id="offerBanner">
@@ -492,7 +490,6 @@ textarea.input {
                 · <a href="{{ url_for('order') }}">Badilisha kifurushi</a>
             </div>
         </div>
-
         <form method="POST" action="{{ url_for('order') }}" id="orderForm">
             <section class="order-card">
                 <div class="section-title">Kifurushi</div>
@@ -511,7 +508,6 @@ textarea.input {
                         </div>
                         <div class="dropdown-arrow" id="dropdownArrow">{% if not (offer_amount and offer_price) %}⌄{% else %}✓{% endif %}</div>
                     </button>
-
                     <div class="bundle-options" id="bundleOptions">
                         <div class="period-buttons" id="periodButtons">
                             <button type="button" class="period-btn" data-period="wiki">Wiki Mbili</button>
@@ -543,6 +539,15 @@ textarea.input {
                                     <div class="option-icon">5</div>
                                     <div class="option-info"><strong>GB 5</strong><span>Wiki Mbili</span></div>
                                     <div class="option-price">TSh 6,000</div>
+                                </div>
+                            </button>
+                            <button type="button" class="bundle-option"
+                                data-amount="GB 6.5 - Wiki Mbili" data-price="7000"
+                                data-name="GB 6.5" data-amount-display="Wiki Mbili">
+                                <div class="option-main">
+                                    <div class="option-icon">6.5</div>
+                                    <div class="option-info"><strong>GB 6.5</strong><span>Wiki Mbili</span></div>
+                                    <div class="option-price">TSh 7,000</div>
                                 </div>
                             </button>
                         </div>
@@ -613,10 +618,8 @@ textarea.input {
                         </div>
                     </div>
                 </div>
-
                 <input type="hidden" name="amount" id="amountInput" value="{{ offer_amount or '' }}">
                 <input type="hidden" name="price" id="priceInput" value="{{ offer_price or '0' }}">
-
                 <div class="price-box">
                     <div>
                         <div class="price-label">Bei</div>
@@ -629,7 +632,6 @@ textarea.input {
                     </div>
                 </div>
             </section>
-
             <section class="order-card">
                 <div class="section-title">Malipo</div>
                 <div class="input-group">
@@ -672,7 +674,6 @@ textarea.input {
         </form>
     </main>
 </div>
-
 <div class="modal-overlay" id="errorModal">
     <div class="modal-card">
         <div class="modal-icon">⚠️</div>
@@ -683,7 +684,6 @@ textarea.input {
         <button type="button" class="modal-btn" id="modalCloseBtn">Jaribu Tena</button>
     </div>
 </div>
-
 <div class="modal-overlay" id="helpModal">
     <div class="modal-card">
         <div class="modal-icon">❓</div>
@@ -713,7 +713,6 @@ textarea.input {
         <button type="button" class="modal-btn" id="helpCloseBtn">Nimeelewa</button>
     </div>
 </div>
-
 <script>
 const bundleSelector = document.getElementById("bundleSelector");
 const bundleSelected = document.getElementById("bundleSelected");
@@ -736,14 +735,12 @@ const submitText = document.getElementById("submitText");
 const helpLink = document.getElementById("helpLink");
 const helpModal = document.getElementById("helpModal");
 const helpCloseBtn = document.getElementById("helpCloseBtn");
-
 // Prefill kutoka server (tangazo / deep link)
 const PREFILL = {
     amount: {{ (offer_amount or '')|tojson }},
     price: {{ (offer_price or '')|tojson }},
     title: {{ (offer_title or '')|tojson }}
 };
-
 function applyPrefill(amount, price, title) {
     if (!amount || !price) return;
     amountInput.value = amount;
@@ -763,11 +760,9 @@ function applyPrefill(amount, price, title) {
         if (p) p.textContent = Number(priceInput.value).toLocaleString();
     }
 }
-
 if (PREFILL.amount && PREFILL.price) {
     applyPrefill(PREFILL.amount, PREFILL.price, PREFILL.title);
 }
-
 // Toggle dropdown — kama imefungwa (kutoka ofa), usifungue
 bundleSelected.addEventListener("click", function(e) {
     e.stopPropagation();
@@ -775,7 +770,6 @@ bundleSelected.addEventListener("click", function(e) {
     bundleOptions.classList.toggle("show");
     bundleSelected.classList.toggle("active");
 });
-
 document.querySelectorAll(".period-btn").forEach(function(btn) {
     btn.addEventListener("click", function(e) {
         e.stopPropagation();
@@ -787,7 +781,6 @@ document.querySelectorAll(".period-btn").forEach(function(btn) {
         else mweziList.classList.add("show");
     });
 });
-
 document.querySelectorAll(".bundle-option").forEach(function(option) {
     option.addEventListener("click", function() {
         const amount = this.dataset.amount || "";
@@ -804,14 +797,12 @@ document.querySelectorAll(".bundle-option").forEach(function(option) {
         bundleSelected.classList.remove("locked");
     });
 });
-
 document.addEventListener("click", function(e) {
     if (bundleSelector && !bundleSelector.contains(e.target)) {
         bundleOptions.classList.remove("show");
         bundleSelected.classList.remove("active");
     }
 });
-
 function showError(title, message) {
     modalTitle.innerText = title;
     modalMessage.innerHTML = message;
@@ -829,7 +820,6 @@ helpCloseBtn.addEventListener("click", function() { helpModal.classList.remove("
 helpModal.addEventListener("click", function(e) {
     if (e.target === helpModal) helpModal.classList.remove("show");
 });
-
 orderForm.addEventListener("submit", function(e) {
     const phone = targetPhone.value.replace(/\s+/g, "").replace(/^\+255/, "0");
     if (!amountInput.value || amountInput.value === "") {

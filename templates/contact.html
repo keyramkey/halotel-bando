@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mawasiliano · Kijiji Tanzania</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen">
+  <header class="bg-orange-500 text-white px-4 py-4 sticky top-0 z-10 shadow">
+    <div class="max-w-3xl mx-auto flex items-center gap-3">
+      <a href="/" class="text-white/90 hover:text-white text-sm">← Nyumbani</a>
+      <h1 class="font-bold text-lg">Mawasiliano / Support</h1>
+    </div>
+  </header>
+
+  <main class="max-w-3xl mx-auto px-4 py-8">
+    <p class="text-slate-600 mb-6">
+      Tunapatikana kukusaidia kuhusu bando, Nakala, Uwakala, malipo, na masuala mengine.
+    </p>
+
+    <div class="space-y-4">
+      <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+        <h2 class="font-bold text-slate-900 mb-2">💬 Chat ndani ya App</h2>
+        <p class="text-sm text-slate-600 mb-3">Njia ya haraka zaidi — ujumbe unafika moja kwa moja kwa timu yetu.</p>
+        <a href="/chat"
+          class="inline-block bg-orange-500 hover:bg-orange-600 text-white font-semibold px-5 py-2.5 rounded-xl text-sm">
+          Fungua Chat
+        </a>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+        <h2 class="font-bold text-slate-900 mb-2">📧 Barua Pepe</h2>
+        <p class="text-sm text-slate-600">
+          <a href="mailto:keyaramadhan0@gmail.com" class="text-orange-600 underline">keyaramadhan0@gmail.com</a>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow border border-slate-200 p-5">
+        <h2 class="font-bold text-slate-900 mb-2">📱 Simu / WhatsApp</h2>
+        <p class="text-sm text-slate-600">
+          {% if admin_phone %}
+            <a href="tel:{{ admin_phone }}" class="text-orange-600 underline">{{ admin_phone }}</a>
+          {% else %}
+            Angalia namba kwenye profile ya admin au chat.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <div class="mt-8 bg-slate-100 rounded-xl p-4 text-sm text-slate-600">
+      <p class="font-semibold text-slate-800 mb-1">Masuala ya kawaida:</p>
+      <ul class="list-disc pl-5 space-y-1">
+        <li>Hali ya oda ya bando → Profile au Chat</li>
+        <li>Ombi la Nakala → Maombi Yangu (My Nakala)</li>
+        <li>Malipo yameshindwa → jaribu tena au wasiliana nasi na rejea</li>
+        <li>Kufuta akaunti → <a href="/delete-account" class="text-orange-600 underline">Kufuta Akaunti</a></li>
+      </ul>
+    </div>
+
+    <div class="mt-10 pt-6 border-t border-slate-200 text-sm text-slate-500">
+      <a href="/privacy" class="text-orange-600 underline">Sera ya Faragha</a> ·
+      <a href="/terms" class="text-orange-600 underline">Vigezo na Masharti</a> ·
+      <a href="/refund-policy" class="text-orange-600 underline">Sera ya Marejesho</a>
+    </div>
+  </main>
+</body>
+</html>

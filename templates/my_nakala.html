@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Ombi la Nakala · {{ req.request_code }}{% endblock %}
+{% block title %}Maombi Yangu ya Nakala{% endblock %}
 {% block content %}
 <style>
     .status.wait-pay {
@@ -17,232 +17,96 @@
         color: #2e7d32;
         border: 1px solid #a5d6a7;
     }
-    .detail-card {
-        background: #fff;
-        border: 1px solid #eee;
-        border-radius: 16px;
-        padding: 16px;
-        margin-bottom: 14px;
+    .nakala-card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        margin-bottom: 12px;
     }
-    .detail-card h3 {
-        font-size: 16px;
-        font-weight: 800;
-        margin: 0 0 12px;
+    .nakala-card-link .application-card {
+        transition: box-shadow 0.15s, border-color 0.15s;
     }
-    .detail-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 12px;
-        padding: 10px 0;
-        border-bottom: 1px solid #f3f3f3;
-        font-size: 13px;
-        line-height: 1.4;
+    .nakala-card-link:active .application-card {
+        transform: scale(0.99);
     }
-    .detail-row:last-child { border-bottom: none; }
-    .detail-row .label {
-        color: #888;
-        font-weight: 600;
-        flex-shrink: 0;
-    }
-    .detail-row .value {
-        color: #222;
-        font-weight: 700;
-        text-align: right;
-        word-break: break-word;
-    }
-    .status-inline {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 12px;
-        font-weight: 800;
-    }
-    .alert-box {
-        border-radius: 14px;
-        padding: 12px 14px;
-        font-size: 13px;
-        line-height: 1.45;
-        margin-bottom: 14px;
-    }
-    .alert-box.fail {
-        background: #fce4ec;
-        border: 1px solid #ef9a9a;
-        color: #b71c1c;
-    }
-    .alert-box.wait {
-        background: #fff3e0;
-        border: 1px solid #ffcc80;
-        color: #e65100;
-    }
-    .alert-box.ok {
-        background: #e8f5e9;
-        border: 1px solid #a5d6a7;
-        color: #1b5e20;
+    .meta-time-sm {
+        font-size: 11px;
+        color: #999;
+        margin-top: 8px;
     }
 </style>
-
 <header class="topbar">
     <div>
-        <div class="brand">Ombi la Nakala</div>
-        <div class="muted">{{ req.request_code }}</div>
+        <div class="brand">Nakala Zangu</div>
+        <div class="muted">TIN · Leseni · NIDA</div>
     </div>
-    <a href="{{ url_for('my_nakala') }}" class="icon-btn">←</a>
+    <a href="{{ url_for('nakala') }}" class="icon-btn">←</a>
 </header>
-
 <div class="page">
-
-    {% if req.status == "payment_failed" %}
-    <div class="alert-box fail">
-        <strong>Malipo yameshindwa.</strong>
-        {% if req.admin_note %}{{ req.admin_note }}{% else %}Jaribu kulipa tena.{% endif %}
-    </div>
-    {% elif req.status == "awaiting_payment" %}
-    <div class="alert-box wait">
-        <strong>Inasubiri malipo.</strong>
-        Angalia simu yako na uingize PIN. Status itasasishwa baada ya ClickPesa kuthibitisha.
-    </div>
-    {% elif req.status == "paid" %}
-    <div class="alert-box ok">
-        <strong>Malipo yamepokelewa.</strong> Ombi linashughulikiwa.
-    </div>
-    {% elif req.status == "completed" %}
-    <div class="alert-box ok">
-        <strong>Ombi limekamilika.</strong>
-        {% if req.result_message %}{{ req.result_message }}{% endif %}
-    </div>
-    {% endif %}
-
-    <div class="detail-card">
-        <h3>
-            {% if req.service_type == "tin" %}TIN Number
-            {% elif req.service_type == "license" %}Leseni ya Biashara
-            {% else %}Online Copy NIDA{% endif %}
-        </h3>
-
-        <div class="detail-row">
-            <span class="label">Code</span>
-            <span class="value">{{ req.request_code }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="label">Hali</span>
-            <span class="value">
+{% if requests %}
+    {% for req in requests %}
+    <a href="{{ url_for('nakala_detail', req_id=req.id) }}" class="nakala-card-link">
+        <div class="application-card">
+            <div class="application-top">
+                <div>
+                    <div class="application-code">{{ req.request_code }}</div>
+                    <div class="application-network">
+                        {% if req.service_type == 'tin' %}TIN
+                        {% elif req.service_type == 'license' %}Leseni · {{ req.license_type[:40] }}{% if req.license_type|length > 40 %}…{% endif %}
+                        {% else %}NIDA Copy{% endif %}
+                    </div>
+                </div>
                 {% if req.status == "awaiting_payment" %}
-                    <span class="status status-inline wait-pay">Inasubiri Malipo</span>
+                    <span class="status wait-pay">Inasubiri Malipo</span>
                 {% elif req.status == "payment_failed" %}
-                    <span class="status status-inline pay-fail">Malipo Yameshindwa</span>
+                    <span class="status pay-fail">Malipo Yameshindwa</span>
                 {% elif req.status == "pending" %}
-                    <span class="status status-inline pending">Inasubiri</span>
+                    <span class="status pending">Inasubiri</span>
                 {% elif req.status == "paid" %}
-                    <span class="status status-inline paid">Imelipwa</span>
+                    <span class="status paid">Imelipwa</span>
                 {% elif req.status == "processing" %}
-                    <span class="status status-inline processing">Inachakatwa</span>
+                    <span class="status processing">Inachakatwa</span>
                 {% elif req.status == "waiting_control_number" %}
-                    <span class="status status-inline processing">Inasubiri Control</span>
+                    <span class="status processing">Inasubiri Control</span>
                 {% elif req.status == "control_issued" %}
-                    <span class="status status-inline pending">Control Imetolewa</span>
+                    <span class="status pending">Control Imetolewa</span>
                 {% elif req.status == "completed" %}
-                    <span class="status status-inline completed">Imekamilika</span>
+                    <span class="status completed">Imekamilika</span>
                 {% elif req.status == "rejected" %}
-                    <span class="status status-inline rejected">Imekataliwa</span>
+                    <span class="status rejected">Imekataliwa</span>
                 {% else %}
-                    <span class="status status-inline rejected">{{ req.status }}</span>
+                    <span class="status rejected">{{ status_label_sw(req.status) if status_label_sw is defined else req.status }}</span>
                 {% endif %}
-            </span>
+            </div>
+            {% if req.service_type == 'license' and req.license_location %}
+            <div class="muted" style="margin-top:8px;font-size:12px;">📍 {{ req.license_location }}</div>
+            {% endif %}
+            {% if req.control_number %}
+            <div style="margin-top:8px;font-size:12px;font-weight:700;color:#e65100;">
+                Control: {{ req.control_number }}
+            </div>
+            {% endif %}
+            {% if req.status == "payment_failed" %}
+            <div style="margin-top:8px;font-size:12px;color:#c62828;font-weight:600;">
+                Malipo hayakufanikiwa — fungua ombi ili ulipe tena.
+            </div>
+            {% elif req.status == "awaiting_payment" %}
+            <div style="margin-top:8px;font-size:12px;color:#e65100;font-weight:600;">
+                Angalia simu yako na uingize PIN ili ukamilishe malipo.
+            </div>
+            {% endif %}
+            {% if req.created_at %}
+            <div class="meta-time-sm">{{ to_dar_es_salaam(req.created_at) }}</div>
+            {% endif %}
         </div>
-        <div class="detail-row">
-            <span class="label">Muda</span>
-            <span class="value">{{ to_dar_es_salaam(req.created_at) }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="label">Jina</span>
-            <span class="value">{{ req.full_name }}</span>
-        </div>
-        <div class="detail-row">
-            <span class="label">Simu</span>
-            <span class="value">{{ req.phone1 }}{% if req.phone2 %} / {{ req.phone2 }}{% endif %}</span>
-        </div>
-
-        {% if req.service_type == "license" %}
-        <div class="detail-row">
-            <span class="label">Aina ya Leseni</span>
-            <span class="value">{{ req.license_type or "—" }}</span>
-        </div>
-        {% if req.license_location %}
-        <div class="detail-row">
-            <span class="label">Eneo</span>
-            <span class="value">{{ req.license_location }}</span>
-        </div>
-        {% endif %}
-        <div class="detail-row">
-            <span class="label">Ada ya huduma</span>
-            <span class="value">TSh {{ "{:,}".format(req.service_fee or req.price or 0) }}</span>
-        </div>
-        {% if req.control_number_fee %}
-        <div class="detail-row">
-            <span class="label">Bei Control Number</span>
-            <span class="value">TSh {{ "{:,}".format(req.control_number_fee) }}</span>
-        </div>
-        {% endif %}
-        {% if req.control_number %}
-        <div class="detail-row">
-            <span class="label">Control Number</span>
-            <span class="value" style="color:#e65100;">{{ req.control_number }}</span>
-        </div>
-        {% endif %}
-        {% if req.control_expires_at %}
-        <div class="detail-row">
-            <span class="label">Control inaisha</span>
-            <span class="value">{{ to_dar_es_salaam(req.control_expires_at) }}</span>
-        </div>
-        {% endif %}
-        {% else %}
-        <div class="detail-row">
-            <span class="label">Ada</span>
-            <span class="value">TSh {{ "{:,}".format(req.price or 0) }}</span>
-        </div>
-        {% endif %}
-    </div>
-
-    {% if req.admin_note and req.status != "payment_failed" %}
-    <div class="detail-card">
-        <h3>Ujumbe wa Admin</h3>
-        <p style="margin:0;font-size:13px;line-height:1.5;color:#444;">{{ req.admin_note }}</p>
-    </div>
-    {% elif req.admin_note and req.status == "payment_failed" %}
-    <div class="detail-card">
-        <h3>Ujumbe wa Admin</h3>
-        <p style="margin:0;font-size:13px;line-height:1.5;color:#b71c1c;">{{ req.admin_note }}</p>
-    </div>
-    {% endif %}
-
-    {% if req.result_message %}
-    <div class="detail-card">
-        <h3>Matokeo</h3>
-        <p style="margin:0;font-size:13px;line-height:1.5;">{{ req.result_message }}</p>
-    </div>
-    {% endif %}
-
-    {% if req.result_file %}
-    <div class="detail-card">
-        <h3>Faili</h3>
-        <a href="{{ url_for('media_file', filename=req.result_file) }}"
-           target="_blank" rel="noopener"
-           class="btn orange" style="display:block;text-align:center;">
-            Pakua / Fungua Faili
-        </a>
-    </div>
-    {% endif %}
-
-    {% if req.status in ("payment_failed", "pending", "awaiting_payment") %}
-    <a href="{{ url_for('nakala_repay', req_id=req.id) }}"
-       class="btn orange" style="display:block;text-align:center;margin-bottom:14px;">
-        {% if req.status == "payment_failed" %}Lipa Tena{% else %}Lipa Sasa{% endif %}
     </a>
-    {% endif %}
-
-    <a href="{{ url_for('my_nakala') }}"
-       class="btn" style="display:block;text-align:center;background:#f0f0f0;color:#444;">
-        ← Rudi kwenye orodha
-    </a>
+    {% endfor %}
+{% else %}
+    <div class="card" style="text-align:center;padding:28px 16px;">
+        <div class="title" style="font-size:18px;">Hakuna maombi bado</div>
+        <p class="muted" style="margin:10px 0 16px;">Anza ombi jipya la TIN, Leseni au NIDA.</p>
+        <a href="{{ url_for('nakala') }}" class="btn orange" style="display:block;text-align:center;">Anza Ombi</a>
+    </div>
+{% endif %}
 </div>
 {% endblock %}

@@ -2285,23 +2285,27 @@ def nakala_pay():
                 return redirect(url_for("my_nakala"))
             else:
                 req.status = "payment_failed"
-                req.admin_note = clean_payment_error(data, "Malipo yameshindwa kuanzishwa. Jaribu tena.")
+                reason = clean_payment_error(data, "Malipo yameshindwa kuanzishwa.")
+                req.admin_note = reason
                 db.session.commit()
                 flash(
-                    f"Malipo yameshindwa kuanzishwa. Jaribu tena (Repay) kwenye ombi lako. "
-                    f"Au lipa manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}",
+                    f"Malipo yameshindwa. Sababu: {reason} "
+                    f"Jaribu tena (Lipa Tena) kwenye ombi lako, au lipa manual: "
+                    f"{PAYMENT_NETWORK} {PAYMENT_NUMBER}.",
                     "error",
                 )
         except Exception as e:
             req.status = "payment_failed"
-            req.admin_note = clean_payment_error(str(e), "Hitilafu ya malipo. Jaribu tena.")
+            reason = clean_payment_error(str(e), "Hitilafu ya malipo.")
+            req.admin_note = reason
             try:
                 db.session.commit()
             except Exception:
                 db.session.rollback()
             flash(
-                f"Hitilafu ya malipo. Fungua ombi na ubonyeze «Lipa Tena». "
-                f"Manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}",
+                f"Malipo yameshindwa. Sababu: {reason} "
+                f"Fungua ombi na ubonyeze «Lipa Tena». Manual: "
+                f"{PAYMENT_NETWORK} {PAYMENT_NUMBER}.",
                 "error",
             )
     else:
@@ -2436,17 +2440,27 @@ def nakala_repay(req_id):
             )
             return redirect(url_for("nakala_detail", req_id=req.id))
         req.status = "payment_failed"
-        req.admin_note = clean_payment_error(data, "Malipo yameshindwa. Jaribu tena.")
+        reason = clean_payment_error(data, "Malipo yameshindwa.")
+        req.admin_note = reason
         db.session.commit()
-        flash(clean_payment_error(data, "Malipo yameshindwa. Jaribu tena."), "error")
+        flash(
+            f"Malipo yameshindwa. Sababu: {reason} "
+            f"Jaribu tena au lipa manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}.",
+            "error",
+        )
     except Exception as e:
         req.status = "payment_failed"
-        req.admin_note = clean_payment_error(str(e), "Hitilafu ya malipo. Jaribu tena.")
+        reason = clean_payment_error(str(e), "Hitilafu ya malipo.")
+        req.admin_note = reason
         try:
             db.session.commit()
         except Exception:
             db.session.rollback()
-        flash(f"Hitilafu: {str(e)[:100]}", "error")
+        flash(
+            f"Malipo yameshindwa. Sababu: {reason} "
+            f"Jaribu tena au lipa manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}.",
+            "error",
+        )
     return redirect(url_for("nakala_detail", req_id=req.id))
 
 

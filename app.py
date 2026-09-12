@@ -2182,7 +2182,16 @@ def nakala_license():
         nida_reg_district = request.form.get("nida_reg_district", "").strip()
         nida_reg_region = request.form.get("nida_reg_region", "").strip()
         nida_reg_street = request.form.get("nida_reg_street", "").strip()
+        # Eneo la leseni: select za Mkoa → Wilaya → Kata → Mtaa
+        loc_mkoa = request.form.get("license_mkoa", "").strip()
+        loc_wilaya = request.form.get("license_wilaya", "").strip()
+        loc_kata = request.form.get("license_kata", "").strip()
+        loc_mtaa = request.form.get("license_mtaa", "").strip()
         license_location = request.form.get("license_location", "").strip()
+        if loc_mkoa and loc_wilaya and loc_kata and loc_mtaa:
+            license_location = f"{loc_mtaa}, {loc_kata}, {loc_wilaya}, {loc_mkoa}"
+        elif not license_location:
+            license_location = ", ".join(x for x in [loc_mtaa, loc_kata, loc_wilaya, loc_mkoa] if x)
 
         lic = LICENSE_BY_ID.get(license_type)
         if not lic:
@@ -2191,8 +2200,12 @@ def nakala_license():
 
         if not all([full_name, mother_name, nida_number, phone1, primary_school,
                     year_completed, school_district, school_region,
-                    nida_reg_district, nida_reg_region, nida_reg_street, license_location]):
-            flash("Jaza taarifa zote muhimu, pamoja na eneo la leseni.", "error")
+                    nida_reg_district, nida_reg_region, nida_reg_street]):
+            flash("Jaza taarifa zote muhimu.", "error")
+            return redirect(url_for("nakala_license"))
+
+        if not all([loc_mkoa, loc_wilaya, loc_kata, loc_mtaa]) and not license_location:
+            flash("Chagua eneo la leseni: Mkoa, Wilaya, Kata na Mtaa.", "error")
             return redirect(url_for("nakala_license"))
 
         if len(nida_number) > 20 or not nida_number.isdigit():

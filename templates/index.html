@@ -57,9 +57,6 @@
     aspect-ratio: 350 / 220;
     box-shadow: 0 4px 15px rgba(0,0,0,0.12);
     flex-shrink: 0;
-    touch-action: pan-y;
-    user-select: none;
-    -webkit-user-select: none;
 }
 .ss-slide {
     display: none;
@@ -82,7 +79,6 @@
     display: block;
     object-fit: contain;
     background: #fff;
-    pointer-events: none;
 }
 .slide-indicator {
     position: absolute;
@@ -93,7 +89,6 @@
     justify-content: center;
     gap: 6px;
     z-index: 5;
-    pointer-events: none;
 }
 .dot {
     width: 8px;
@@ -194,6 +189,24 @@
         font-size: 18px;
         flex-shrink: 0;
     }
+    /* Legal footer */
+    .home-legal-footer {
+        margin: 18px 12px 8px;
+        padding: 14px 12px;
+        text-align: center;
+        font-size: 11px;
+        color: #888;
+        border-top: 1px solid #eee;
+    }
+    .home-legal-footer a {
+        color: #666;
+        text-decoration: none;
+        margin: 0 6px;
+    }
+    .home-legal-footer a:hover {
+        color: #ed4800;
+        text-decoration: underline;
+    }
 </style>
 <div class="home-page">
     <header class="topbar">
@@ -224,7 +237,7 @@
         {% for slide in slides %}
         <div class="ss-slide {% if loop.first %}ss-on{% endif %}">
             {% if slide.link %}
-            <a href="{{ slide.link }}" {% if slide.link.startswith('http') %}target="_blank" rel="noopener"{% endif %}>
+            <a href="{{ slide.link }}" target="_blank" rel="noopener">
                 <img src="{{ url_for('media_file', filename='slide/' + slide.image) }}"
                      alt="{{ slide.title or 'Tangazo' }}">
             </a>
@@ -272,115 +285,40 @@
             <div class="main-arrow">→</div>
         </a>
     </div>
+
+    <!-- Legal footer -->
+    <div class="home-legal-footer">
+        <div style="margin-bottom:6px;">
+            <a href="{{ url_for('privacy') }}">Sera ya Faragha</a>
+            <a href="{{ url_for('terms') }}">Vigezo</a>
+            <a href="{{ url_for('refund_policy') }}">Marejesho</a>
+            <a href="{{ url_for('contact') }}">Mawasiliano</a>
+        </div>
+        <div>© MR. SULE DIGITAL BUSINESS</div>
+    </div>
 </div>
 <script>
 (function() {
-    var wrap = document.getElementById('slideshowWrapper');
-    var slides = document.querySelectorAll('.ss-slide');
-    var dotsBox = document.getElementById('dots');
-    if (!wrap || !slides.length) return;
-
-    var i = 0;
-    var timer = null;
-    var INTERVAL = 2500;
-    var paused = false;
-
+    const slides = document.querySelectorAll('.ss-slide');
+    const dotsBox = document.getElementById('dots');
+    if (!slides.length) return;
+    let i = 0;
     slides.forEach(function(_, idx) {
         var d = document.createElement('div');
         d.className = 'dot' + (idx === 0 ? ' active' : '');
         dotsBox.appendChild(d);
     });
     var dots = dotsBox.querySelectorAll('.dot');
-
     function show(n) {
-        if (n < 0) n = slides.length - 1;
-        if (n >= slides.length) n = 0;
         slides.forEach(function(s, idx) {
             s.classList.toggle('ss-on', idx === n);
             if (dots[idx]) dots[idx].classList.toggle('active', idx === n);
         });
         i = n;
     }
-
-    function next() { show(i + 1); }
-    function prev() { show(i - 1); }
-
-    function startAuto() {
-        stopAuto();
-        if (paused || slides.length < 2) return;
-        timer = setInterval(next, INTERVAL);
-    }
-    function stopAuto() {
-        if (timer) { clearInterval(timer); timer = null; }
-    }
-
-    /* —— Touch / mouse swipe —— */
-    var startX = 0, startY = 0, moved = false, tracking = false;
-    var SWIPE_MIN = 40;
-
-    function onStart(x, y) {
-        startX = x;
-        startY = y;
-        moved = false;
-        tracking = true;
-        paused = true;
-        stopAuto();
-    }
-    function onMove(x, y) {
-        if (!tracking) return;
-        if (Math.abs(x - startX) > 8 || Math.abs(y - startY) > 8) moved = true;
-    }
-    function onEnd(x) {
-        if (!tracking) return;
-        tracking = false;
-        var dx = x - startX;
-        if (Math.abs(dx) >= SWIPE_MIN) {
-            if (dx < 0) next();   /* swipe kushoto → mbele */
-            else prev();          /* swipe kulia → nyuma */
-        }
-        /* Baada ya kugusa, subiri kidogo kisha auto iendelee */
-        setTimeout(function() {
-            paused = false;
-            startAuto();
-        }, 4000);
-    }
-
-    wrap.addEventListener('touchstart', function(e) {
-        if (!e.touches || !e.touches[0]) return;
-        onStart(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-
-    wrap.addEventListener('touchmove', function(e) {
-        if (!e.touches || !e.touches[0]) return;
-        onMove(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-
-    wrap.addEventListener('touchend', function(e) {
-        var t = (e.changedTouches && e.changedTouches[0]) || null;
-        onEnd(t ? t.clientX : startX);
-    }, { passive: true });
-
-    /* Mouse (desktop) */
-    wrap.addEventListener('mousedown', function(e) {
-        onStart(e.clientX, e.clientY);
-    });
-    window.addEventListener('mousemove', function(e) {
-        if (tracking) onMove(e.clientX, e.clientY);
-    });
-    window.addEventListener('mouseup', function(e) {
-        if (tracking) onEnd(e.clientX);
-    });
-
-    /* Zuia click ya link ikiwa ilikuwa swipe */
-    wrap.addEventListener('click', function(e) {
-        if (moved) {
-            e.preventDefault();
-            e.stopPropagation();
-            moved = false;
-        }
-    }, true);
-
-    startAuto();
+    setInterval(function() {
+        show((i + 1) % slides.length);
+    }, 2500);
 })();
 </script>
 {% endblock %}

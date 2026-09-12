@@ -1,342 +1,257 @@
 {% extends "base.html" %}
-{% block title %}Ujumbe · Admin{% endblock %}
+{% block title %}Chat · {{ user.username }}{% endblock %}
 {% block content %}
 <style>
-.msg-wrap {
-    max-width: 640px;
-    margin: 0 auto;
-    padding: 0 0 48px;
-    min-height: 70vh;
-}
-
-.msg-hero {
-    background: linear-gradient(135deg, #f56b00 0%, #e85d04 55%, #dc2f02 100%);
-    color: #fff;
-    padding: 16px 16px 18px;
-    border-radius: 0 0 20px 20px;
-    box-shadow: 0 6px 18px rgba(245, 107, 0, 0.22);
-    margin-bottom: 12px;
-}
-.msg-hero-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    margin-bottom: 10px;
-}
-.msg-hero h1 {
-    font-size: 18px;
-    font-weight: 800;
-    margin: 0;
-    letter-spacing: -0.3px;
-}
-.msg-hero p {
-    font-size: 12px;
-    opacity: 0.92;
-    margin: 4px 0 0;
-    line-height: 1.35;
-}
-.msg-count {
-    background: rgba(255,255,255,0.22);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 800;
-    padding: 5px 11px;
-    border-radius: 999px;
-    white-space: nowrap;
-}
-
-.search-bar {
-    position: relative;
-    margin: 0 14px 12px;
-}
-.search-bar input {
-    width: 100%;
-    padding: 12px 14px 12px 40px;
-    border: 1.5px solid #ebebeb;
-    border-radius: 14px;
-    font-size: 14px;
-    background: #fff;
-    box-sizing: border-box;
-    outline: none;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.04);
-}
-.search-bar input:focus {
-    border-color: #f56b00;
-    box-shadow: 0 0 0 3px rgba(245, 107, 0, 0.1);
-}
-.search-bar .s-icon {
-    position: absolute;
-    left: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 15px;
-    opacity: 0.45;
-    pointer-events: none;
-}
-
-.thread-list {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 0 14px;
-}
-
-.thread-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #fff;
-    border: 1px solid #efefef;
-    border-radius: 16px;
-    padding: 13px 14px;
-    text-decoration: none;
-    color: inherit;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.03);
-    transition: background 0.12s, transform 0.1s;
-    -webkit-tap-highlight-color: transparent;
-}
-.thread-card:active {
-    background: #fff8f3;
-    transform: scale(0.985);
-}
-.thread-card.unread {
-    border-color: #ffd4b0;
-    background: linear-gradient(90deg, #fff8f0, #fff);
-    box-shadow: inset 3px 0 0 #f56b00, 0 2px 8px rgba(245, 107, 0, 0.06);
-}
-
-.thread-avatar {
-    width: 46px;
-    height: 46px;
-    border-radius: 14px;
-    background: linear-gradient(135deg, #fff1e8, #ffe0c8);
-    color: #e65100;
-    display: grid;
-    place-items: center;
-    font-weight: 800;
-    font-size: 16px;
-    flex-shrink: 0;
-    position: relative;
-}
-.thread-avatar .dot {
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #f56b00;
-    border: 2px solid #fff;
-}
-
-.thread-body { flex: 1; min-width: 0; }
-.thread-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 3px;
-}
-.thread-name {
-    font-size: 14.5px;
-    font-weight: 800;
-    color: #1a1a1a;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.thread-time {
-    font-size: 11px;
-    color: #aaa;
-    flex-shrink: 0;
-    font-weight: 600;
-}
-.thread-card.unread .thread-time {
-    color: #f56b00;
-    font-weight: 700;
-}
-
-.thread-preview {
-    font-size: 13px;
-    color: #666;
-    line-height: 1.4;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.thread-card.unread .thread-preview {
-    color: #333;
-    font-weight: 600;
-}
-.thread-preview .from {
-    font-weight: 700;
-    color: #f56b00;
-}
-.thread-meta {
-    font-size: 11px;
-    color: #b0b0b0;
-    margin-top: 3px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-.badge-new {
-    display: inline-block;
-    font-size: 9.5px;
-    font-weight: 800;
-    background: #f56b00;
-    color: #fff;
-    padding: 2px 7px;
-    border-radius: 999px;
-    letter-spacing: 0.2px;
-    text-transform: uppercase;
-}
-
-.chevron {
-    color: #ddd;
-    font-size: 18px;
-    flex-shrink: 0;
-    font-weight: 300;
-}
-.thread-card.unread .chevron { color: #f56b00; }
-
-.empty {
-    text-align: center;
-    padding: 48px 20px;
-    color: #999;
-}
-.empty .empty-icon {
-    font-size: 40px;
-    margin-bottom: 12px;
-    opacity: 0.7;
-}
-.empty h3 {
-    font-size: 15px;
-    font-weight: 800;
-    color: #666;
-    margin: 0 0 6px;
-}
-.empty p {
-    font-size: 13px;
-    line-height: 1.45;
-    margin: 0;
-}
-
-.no-match {
-    text-align: center;
-    padding: 28px 16px;
-    color: #aaa;
-    font-size: 13px;
-    display: none;
-}
-
-.hint-bar {
-    margin: 14px 14px 0;
-    padding: 10px 12px;
-    background: #fff8f0;
-    border: 1px solid #ffe0c2;
-    border-radius: 12px;
-    font-size: 12px;
-    color: #8d4e00;
-    line-height: 1.4;
-}
+    .achat-page {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 70px);
+        background: #f4f5f7;
+        max-width: 640px;
+        margin: 0 auto;
+    }
+    .achat-head {
+        background: linear-gradient(135deg, #f56b00, #e85d04);
+        color: #fff;
+        padding: 14px 16px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .achat-head a.back {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.2);
+        display: grid;
+        place-items: center;
+        color: #fff;
+        text-decoration: none;
+        font-size: 18px;
+        flex-shrink: 0;
+    }
+    .achat-head .info { flex: 1; min-width: 0; }
+    .achat-head h1 {
+        font-size: 16px;
+        font-weight: 800;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .achat-head p {
+        font-size: 12px;
+        margin: 2px 0 0;
+        opacity: 0.9;
+    }
+    .achat-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .msg {
+        max-width: 82%;
+        padding: 12px 14px;
+        border-radius: 16px;
+        font-size: 14px;
+        line-height: 1.45;
+        word-wrap: break-word;
+    }
+    .msg.customer {
+        align-self: flex-start;
+        background: #fff;
+        border: 1px solid #eee;
+        border-bottom-left-radius: 4px;
+    }
+    .msg.admin {
+        align-self: flex-end;
+        background: #f56b00;
+        color: #fff;
+        border-bottom-right-radius: 4px;
+    }
+    .msg img {
+        max-width: 220px;
+        width: 100%;
+        border-radius: 10px;
+        margin-top: 6px;
+        display: block;
+    }
+    .msg-time {
+        display: block;
+        margin-top: 5px;
+        font-size: 10px;
+        opacity: 0.7;
+    }
+    .msg-label {
+        font-size: 10px;
+        font-weight: 700;
+        margin-bottom: 4px;
+        opacity: 0.75;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+    .empty-chat {
+        text-align: center;
+        color: #999;
+        margin: auto;
+        padding: 40px 16px;
+        font-size: 14px;
+        line-height: 1.5;
+    }
+    .achat-form {
+        background: #fff;
+        border-top: 1px solid #eee;
+        padding: 12px 14px;
+        flex-shrink: 0;
+    }
+    .achat-row {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+    .attach-btn {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background: #f1f1f1;
+        display: grid;
+        place-items: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: #555;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .achat-input {
+        flex: 1;
+        height: 44px;
+        border: 1px solid #ddd;
+        border-radius: 22px;
+        padding: 0 16px;
+        outline: none;
+        font-size: 14px;
+        background: #fafafa;
+    }
+    .achat-input:focus {
+        border-color: #f56b00;
+        background: #fff;
+    }
+    .send-btn {
+        height: 44px;
+        padding: 0 18px;
+        border: 0;
+        border-radius: 22px;
+        background: #f56b00;
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+    .send-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
 </style>
 
-<header class="topbar">
-    <div>
-        <div class="brand">Ujumbe</div>
-        <div class="muted">Mazungumzo na wateja</div>
-    </div>
-    <a href="{{ url_for('dashboard') }}" class="icon-btn" title="Dashboard">←</a>
-</header>
-
-<div class="msg-wrap">
-    <div class="msg-hero">
-        <div class="msg-hero-top">
-            <div>
-                <h1>📬 Ujumbe / Chat</h1>
-                <p>Gusa ili uone na ujibu mteja</p>
-            </div>
-            {% if threads %}
-            <div class="msg-count">{{ threads|length }}</div>
-            {% endif %}
+<div class="achat-page">
+    <div class="achat-head">
+        <a class="back" href="{{ url_for('admin_messages') }}" title="Rudi">←</a>
+        <div class="info">
+            <h1>{{ user.username }}</h1>
+            <p>{{ user.phone or '—' }}{% if user.email %} · {{ user.email }}{% endif %}</p>
         </div>
     </div>
 
-    {% if threads %}
-    <div class="search-bar">
-        <span class="s-icon">🔍</span>
-        <input type="search" id="msgSearch" placeholder="Tafuta jina au namba..." autocomplete="off">
-    </div>
-
-    <div class="thread-list" id="threadList">
-        {% for t in threads %}
-        <a href="{{ url_for('admin_chat', user_id=t.user.id) }}"
-           class="thread-card{% if t.unread_from_customer %} unread{% endif %}"
-           data-search="{{ (t.user.username or '')|lower }} {{ (t.user.phone or '')|lower }} {{ (t.last_message or '')|lower }}">
-            <div class="thread-avatar">
-                {{ (t.user.username or '?')[0]|upper }}
-                {% if t.unread_from_customer %}<span class="dot"></span>{% endif %}
-            </div>
-            <div class="thread-body">
-                <div class="thread-top">
-                    <div class="thread-name">
-                        {{ t.user.username }}
-                        {% if t.unread_from_customer %}
-                        <span class="badge-new">Mpya</span>
-                        {% endif %}
-                    </div>
-                    <div class="thread-time">{{ to_dar_es_salaam(t.last_at) }}</div>
+    <div class="achat-body" id="chatBody">
+        {% if messages %}
+            {% for msg in messages %}
+            <div class="msg {{ msg.sender }}">
+                <div class="msg-label">
+                    {% if msg.sender == 'customer' %}Mteja{% else %}Wewe (Admin){% endif %}
                 </div>
-                <div class="thread-preview">
-                    {% if t.last_sender == 'customer' %}
-                    <span class="from">Mteja:</span>
-                    {% else %}
-                    <span class="from">Wewe:</span>
-                    {% endif %}
-                    {{ t.last_message }}
-                </div>
-                {% if t.user.phone %}
-                <div class="thread-meta">📱 {{ t.user.phone }}</div>
+                {% if msg.message %}
+                <div>{{ msg.message }}</div>
+                {% endif %}
+                {% if msg.image %}
+                <img src="{{ url_for('media_file', filename=msg.image) }}" alt="Picha">
+                {% endif %}
+                {% if msg.created_at %}
+                <span class="msg-time">{{ to_dar_es_salaam(msg.created_at) }}</span>
                 {% endif %}
             </div>
-            <div class="chevron">›</div>
-        </a>
-        {% endfor %}
+            {% endfor %}
+        {% else %}
+            <div class="empty-chat">
+                Hakuna ujumbe kwenye mazungumzo haya bado.<br>
+                Andika jibu hapa chini.
+            </div>
+        {% endif %}
     </div>
-    <div class="no-match" id="noMatch">Hakuna mazungumzo yanayolingana na utafutaji.</div>
 
-    <div class="hint-bar">
-        💡 Ukipata notification, bonyeza <strong>Fungua</strong> au fungua ukurasa huu — ujumbe utaonekana hapa.
+    <div class="achat-form">
+        <form id="adminChatForm" enctype="multipart/form-data">
+            <div class="achat-row">
+                <label class="attach-btn">
+                    File
+                    <input type="file" name="image" accept="image/*" hidden id="imageInput">
+                </label>
+                <input
+                    class="achat-input"
+                    type="text"
+                    name="message"
+                    id="messageInput"
+                    placeholder="Andika jibu..."
+                    autocomplete="off"
+                >
+                <button class="send-btn" type="submit" id="sendBtn">Tuma</button>
+            </div>
+        </form>
     </div>
-
-    {% else %}
-    <div class="empty">
-        <div class="empty-icon">💬</div>
-        <h3>Hakuna ujumbe bado</h3>
-        <p>Wateja wakituma ujumbe, mazungumzo yataonekana hapa.<br>
-        Notification itakujulisha papo hapo.</p>
-    </div>
-    {% endif %}
 </div>
 
 <script>
-(function() {
-    var input = document.getElementById('msgSearch');
-    var list = document.getElementById('threadList');
-    var noMatch = document.getElementById('noMatch');
-    if (!input || !list) return;
+(function () {
+    var body = document.getElementById('chatBody');
+    if (body) body.scrollTop = body.scrollHeight;
 
-    input.addEventListener('input', function() {
-        var q = (this.value || '').toLowerCase().trim();
-        var shown = 0;
-        list.querySelectorAll('.thread-card').forEach(function(card) {
-            var ok = !q || (card.dataset.search || '').indexOf(q) !== -1;
-            card.style.display = ok ? 'flex' : 'none';
-            if (ok) shown++;
-        });
-        if (noMatch) noMatch.style.display = shown ? 'none' : 'block';
+    var form = document.getElementById('adminChatForm');
+    var sendBtn = document.getElementById('sendBtn');
+    var messageInput = document.getElementById('messageInput');
+    var imageInput = document.getElementById('imageInput');
+    if (!form) return;
+
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        var text = (messageInput.value || '').trim();
+        var hasImage = imageInput.files && imageInput.files.length > 0;
+        if (!text && !hasImage) return;
+
+        sendBtn.disabled = true;
+        sendBtn.textContent = 'Inatuma...';
+
+        try {
+            var res = await fetch("{{ url_for('admin_send_message', user_id=user.id) }}", {
+                method: 'POST',
+                body: new FormData(form)
+            });
+            var data = await res.json();
+            if (data.success) {
+                location.reload();
+            } else {
+                alert('Imeshindwa kutuma.');
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Tuma';
+            }
+        } catch (err) {
+            alert('Hitilafu ya mtandao.');
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Tuma';
+        }
     });
 })();
 </script>

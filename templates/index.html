@@ -8,7 +8,6 @@
         min-height: calc(100vh - 60px);
         padding-bottom: 12px;
     }
-
     /* Topbar sticky — haichezi juu/chini scroll */
     .home-page > .topbar {
         position: sticky;
@@ -16,7 +15,6 @@
         z-index: 50;
         background: #fff;
     }
-
     .home-hero {
         margin: 10px 12px 8px;
         padding: 14px 16px;
@@ -47,27 +45,22 @@
         opacity: .9;
         margin: 0;
     }
-
 /* ===== SLIDESHOW RESPONSIVE ===== */
-
 .slideshow-wrapper {
     width: calc(100% - 24px);
     max-width: 900px;
     margin: 8px auto;
-
     position: relative;
     overflow: hidden;
-
     border-radius: 16px;
     background: #fff;
-
     aspect-ratio: 350 / 220;
-
     box-shadow: 0 4px 15px rgba(0,0,0,0.12);
-
     flex-shrink: 0;
+    touch-action: pan-y;
+    user-select: none;
+    -webkit-user-select: none;
 }
-
 .ss-slide {
     display: none;
     width: 100%;
@@ -75,38 +68,33 @@
     background: #fff;
     text-align: center;
 }
-
 .ss-slide.ss-on {
     display: block;
 }
-
 .ss-slide a {
     display: block;
     width: 100%;
     height: 100%;
 }
-
 .ss-slide img {
     width: 100%;
     height: 100%;
     display: block;
     object-fit: contain;
     background: #fff;
+    pointer-events: none;
 }
-
 .slide-indicator {
     position: absolute;
     bottom: 8px;
     left: 0;
     right: 0;
-
     display: flex;
     justify-content: center;
     gap: 6px;
-
     z-index: 5;
+    pointer-events: none;
 }
-
 .dot {
     width: 8px;
     height: 8px;
@@ -114,41 +102,31 @@
     background: rgba(0,0,0,0.25);
     transition: all 0.3s;
 }
-
 .dot.active {
     background: #ff8a29;
     transform: scale(1.25);
 }
-
-
 /* ===== SIMU ===== */
-
 @media (max-width: 767px) {
-
     .slideshow-wrapper {
         width: calc(100% - 20px);
         aspect-ratio: 350 / 220;
         margin: 7px auto;
         border-radius: 14px;
     }
-
     .ss-slide img {
         width: 100%;
         height: 100%;
         object-fit: contain;
     }
 }
-
-
 @media (min-width: 768px) {
-
     .slideshow-wrapper {
         width: calc(100% - 30px);
         max-width: 900px;
         aspect-ratio: 350 / 220;
         margin: 10px auto;
     }
-
     .ss-slide img {
         width: 100%;
         height: 100%;
@@ -217,7 +195,6 @@
         flex-shrink: 0;
     }
 </style>
-
 <div class="home-page">
     <header class="topbar">
         <div>
@@ -234,7 +211,6 @@
             </a>
         {% endif %}
     </header>
-
     <section class="home-hero">
         <img src="{{ url_for('static', filename='uploads/myphoto.png') }}"
              alt="Mr. Sule" class="home-hero-img"
@@ -242,14 +218,13 @@
         <h1>MR. SULE DIGITAL BUSINESS</h1>
         <p>Pata huduma za bando, usajili wa laini, uwakala na malipo sehemu moja.</p>
     </section>
-
     <!-- SLIDESHOW -->
     {% if slides %}
     <div class="slideshow-wrapper" id="slideshowWrapper">
         {% for slide in slides %}
         <div class="ss-slide {% if loop.first %}ss-on{% endif %}">
             {% if slide.link %}
-            <a href="{{ slide.link }}" target="_blank" rel="noopener">
+            <a href="{{ slide.link }}" {% if slide.link.startswith('http') %}target="_blank" rel="noopener"{% endif %}>
                 <img src="{{ url_for('media_file', filename='slide/' + slide.image) }}"
                      alt="{{ slide.title or 'Tangazo' }}">
             </a>
@@ -262,7 +237,6 @@
         <div class="slide-indicator" id="dots"></div>
     </div>
     {% endif %}
-
     <div class="section-title">
         <h2>Huduma Kuu</h2>
     </div>
@@ -299,14 +273,18 @@
         </a>
     </div>
 </div>
-
 <script>
 (function() {
-    const slides = document.querySelectorAll('.ss-slide');
-    const dotsBox = document.getElementById('dots');
-    if (!slides.length) return;
+    var wrap = document.getElementById('slideshowWrapper');
+    var slides = document.querySelectorAll('.ss-slide');
+    var dotsBox = document.getElementById('dots');
+    if (!wrap || !slides.length) return;
 
-    let i = 0;
+    var i = 0;
+    var timer = null;
+    var INTERVAL = 2500;
+    var paused = false;
+
     slides.forEach(function(_, idx) {
         var d = document.createElement('div');
         d.className = 'dot' + (idx === 0 ? ' active' : '');
@@ -315,6 +293,8 @@
     var dots = dotsBox.querySelectorAll('.dot');
 
     function show(n) {
+        if (n < 0) n = slides.length - 1;
+        if (n >= slides.length) n = 0;
         slides.forEach(function(s, idx) {
             s.classList.toggle('ss-on', idx === n);
             if (dots[idx]) dots[idx].classList.toggle('active', idx === n);
@@ -322,9 +302,85 @@
         i = n;
     }
 
-    setInterval(function() {
-        show((i + 1) % slides.length);
-    }, 2500);
+    function next() { show(i + 1); }
+    function prev() { show(i - 1); }
+
+    function startAuto() {
+        stopAuto();
+        if (paused || slides.length < 2) return;
+        timer = setInterval(next, INTERVAL);
+    }
+    function stopAuto() {
+        if (timer) { clearInterval(timer); timer = null; }
+    }
+
+    /* —— Touch / mouse swipe —— */
+    var startX = 0, startY = 0, moved = false, tracking = false;
+    var SWIPE_MIN = 40;
+
+    function onStart(x, y) {
+        startX = x;
+        startY = y;
+        moved = false;
+        tracking = true;
+        paused = true;
+        stopAuto();
+    }
+    function onMove(x, y) {
+        if (!tracking) return;
+        if (Math.abs(x - startX) > 8 || Math.abs(y - startY) > 8) moved = true;
+    }
+    function onEnd(x) {
+        if (!tracking) return;
+        tracking = false;
+        var dx = x - startX;
+        if (Math.abs(dx) >= SWIPE_MIN) {
+            if (dx < 0) next();   /* swipe kushoto → mbele */
+            else prev();          /* swipe kulia → nyuma */
+        }
+        /* Baada ya kugusa, subiri kidogo kisha auto iendelee */
+        setTimeout(function() {
+            paused = false;
+            startAuto();
+        }, 4000);
+    }
+
+    wrap.addEventListener('touchstart', function(e) {
+        if (!e.touches || !e.touches[0]) return;
+        onStart(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+
+    wrap.addEventListener('touchmove', function(e) {
+        if (!e.touches || !e.touches[0]) return;
+        onMove(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+
+    wrap.addEventListener('touchend', function(e) {
+        var t = (e.changedTouches && e.changedTouches[0]) || null;
+        onEnd(t ? t.clientX : startX);
+    }, { passive: true });
+
+    /* Mouse (desktop) */
+    wrap.addEventListener('mousedown', function(e) {
+        onStart(e.clientX, e.clientY);
+    });
+    window.addEventListener('mousemove', function(e) {
+        if (tracking) onMove(e.clientX, e.clientY);
+    });
+    window.addEventListener('mouseup', function(e) {
+        if (tracking) onEnd(e.clientX);
+    });
+
+    /* Zuia click ya link ikiwa ilikuwa swipe */
+    wrap.addEventListener('click', function(e) {
+        if (moved) {
+            e.preventDefault();
+            e.stopPropagation();
+            moved = false;
+        }
+    }, true);
+
+    startAuto();
 })();
 </script>
 {% endblock %}

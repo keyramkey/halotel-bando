@@ -1,105 +1,112 @@
 {% extends "base.html" %}
-{% block title %}{{ req.request_code }}{% endblock %}
+{% block title %}Maombi Yangu ya Nakala{% endblock %}
 {% block content %}
 <style>
-    .nd-wrap { max-width: 640px; margin: 0 auto; }
-    .nd-card {
-        background: #fff; border-radius: 18px; border: 1px solid #eee;
-        padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    .status.wait-pay {
+        background: #fff3e0;
+        color: #e65100;
+        border: 1px solid #ffcc80;
     }
-    .nd-title { font-size: 16px; font-weight: 800; margin-bottom: 8px; }
-    .nd-row { display:flex; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px solid #f3f3f3; font-size:13px; }
-    .nd-row:last-child { border-bottom:none; }
-    .nd-lbl { color:#888; font-weight:600; }
-    .nd-val { font-weight:700; text-align:right; word-break:break-word; }
-    .ctrl-box {
-        background: linear-gradient(135deg, #fff3e8, #fff8f0);
-        border: 1px solid #ffd0b0; border-radius: 16px; padding: 16px; margin-bottom: 14px;
+    .status.pay-fail {
+        background: #fce4ec;
+        color: #c62828;
+        border: 1px solid #ef9a9a;
     }
-    .ctrl-box .big { font-size: 20px; font-weight: 900; color: #e65100; letter-spacing: 0.5px; word-break: break-all; }
-    .ctrl-box .exp { font-size: 12px; color: #a65c00; margin-top: 8px; line-height: 1.4; }
-    .file-btn {
-        display:block; text-align:center; padding:14px; border-radius:14px;
-        background: linear-gradient(135deg, #f56b00, #e85d04); color:#fff !important;
-        font-weight:800; text-decoration:none; margin-top:8px;
+    .status.paid {
+        background: #e8f5e9;
+        color: #2e7d32;
+        border: 1px solid #a5d6a7;
+    }
+    .nakala-card-link {
+        display: block;
+        text-decoration: none;
+        color: inherit;
+        margin-bottom: 12px;
+    }
+    .nakala-card-link .application-card {
+        transition: box-shadow 0.15s, border-color 0.15s;
+    }
+    .nakala-card-link:active .application-card {
+        transform: scale(0.99);
+    }
+    .meta-time-sm {
+        font-size: 11px;
+        color: #999;
+        margin-top: 8px;
     }
 </style>
-
 <header class="topbar">
     <div>
-        <div class="brand">Ombi la Nakala</div>
-        <div class="muted">{{ req.request_code }}</div>
+        <div class="brand">Nakala Zangu</div>
+        <div class="muted">TIN · Leseni · NIDA</div>
     </div>
-    <a href="{{ url_for('my_nakala') }}" class="icon-btn">←</a>
+    <a href="{{ url_for('nakala') }}" class="icon-btn">←</a>
 </header>
-
-<div class="page nd-wrap">
-    <div class="nd-card">
-        <div class="nd-title">
-            {% if req.service_type == 'tin' %}TIN Number
-            {% elif req.service_type == 'license' %}Leseni ya Biashara
-            {% else %}Online Copy NIDA{% endif %}
-        </div>
-        <div class="nd-row"><span class="nd-lbl">Code</span><span class="nd-val">{{ req.request_code }}</span></div>
-        <div class="nd-row">
-            <span class="nd-lbl">Hali</span>
-            <span class="nd-val">
-                {% if req.status == 'pending' %}Inasubiri malipo
-                {% elif req.status == 'paid' %}Imelipwa
-                {% elif req.status == 'waiting_control_number' %}Inasubiri Control Number
-                {% elif req.status == 'control_issued' %}Control Number Imetolewa
-                {% elif req.status == 'processing' %}Inachakatwa
-                {% elif req.status == 'completed' %}Imekamilika
-                {% else %}{{ req.status }}{% endif %}
-            </span>
-        </div>
-        <div class="nd-row"><span class="nd-lbl">Jina</span><span class="nd-val">{{ req.full_name }}</span></div>
-        <div class="nd-row"><span class="nd-lbl">Simu</span><span class="nd-val">{{ req.phone1 }}</span></div>
-        {% if req.service_type == 'license' %}
-        <div class="nd-row"><span class="nd-lbl">Aina ya Leseni</span><span class="nd-val">{{ req.license_type }}</span></div>
-        <div class="nd-row"><span class="nd-lbl">Eneo</span><span class="nd-val">{{ req.license_location or '—' }}</span></div>
-        <div class="nd-row"><span class="nd-lbl">Ada ya huduma</span><span class="nd-val">TSh {{ "{:,}".format(req.service_fee or req.price or 0) }}</span></div>
-        <div class="nd-row"><span class="nd-lbl">Bei Control Number</span><span class="nd-val">TSh {{ "{:,}".format(req.control_number_fee or 0) }}</span></div>
-        {% endif %}
-    </div>
-
-    {% if req.service_type == 'license' and req.control_number %}
-    <div class="ctrl-box">
-        <div style="font-size:12px;font-weight:700;color:#a65c00;">CONTROL NUMBER YAKO</div>
-        <div class="big">{{ req.control_number }}</div>
-        <div class="exp">
-            Lipa <strong>TSh {{ "{:,}".format(req.control_number_fee or 0) }}</strong> kwa control number hii.
-            {% if req.control_expires_at %}
-            <br>Inaisha: <strong>{{ req.control_expires_at.strftime('%d/%m/%Y %H:%M') }} UTC</strong> (siku 1).
-            {% else %}
-            <br>Inaisha baada ya <strong>siku 1</strong> tangu kutolewa.
+<div class="page">
+{% if requests %}
+    {% for req in requests %}
+    <a href="{{ url_for('nakala_detail', req_id=req.id) }}" class="nakala-card-link">
+        <div class="application-card">
+            <div class="application-top">
+                <div>
+                    <div class="application-code">{{ req.request_code }}</div>
+                    <div class="application-network">
+                        {% if req.service_type == 'tin' %}TIN
+                        {% elif req.service_type == 'license' %}Leseni · {{ req.license_type[:40] }}{% if req.license_type|length > 40 %}…{% endif %}
+                        {% else %}NIDA Copy{% endif %}
+                    </div>
+                </div>
+                {% if req.status == "awaiting_payment" %}
+                    <span class="status wait-pay">Inasubiri Malipo</span>
+                {% elif req.status == "payment_failed" %}
+                    <span class="status pay-fail">Malipo Yameshindwa</span>
+                {% elif req.status == "pending" %}
+                    <span class="status pending">Inasubiri</span>
+                {% elif req.status == "paid" %}
+                    <span class="status paid">Imelipwa</span>
+                {% elif req.status == "processing" %}
+                    <span class="status processing">Inachakatwa</span>
+                {% elif req.status == "waiting_control_number" %}
+                    <span class="status processing">Inasubiri Control</span>
+                {% elif req.status == "control_issued" %}
+                    <span class="status pending">Control Imetolewa</span>
+                {% elif req.status == "completed" %}
+                    <span class="status completed">Imekamilika</span>
+                {% elif req.status == "rejected" %}
+                    <span class="status rejected">Imekataliwa</span>
+                {% else %}
+                    <span class="status rejected">{{ status_label_sw(req.status) if status_label_sw is defined else req.status }}</span>
+                {% endif %}
+            </div>
+            {% if req.service_type == 'license' and req.license_location %}
+            <div class="muted" style="margin-top:8px;font-size:12px;">📍 {{ req.license_location }}</div>
             {% endif %}
-            Baada ya kulipia, admin atakupakia leseni (PDF/picha).
+            {% if req.control_number %}
+            <div style="margin-top:8px;font-size:12px;font-weight:700;color:#e65100;">
+                Control: {{ req.control_number }}
+            </div>
+            {% endif %}
+            {% if req.status == "payment_failed" %}
+            <div style="margin-top:8px;font-size:12px;color:#c62828;font-weight:600;">
+                Malipo hayakufanikiwa — fungua ombi ili ulipe tena.
+            </div>
+            {% elif req.status == "awaiting_payment" %}
+            <div style="margin-top:8px;font-size:12px;color:#e65100;font-weight:600;">
+                Angalia simu yako na uingize PIN ili ukamilishe malipo.
+            </div>
+            {% endif %}
+            {% if req.created_at %}
+            <div class="meta-time-sm">{{ to_dar_es_salaam(req.created_at) }}</div>
+            {% endif %}
         </div>
+    </a>
+    {% endfor %}
+{% else %}
+    <div class="card" style="text-align:center;padding:28px 16px;">
+        <div class="title" style="font-size:18px;">Hakuna maombi bado</div>
+        <p class="muted" style="margin:10px 0 16px;">Anza ombi jipya la TIN, Leseni au NIDA.</p>
+        <a href="{{ url_for('nakala') }}" class="btn orange" style="display:block;text-align:center;">Anza Ombi</a>
     </div>
-    {% endif %}
-
-    {% if req.admin_note %}
-    <div class="nd-card">
-        <div class="nd-title">Ujumbe wa Admin</div>
-        <p style="font-size:13px;line-height:1.5;color:#333;">{{ req.admin_note }}</p>
-    </div>
-    {% endif %}
-
-    {% if req.result_message %}
-    <div class="nd-card">
-        <div class="nd-title">Matokeo</div>
-        <p style="font-size:13px;line-height:1.5;">{{ req.result_message }}</p>
-    </div>
-    {% endif %}
-
-    {% if req.result_file %}
-    <div class="nd-card">
-        <div class="nd-title">Faili / Leseni</div>
-        <a class="file-btn" href="{{ url_for('media_file', filename=req.result_file) }}" target="_blank">
-            📄 Pakua Leseni / Faili
-        </a>
-    </div>
-    {% endif %}
+{% endif %}
 </div>
 {% endblock %}

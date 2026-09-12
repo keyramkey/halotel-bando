@@ -981,12 +981,31 @@ def asante():
 # ---------------------------------------------------------------------------
 # ClickPesa Webhook
 # ---------------------------------------------------------------------------
+def _parse_nakala_pay_ref(order_ref):
+    """NKR{id} au NKR{id}T{timestamp} → NakalaRequest au None."""
+    if not order_ref:
+        return None
+    ref = order_ref.strip().upper()
+    if not ref.startswith("NKR"):
+        return None
+    try:
+        rest = order_ref.strip()[3:]
+        # chukua digits kabla ya T (repay uniqueness)
+        part = rest.split("T")[0].split("-")[0]
+        nid = int("".join(ch for ch in part if ch.isdigit()) or "0")
+        if nid:
+            return NakalaRequest.query.get(nid)
+    except Exception:
+        return None
+    return None
+
+
 @app.route("/webhook/clickpesa", methods=["POST"])
 def clickpesa_webhook():
     """
-    Configure kwenye ClickPesa Dashboard:
-    https://your-domain.com/webhook/clickpesa
+    ClickPesa webhook — malipo yanathibitishwa HAPPA tu.
     Events: PAYMENT RECEIVED + PAYMENT FAILED
+    Refs: ORD... (bando) | NKR{id} (nakala)
     """
     try:
         data = request.get_json(force=True, silent=True) or {}
@@ -996,18 +1015,79 @@ def clickpesa_webhook():
     event = (data.get("event") or "").upper()
     payload = data.get("data") or data
 
-    order_ref = payload.get("orderReference") or payload.get("order_reference")
+    order_ref = (payload.get("orderReference") or payload.get("order_reference") or "").strip()
     status = (payload.get("status") or "").upper()
-    message = payload.get("message") or ""
+    message = (payload.get("message") or "")[:200]
 
     if not order_ref:
         return jsonify({"ok": False, "error": "No orderReference"}), 400
 
+    paid_ok = event == "PAYMENT RECEIVED" or status in ("SUCCESS", "SETTLED")
+    failed = event == "PAYMENT FAILED" or status == "FAILED"
+
+    # ---------- Nakala ----------
+    nakala_req = _parse_nakala_pay_ref(order_ref)
+    if nakala_req:
+        if paid_ok:
+            # Thibitisha: pending / awaiting_payment / payment_failed → paid
+            if nakala_req.status in (
+                "pending", "awaiting_payment", "payment_failed", "failed"
+            ):
+                if nakala_req.service_type == "license":
+                    nakala_req.status = "waiting_control_number"
+                else:
+                    nakala_req.status = "paid"
+                # safisha ujumbe wa fail wa zamani
+                if nakala_req.admin_note and "Malipo yameshindwa" in (nakala_req.admin_note or ""):
+                    nakala_req.admin_note = ""
+                db.session.commit()
+                try:
+                    label = nakala_req.license_type if nakala_req.service_type == "license" else nakala_req.service_type
+                    send_push_to_admins(
+                        "Nakala — malipo yamepokelewa ✓",
+                        f"{nakala_req.request_code}: {label or '—'}"
+                        + (f" · {nakala_req.license_location}" if nakala_req.license_location else ""),
+                        url="/dashboard",
+                        tag=f"nakala-pay-{nakala_req.id}",
+                    )
+                    send_push_to_user(
+                        nakala_req.user_id,
+                        "Malipo yamepokelewa ✓",
+                        f"Ombi {nakala_req.request_code} limethibitishwa. Linashughulikiwa sasa.",
+                        url=f"/nakala/{nakala_req.id}",
+                        tag=f"nakala-ok-{nakala_req.id}",
+                    )
+                except Exception as e:
+                    print(f"nakala webhook ok: {e}")
+        elif failed:
+            if nakala_req.status in ("pending", "awaiting_payment"):
+                nakala_req.status = "payment_failed"
+                nakala_req.admin_note = f"Malipo yameshindwa: {message or 'FAILED'}"[:255]
+                db.session.commit()
+                try:
+                    send_push_to_admins(
+                        "Nakala — malipo yameshindwa ⚠",
+                        f"{nakala_req.request_code}: {message or 'Imeshindwa'}",
+                        url="/dashboard",
+                        tag=f"nakala-fail-{nakala_req.id}",
+                    )
+                    send_push_to_user(
+                        nakala_req.user_id,
+                        "Malipo yameshindwa",
+                        f"Ombi {nakala_req.request_code}: malipo yameshindwa. Fungua ombi na ulipe tena.",
+                        url=f"/nakala/{nakala_req.id}",
+                        tag=f"nakala-fail-{nakala_req.id}",
+                    )
+                except Exception as e:
+                    print(f"nakala webhook fail: {e}")
+        return jsonify({"ok": True, "type": "nakala"}), 200
+
+    # ---------- Oda bando ----------
     order = Order.query.filter_by(order_reference=order_ref).first()
     if not order:
         return jsonify({"ok": False, "error": "Order not found"}), 200
 
-    if event == "PAYMENT RECEIVED" or status in ("SUCCESS", "SETTLED"):
+    if paid_ok:
         if order.status in ("awaiting_payment", "failed"):
             order.status = "pending"
             order.fail_reason = ""
@@ -1015,21 +1095,20 @@ def clickpesa_webhook():
             try:
                 send_push_to_admins(
                     "Malipo yamepokelewa ✓",
-                    f"Oda #{order.id} — {order.amount} (TSh {order.price}). Namba: {order.phone}",
+                    f"Oda #{order.id} — {order.amount}. Namba: {order.phone}",
                     url="/dashboard",
                     tag=f"pay-ok-{order.id}",
                 )
                 send_push_to_user(
                     order.user_id,
-                    "Malipo yamepokelewa",
+                    "Malipo yamepokelewa ✓",
                     f"Malipo ya oda #{order.id} yamefanikiwa. Inashughulikiwa sasa.",
                     url="/profile",
                     tag=f"pay-ok-{order.id}",
                 )
             except Exception as e:
                 print(f"webhook success push: {e}")
-
-    elif event == "PAYMENT FAILED" or status == "FAILED":
+    elif failed:
         order.status = "failed"
         order.fail_reason = (message or "Malipo yameshindwa")[:200]
         db.session.commit()
@@ -1043,14 +1122,14 @@ def clickpesa_webhook():
             send_push_to_user(
                 order.user_id,
                 "Malipo yameshindwa",
-                f"Malipo ya oda #{order.id} yameshindwa. Jaribu tena au wasiliana nasi.",
+                f"Malipo ya oda #{order.id} yameshindwa. Jaribu tena.",
                 url="/order",
                 tag=f"pay-fail-{order.id}",
             )
         except Exception as e:
             print(f"webhook fail push: {e}")
 
-    return jsonify({"ok": True}), 200
+    return jsonify({"ok": True, "type": "order"}), 200
 
 
 # ---------------------------------------------------------------------------
@@ -1096,48 +1175,6 @@ def send_message():
     except Exception as e:
         print(f"customer chat push: {e}")
     return jsonify({"success": True})
-
-
-def get_recent_chat_threads(limit=50):
-    """Orodha ya users waliotuma/kupokea ujumbe, sorted by last message."""
-    from sqlalchemy import func
-    subq = (
-        db.session.query(
-            Message.user_id,
-            func.max(Message.id).label("last_id"),
-        )
-        .group_by(Message.user_id)
-        .subquery()
-    )
-    rows = (
-        db.session.query(Message, User)
-        .join(subq, Message.id == subq.c.last_id)
-        .join(User, User.id == Message.user_id)
-        .order_by(Message.created_at.desc())
-        .limit(limit)
-        .all()
-    )
-    threads = []
-    for msg, usr in rows:
-        preview = (msg.message or "").strip() or ("📷 Picha" if msg.image else "—")
-        if len(preview) > 60:
-            preview = preview[:57] + "..."
-        threads.append({
-            "user": usr,
-            "last_message": preview,
-            "last_sender": msg.sender,
-            "last_at": msg.created_at,
-            "unread_from_customer": msg.sender == "customer",
-        })
-    return threads
-
-
-@app.route("/admin/messages")
-@admin_required
-def admin_messages():
-    """Orodha ya mazungumzo yote — sehemu ya kukuta ujumbe."""
-    threads = get_recent_chat_threads(80)
-    return render_template("admin_messages.html", threads=threads)
 
 
 @app.route("/admin/chat/<int:user_id>")
@@ -2087,59 +2124,68 @@ def nakala_pay():
                 "Authorization": token,
                 "Content-Type": "application/json"
             }
+            # NKR{id} — "imelipwa" inakuja TU kutoka webhook
+            pay_ref = f"NKR{req.id}"
             payload = {
                 "amount": str(price),
                 "currency": "TZS",
-                "orderReference": f"NK{req.id}{int(time.time())}"[:20],
-                "phoneNumber": normalize_phone(payment_phone)
+                "orderReference": pay_ref,
+                "phoneNumber": normalize_phone(payment_phone),
             }
             response = requests.post(url, json=payload, headers=headers, timeout=20)
-            data = response.json()
+            data = response.json() if response.content else {}
             if response.status_code in [200, 201]:
-                # Baada ya malipo ya ada ya huduma: leseni → waiting_control_number; nyingine → paid
-                if req.service_type == "license":
-                    req.status = "waiting_control_number"
-                else:
-                    req.status = "paid"
+                req.status = "awaiting_payment"
                 db.session.commit()
                 try:
-                    if req.service_type == "license":
-                        send_push_to_admins(
-                            "Leseni — malipo yamepokelewa",
-                            f"{req.request_code}: {req.license_type} · Eneo: {req.license_location or '—'} · Control fee TSh {req.control_number_fee:,}",
-                            url="/dashboard",
-                            tag=f"nakala-pay-{req.id}",
-                        )
-                        send_push_to_user(
-                            req.user_id,
-                            "Malipo yamepokelewa",
-                            f"Ombi {req.request_code} limesubiri control number kutoka admin. Utajulishwa.",
-                            url=f"/nakala/{req.id}",
-                            tag=f"nakala-wait-{req.id}",
-                        )
-                    else:
-                        send_push_to_admins(
-                            "Nakala — malipo yameanzishwa",
-                            f"{req.request_code} ({req.service_type}) — TSh {req.price}",
-                            url="/dashboard",
-                            tag=f"nakala-pay-{req.id}",
-                        )
+                    send_push_to_admins(
+                        "Nakala — inasubiri malipo",
+                        f"{req.request_code} ({req.service_type})"
+                        + (f" · {req.license_type}" if req.license_type else ""),
+                        url="/dashboard",
+                        tag=f"nakala-wait-{req.id}",
+                    )
+                    send_push_to_user(
+                        req.user_id,
+                        "Ombi la malipo limeshushwa",
+                        "Angalia simu, ingiza PIN. Utajulishwa baada ya ClickPesa kuthibitisha.",
+                        url=f"/nakala/{req.id}",
+                        tag=f"nakala-init-{req.id}",
+                    )
                 except Exception as e:
                     print(f"nakala pay push: {e}")
-                if req.service_type == "license":
-                    flash("Malipo yameanzishwa! Baada ya kulipia, ombi litasubiri control number kutoka admin.", "success")
-                else:
-                    flash("Ombi la malipo limeshushwa! Angalia simu yako na uingize PIN. Ombi limetumwa kwa admin.", "success")
+                flash(
+                    "Ombi la malipo limeshushwa! Angalia simu yako na uingize PIN. "
+                    "Status itakuwa «Imelipwa» baada tu ya ClickPesa kuthibitisha.",
+                    "success",
+                )
                 return redirect(url_for("my_nakala"))
             else:
-                flash(f"ClickPesa imeshindwa: {data}. Ombi limehifadhiwa. Lipa manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}", "error")
+                req.status = "payment_failed"
+                req.admin_note = f"ClickPesa initiate fail: {str(data)[:120]}"
+                db.session.commit()
+                flash(
+                    f"Malipo yameshindwa kuanzishwa. Jaribu tena (Repay) kwenye ombi lako. "
+                    f"Au lipa manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}",
+                    "error",
+                )
         except Exception as e:
-            flash(f"Hitilafu ya malipo: {str(e)}. Ombi limehifadhiwa. Lipa manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}", "error")
+            req.status = "payment_failed"
+            req.admin_note = f"Hitilafu malipo: {str(e)[:120]}"
+            try:
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+            flash(
+                f"Hitilafu ya malipo. Fungua ombi na ubonyeze «Lipa Tena». "
+                f"Manual: {PAYMENT_NETWORK} {PAYMENT_NUMBER}",
+                "error",
+            )
     else:
         try:
             send_push_to_admins(
-                "Ombi jipya la Nakala",
-                f"{req.request_code} ({req.service_type}) — TSh {price}",
+                "Ombi jipya la Nakala (manual)",
+                f"{req.request_code} ({req.service_type})",
                 url="/dashboard",
                 tag=f"nakala-new-{req.id}",
             )
@@ -2176,37 +2222,126 @@ def nakala_detail(req_id):
     return render_template("nakala_detail.html", req=req)
 
 
+@app.route("/nakala/<int:req_id>/repay", methods=["GET", "POST"])
+@login_required
+def nakala_repay(req_id):
+    """Lipa tena baada ya payment_failed / pending bila malipo yaliyothibitishwa."""
+    user = get_current_user()
+    req = NakalaRequest.query.get_or_404(req_id)
+    if req.user_id != user.id:
+        flash("Huna ruhusa.", "error")
+        return redirect(url_for("my_nakala"))
+
+    # Usiruhusu repay kama tayari imelipwa / inachakatwa
+    if req.status in (
+        "paid", "processing", "waiting_control_number",
+        "control_issued", "completed",
+    ):
+        flash("Ombi hili tayari limelipwa au linashughulikiwa.", "error")
+        return redirect(url_for("nakala_detail", req_id=req.id))
+
+    if request.method == "GET":
+        # Fomu rahisi ya namba ya kulipia
+        return f"""<!DOCTYPE html>
+<html lang="sw"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lipa Tena · {req.request_code}</title>
+<script src="https://cdn.tailwindcss.com"></script></head>
+<body class="bg-slate-50 min-h-screen p-4">
+<div class="max-w-md mx-auto bg-white rounded-2xl shadow p-6 mt-8">
+  <h1 class="text-lg font-bold text-slate-800 mb-1">Lipa Tena</h1>
+  <p class="text-sm text-slate-500 mb-4">{req.request_code} · Ada TSh {req.price:,}</p>
+  <form method="POST">
+    <label class="block text-xs font-bold text-slate-600 mb-1">Namba yenye pesa</label>
+    <input name="payment_phone" type="tel" required placeholder="07XXXXXXXX"
+      value="{user.phone or ''}"
+      class="w-full border border-slate-200 rounded-xl px-3 py-3 mb-4 text-sm">
+    <button type="submit"
+      class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl">
+      Tuma Ombi la Malipo
+    </button>
+  </form>
+  <a href="/nakala/{req.id}" class="block text-center text-sm text-slate-500 mt-4">← Rudi</a>
+</div></body></html>"""
+
+    payment_phone = request.form.get("payment_phone", "").strip()
+    if not payment_phone:
+        flash("Weka namba ya kulipia.", "error")
+        return redirect(url_for("nakala_repay", req_id=req.id))
+
+    price = int(req.price or 0)
+    if not (CLICKPESA_CLIENT_ID and CLICKPESA_API_KEY and price > 0):
+        flash(
+            f"Lipa manual TSh {price:,} kwa {PAYMENT_NETWORK} {PAYMENT_NUMBER} ({PAYMENT_NAME}).",
+            "error",
+        )
+        return redirect(url_for("nakala_detail", req_id=req.id))
+
+    try:
+        token = get_clickpesa_token()
+        # Reference mpya kila jaribio (ClickPesa inahitaji unique)
+        pay_ref = f"NKR{req.id}T{int(time.time())}"[:20]
+        headers = {"Authorization": token, "Content-Type": "application/json"}
+        payload = {
+            "amount": str(price),
+            "currency": "TZS",
+            "orderReference": pay_ref,
+            "phoneNumber": normalize_phone(payment_phone),
+        }
+        response = requests.post(
+            "https://api.clickpesa.com/third-parties/payments/initiate-ussd-push-request",
+            json=payload, headers=headers, timeout=20,
+        )
+        data = response.json() if response.content else {}
+        if response.status_code in (200, 201):
+            req.status = "awaiting_payment"
+            req.admin_note = ""
+            db.session.commit()
+            try:
+                send_push_to_user(
+                    req.user_id,
+                    "Ombi la malipo limeshushwa tena",
+                    "Angalia simu, ingiza PIN. Utajulishwa baada ya uthibitisho.",
+                    url=f"/nakala/{req.id}",
+                    tag=f"nakala-repay-{req.id}",
+                )
+            except Exception:
+                pass
+            flash(
+                "Ombi la malipo limeshushwa tena! Ingiza PIN kwenye simu. "
+                "«Imelipwa» itaonekana baada ya ClickPesa kuthibitisha.",
+                "success",
+            )
+            return redirect(url_for("nakala_detail", req_id=req.id))
+        req.status = "payment_failed"
+        req.admin_note = f"Repay fail: {str(data)[:120]}"
+        db.session.commit()
+        flash(f"Malipo yameshindwa kuanzishwa tena: {str(data)[:80]}", "error")
+    except Exception as e:
+        req.status = "payment_failed"
+        req.admin_note = f"Repay error: {str(e)[:120]}"
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+        flash(f"Hitilafu: {str(e)[:100]}", "error")
+    return redirect(url_for("nakala_detail", req_id=req.id))
+
+
 @app.route("/dashboard")
 @admin_required
 def dashboard():
-    from sqlalchemy import or_
     users_count = User.query.count()
     pending_count = Order.query.filter_by(status="pending").count()
     agency_pending = Application.query.filter_by(status="pending").count()
     nakala_pending = NakalaRequest.query.filter(NakalaRequest.status.in_([
-        "pending", "awaiting_payment", "paid", "processing",
+        "pending", "awaiting_payment", "payment_failed", "paid", "processing",
         "waiting_control_number", "control_issued",
     ])).count()
-
-    # Search oda kwa reference / ID / phone
-    ref_q = (request.args.get("ref") or "").strip()
-    orders_query = Order.query.order_by(Order.created_at.desc())
-    if ref_q:
-        like = f"%{ref_q}%"
-        filters = [
-            Order.order_reference.ilike(like),
-            Order.phone.ilike(like),
-            Order.amount.ilike(like),
-            Order.note.ilike(like),
-        ]
-        if ref_q.isdigit():
-            filters.append(Order.id == int(ref_q))
-        orders_query = orders_query.filter(or_(*filters))
-    orders = orders_query.limit(80).all()
-
+    orders = Order.query.order_by(Order.created_at.desc()).limit(50).all()
     applications = Application.query.order_by(Application.created_at.desc()).limit(50).all()
     slides = Slide.query.order_by(Slide.sort_order.asc(), Slide.id.asc()).all()
     nakala_list = NakalaRequest.query.order_by(NakalaRequest.created_at.desc()).limit(50).all()
+    # Active password-reset OTPs (for admin to read to customer via WhatsApp)
     pending_resets = (
         User.query.filter(User.reset_otp.isnot(None), User.reset_otp != "")
         .filter(
@@ -2217,6 +2352,7 @@ def dashboard():
         .limit(20)
         .all()
     )
+    # Users list + search (admin Users tab)
     q = (request.args.get("q") or "").strip()
     users_query = User.query.order_by(User.created_at.desc())
     if q:
@@ -2228,16 +2364,9 @@ def dashboard():
         ]
         if q.isdigit():
             filters.append(User.id == int(q))
+        from sqlalchemy import or_
         users_query = users_query.filter(or_(*filters))
     all_users = users_query.limit(300).all()
-
-    try:
-        chat_threads = get_recent_chat_threads(30)
-    except Exception as e:
-        print(f"chat_threads: {e}")
-        chat_threads = []
-    chat_unread = sum(1 for t in chat_threads if t.get("unread_from_customer"))
-
     return render_template(
         "dashboard.html",
         users_count=users_count,
@@ -2251,9 +2380,6 @@ def dashboard():
         pending_resets=pending_resets,
         all_users=all_users,
         users_search_q=q,
-        orders_ref_q=ref_q,
-        chat_threads=chat_threads,
-        chat_unread=chat_unread,
     )
 
 
@@ -2546,6 +2672,8 @@ def admin_nakala_update(req_id):
 
     allowed_status = (
         "pending",
+        "awaiting_payment",
+        "payment_failed",
         "paid",
         "processing",
         "waiting_control_number",
@@ -2596,6 +2724,8 @@ def admin_nakala_update(req_id):
     try:
         status_sw = {
             "pending": "Inasubiri",
+            "awaiting_payment": "Inasubiri Malipo",
+            "payment_failed": "Malipo Yameshindwa",
             "paid": "Imelipwa",
             "processing": "Inashughulikiwa",
             "waiting_control_number": "Inasubiri Control Number",

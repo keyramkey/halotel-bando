@@ -2,51 +2,45 @@
 {% block title %}Chat · {{ user.username }}{% endblock %}
 {% block content %}
 <style>
-
-    /* Ficha scrollbar, scroll inaendelea */
-    .achat-body, .chat-body {
-        scrollbar-width: none;          /* Firefox */
-        -ms-overflow-style: none;       /* IE/Edge legacy */
+    /* Ficha scrollbar */
+    .achat-body {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
     }
-    .achat-body::-webkit-scrollbar,
-    .chat-body::-webkit-scrollbar {
-        width: 0;
-        height: 0;
-        display: none;                  /* Chrome, Safari, Android */
+    .achat-body::-webkit-scrollbar {
+        width: 0; height: 0; display: none;
     }
 
-    /* Ficha bottom nav kwenye chat ili space iwe ya kutosha */
-    .bottom-nav, nav.bottom, .tabbar, footer.app-nav { display: none !important; }
-
+    /* SI full screen — inaacha nafasi ya bottom nav */
     .achat {
         display: flex;
         flex-direction: column;
-        height: 100dvh;
-        max-height: 100dvh;
         width: 100%;
         max-width: 480px;
         margin: 0 auto;
         background: #efeae2;
-        position: relative;
+        height: calc(100dvh - 64px);
+        max-height: calc(100dvh - 64px);
         overflow: hidden;
+        box-sizing: border-box;
     }
     @supports not (height: 100dvh) {
-        .achat { height: 100vh; max-height: 100vh; }
+        .achat {
+            height: calc(100vh - 64px);
+            max-height: calc(100vh - 64px);
+        }
     }
 
-    /* Header STATIC */
+    /* Header mfupi — static */
     .achat-head {
         display: flex;
         align-items: center;
         gap: 10px;
         padding: 8px 10px;
-        padding-top: max(8px, env(safe-area-inset-top));
         background: #fff;
         border-bottom: 1px solid #e8e8e8;
-        flex-shrink: 0;
-        position: sticky;
-        top: 0;
-        z-index: 10;
+        flex: 0 0 auto;
+        z-index: 2;
     }
     .achat-back {
         width: 36px; height: 36px; border-radius: 50%;
@@ -70,8 +64,10 @@
     .achat-body {
         flex: 1 1 auto;
         min-height: 0;
+        overflow-x: hidden;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
         padding: 10px 10px 12px;
         display: flex;
         flex-direction: column;
@@ -176,16 +172,13 @@
         font-size: 13px; padding: 20px;
     }
 
-    /* Footer STATIC */
+    /* Form chini — static */
     .achat-foot {
-        flex-shrink: 0;
+        flex: 0 0 auto;
         background: #f0f0f0;
         border-top: 1px solid #e5e5e5;
         padding: 8px 8px;
-        padding-bottom: max(8px, env(safe-area-inset-bottom));
-        z-index: 10;
-        position: sticky;
-        bottom: 0;
+        z-index: 2;
     }
     .achat-row {
         display: flex; align-items: flex-end; gap: 6px;

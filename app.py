@@ -2373,17 +2373,58 @@ def nakala_repay(req_id):
 @app.route("/dashboard")
 @admin_required
 def dashboard():
+    from sqlalchemy import or_, and_
+
     users_count = User.query.count()
     pending_count = Order.query.filter_by(status="pending").count()
     agency_pending = Application.query.filter_by(status="pending").count()
+    # Pending work — bila malipo yaliyoshindwa (hayo yanaenda trash)
     nakala_pending = NakalaRequest.query.filter(NakalaRequest.status.in_([
-        "pending", "awaiting_payment", "payment_failed", "paid", "processing",
+        "pending", "awaiting_payment", "paid", "processing",
         "waiting_control_number", "control_issued",
     ])).count()
-    orders = Order.query.order_by(Order.created_at.desc()).limit(50).all()
+
+    # Search oda kwa ref / id / simu / amount
+    orders_ref_q = (request.args.get("ref") or "").strip()
+    orders_q = Order.query.filter(Order.status != "failed")
+    if orders_ref_q:
+        like = f"%{orders_ref_q}%"
+        filters = [
+            Order.order_reference.ilike(like),
+            Order.phone.ilike(like),
+            Order.amount.ilike(like),
+            Order.note.ilike(like),
+        ]
+        if orders_ref_q.isdigit():
+            filters.append(Order.id == int(orders_ref_q))
+        orders_q = orders_q.filter(or_(*filters))
+    orders = orders_q.order_by(Order.created_at.desc()).limit(50).all()
+
+    # Trash: malipo yameshindwa tu
+    trash_orders = (
+        Order.query.filter_by(status="failed")
+        .order_by(Order.created_at.desc())
+        .limit(100)
+        .all()
+    )
+    trash_nakala = (
+        NakalaRequest.query.filter_by(status="payment_failed")
+        .order_by(NakalaRequest.created_at.desc())
+        .limit(100)
+        .all()
+    )
+    trash_orders_count = Order.query.filter_by(status="failed").count()
+    trash_nakala_count = NakalaRequest.query.filter_by(status="payment_failed").count()
+    trash_count = trash_orders_count + trash_nakala_count
+
     applications = Application.query.order_by(Application.created_at.desc()).limit(50).all()
     slides = Slide.query.order_by(Slide.sort_order.asc(), Slide.id.asc()).all()
-    nakala_list = NakalaRequest.query.order_by(NakalaRequest.created_at.desc()).limit(50).all()
+    nakala_list = (
+        NakalaRequest.query.filter(NakalaRequest.status != "payment_failed")
+        .order_by(NakalaRequest.created_at.desc())
+        .limit(50)
+        .all()
+    )
     # Active password-reset OTPs (for admin to read to customer via WhatsApp)
     pending_resets = (
         User.query.filter(User.reset_otp.isnot(None), User.reset_otp != "")
@@ -2407,7 +2448,6 @@ def dashboard():
         ]
         if q.isdigit():
             filters.append(User.id == int(q))
-        from sqlalchemy import or_
         users_query = users_query.filter(or_(*filters))
     all_users = users_query.limit(300).all()
     return render_template(
@@ -2417,13 +2457,89 @@ def dashboard():
         agency_pending=agency_pending,
         nakala_pending=nakala_pending,
         orders=orders,
+        orders_ref_q=orders_ref_q,
         applications=applications,
         slides=slides,
         nakala_list=nakala_list,
         pending_resets=pending_resets,
         all_users=all_users,
         users_search_q=q,
+        trash_orders=trash_orders,
+        trash_nakala=trash_nakala,
+        trash_orders_count=trash_orders_count,
+        trash_nakala_count=trash_nakala_count,
+        trash_count=trash_count,
     )
+
+
+
+@app.route("/admin/order/delete/<int:order_id>", methods=["POST"])
+@admin_required
+def admin_order_delete(order_id):
+    """Futa oda iliyoshindwa malipo (trash) — failed tu."""
+    order_item = Order.query.get_or_404(order_id)
+    if order_item.status != "failed":
+        flash("Unaweza kufuta kutoka trash oda zilizo 'Malipo Yameshindwa' tu.", "error")
+        return redirect(url_for("dashboard") + "#trash")
+    oid = order_item.id
+    db.session.delete(order_item)
+    db.session.commit()
+    flash(f"Oda #{oid} imefutwa kabisa kutoka trash.", "success")
+    return redirect(url_for("dashboard") + "#trash")
+
+
+@app.route("/admin/order/trash/empty", methods=["POST"])
+@admin_required
+def admin_order_trash_empty():
+    """Futa oda zote zilizo failed (trash)."""
+    n = Order.query.filter_by(status="failed").delete()
+    db.session.commit()
+    flash(f"Trash ya oda tupu: {n} zimefutwa.", "success")
+    return redirect(url_for("dashboard") + "#trash")
+
+
+@app.route("/admin/nakala/delete/<int:req_id>", methods=["POST"])
+@admin_required
+def admin_nakala_delete(req_id):
+    """Futa ombi la nakala lililoshindwa malipo (payment_failed) — trash."""
+    req = NakalaRequest.query.get_or_404(req_id)
+    if req.status != "payment_failed":
+        flash("Unaweza kufuta kutoka trash maombi yaliyo 'Malipo Yameshindwa' tu.", "error")
+        return redirect(url_for("dashboard") + "#trash")
+    # Ondoa faili ya matokeo ikiwa ipo
+    if req.result_file:
+        try:
+            fp = os.path.join(app.config["UPLOAD_FOLDER"], req.result_file)
+            if os.path.isfile(fp):
+                os.remove(fp)
+        except OSError:
+            pass
+    code = req.request_code
+    db.session.delete(req)
+    db.session.commit()
+    flash(f"Ombi {code} limetolewa kabisa kutoka trash.", "success")
+    return redirect(url_for("dashboard") + "#trash")
+
+
+@app.route("/admin/nakala/trash/empty", methods=["POST"])
+@admin_required
+def admin_nakala_trash_empty():
+    """Futa maombi yote ya nakala yaliyo payment_failed."""
+    rows = NakalaRequest.query.filter_by(status="payment_failed").all()
+    n = 0
+    for req in rows:
+        if req.result_file:
+            try:
+                fp = os.path.join(app.config["UPLOAD_FOLDER"], req.result_file)
+                if os.path.isfile(fp):
+                    os.remove(fp)
+            except OSError:
+                pass
+        db.session.delete(req)
+        n += 1
+    db.session.commit()
+    flash(f"Trash ya nakala tupu: {n} zimefutwa.", "success")
+    return redirect(url_for("dashboard") + "#trash")
 
 
 @app.route("/admin/users/block/<int:user_id>", methods=["POST"])

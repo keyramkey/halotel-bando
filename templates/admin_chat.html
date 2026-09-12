@@ -2,6 +2,19 @@
 {% block title %}Chat · {{ user.username }}{% endblock %}
 {% block content %}
 <style>
+
+    /* Ficha scrollbar, scroll inaendelea */
+    .achat-body, .chat-body {
+        scrollbar-width: none;          /* Firefox */
+        -ms-overflow-style: none;       /* IE/Edge legacy */
+    }
+    .achat-body::-webkit-scrollbar,
+    .chat-body::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+        display: none;                  /* Chrome, Safari, Android */
+    }
+
     /* Ficha bottom nav kwenye chat ili space iwe ya kutosha */
     .bottom-nav, nav.bottom, .tabbar, footer.app-nav { display: none !important; }
 

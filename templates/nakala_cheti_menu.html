@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Cheti Cha Kuzaliwa / Kifo{% endblock %}
+{% block content %}
+<style>
+    .nk-wrap { max-width: 640px; margin: 0 auto; }
+    .nk-hero {
+        background: linear-gradient(135deg, #f56b00 0%, #e85d04 55%, #dc2f02 100%);
+        border-radius: 20px; padding: 22px 20px; color: #fff; margin-bottom: 18px;
+        box-shadow: 0 8px 24px rgba(245, 107, 0, 0.28);
+    }
+    .nk-hero h1 { font-size: 20px; font-weight: 800; margin: 0 0 6px; }
+    .nk-hero p { margin: 0; font-size: 13px; opacity: 0.92; line-height: 1.45; }
+    .nk-grid { display: grid; gap: 12px; }
+    .nk-card {
+        display: flex; align-items: center; gap: 14px; background: #fff;
+        border: 1px solid #eee; border-radius: 16px; padding: 16px;
+        text-decoration: none; color: inherit; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .nk-card:active { transform: scale(0.98); }
+    .nk-icon {
+        width: 52px; height: 52px; border-radius: 14px; display: grid;
+        place-items: center; font-size: 24px; flex-shrink: 0;
+    }
+    .nk-body { flex: 1; min-width: 0; }
+    .nk-body h3 { margin: 0; font-size: 15px; font-weight: 800; color: #1a1a1a; }
+    .nk-body p { margin: 4px 0 0; font-size: 12px; color: #777; line-height: 1.35; }
+    .nk-price { font-size: 12px; font-weight: 800; color: #f56b00; white-space: nowrap; }
+    .nk-arrow { color: #ccc; font-size: 18px; font-weight: 700; }
+</style>
+<header class="topbar">
+    <div>
+        <div class="brand">Cheti</div>
+        <div class="muted">Kuzaliwa · Kifo · Uhakiki</div>
+    </div>
+    <a href="{{ url_for('nakala') }}" class="icon-btn">←</a>
+</header>
+<div class="page nk-wrap">
+    <div class="nk-hero">
+        <h1>Cheti Cha Kuzaliwa / Kifo</h1>
+        <p>Chagua aina ya ombi. Jaza taarifa kwa umakini kisha lipa.</p>
+    </div>
+    <div class="nk-grid">
+        <a class="nk-card" href="{{ url_for('nakala_birth_cert') }}">
+            <div class="nk-icon" style="background:#e8f5e9;">👶</div>
+            <div class="nk-body">
+                <h3>1. Cheti cha Kuzaliwa</h3>
+                <p>Usajili wa cheti cha kuzaliwa</p>
+            </div>
+            <div class="nk-price">TSh 30,000</div>
+            <div class="nk-arrow">›</div>
+        </a>
+        <a class="nk-card" href="{{ url_for('nakala_death_cert') }}">
+            <div class="nk-icon" style="background:#fce4ec;">🕊️</div>
+            <div class="nk-body">
+                <h3>2. Cheti cha Kifo</h3>
+                <p>Usajili wa cheti cha kifo</p>
+            </div>
+            <div class="nk-price">TSh 18,000</div>
+            <div class="nk-arrow">›</div>
+        </a>
+        <a class="nk-card" href="{{ url_for('nakala_cheti_verify_menu') }}">
+            <div class="nk-icon" style="background:#e3f2fd;">🔍</div>
+            <div class="nk-body">
+                <h3>3. Cheti Verification</h3>
+                <p>Uhakiki wa cheti cha kuzaliwa au kifo</p>
+            </div>
+            <div class="nk-price">TSh 9,000</div>
+            <div class="nk-arrow">›</div>
+        </a>
+    </div>
+</div>
+{% endblock %}

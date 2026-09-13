@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Uhakiki — Cheti cha Kuzaliwa{% endblock %}
+{% block content %}
+<style>
+    .f-wrap { max-width: 640px; margin: 0 auto; }
+    .f-card {
+        background: #fff; border-radius: 16px; border: 1px solid #eee;
+        padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .f-card h3 { margin: 0 0 12px; font-size: 14px; font-weight: 800; }
+    label { display: block; font-size: 12px; font-weight: 700; color: #666; margin: 10px 0 4px; }
+    .req { color: #e74c3c; }
+    input, select {
+        width: 100%; padding: 12px 14px; border: 1.5px solid #eee; border-radius: 12px;
+        font-size: 14px; background: #fafafa; box-sizing: border-box;
+    }
+    .price-bar {
+        background: linear-gradient(135deg, #fff3e8, #fff8f0); border: 1px solid #ffd0b0;
+        border-radius: 14px; padding: 14px; margin-bottom: 14px; text-align: center;
+    }
+    .price-bar strong { font-size: 18px; color: #e65100; }
+    .btn-submit {
+        width: 100%; padding: 14px; border: none; border-radius: 14px;
+        background: linear-gradient(135deg, #f56b00, #e85d04); color: #fff;
+        font-weight: 800; font-size: 15px; cursor: pointer;
+    }
+</style>
+<header class="topbar">
+    <div>
+        <div class="brand">Uhakiki — Kuzaliwa</div>
+        <div class="muted">Verification</div>
+    </div>
+    <a href="{{ url_for('nakala_cheti_verify_menu') }}" class="icon-btn">←</a>
+</header>
+<div class="page f-wrap">
+    <div class="price-bar">Ada: <strong>TSh {{ "{:,}".format(price) }}</strong> (inclusive)</div>
+    <form method="POST">
+        <div class="f-card">
+            <h3>Taarifa za Uhakiki</h3>
+            <label>Entry namba ya cheti cha kuzaliwa <span class="req">*</span></label>
+            <input name="entry_number" required>
+            <label>Sehemu ulipozaliwa</label>
+            <input name="birth_place">
+            <label>Majina matatu <span class="req">*</span></label>
+            <input name="full_name" required>
+            <label>Jinsia</label>
+            <select name="gender">
+                <option value="">— Chagua —</option>
+                <option value="Mwanaume">Mwanaume</option>
+                <option value="Mwanamke">Mwanamke</option>
+            </select>
+            <label>Majina matatu ya Baba</label>
+            <input name="father_name">
+            <label>Majina matatu ya Mama</label>
+            <input name="mother_name">
+            <label>Namba ya simu <span class="req">*</span></label>
+            <input name="phone" type="tel" required placeholder="07XXXXXXXX">
+        </div>
+        <button class="btn-submit" type="submit">Endelea — Hakiki Taarifa</button>
+    </form>
+</div>
+{% endblock %}

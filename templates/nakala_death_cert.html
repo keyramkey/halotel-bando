@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Cheti cha Kifo{% endblock %}
+{% block content %}
+<style>
+    .f-wrap { max-width: 640px; margin: 0 auto; }
+    .f-card {
+        background: #fff; border-radius: 16px; border: 1px solid #eee;
+        padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+    .f-card h3 {
+        margin: 0 0 12px; font-size: 14px; font-weight: 800; color: #222;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .f-card h3 .ico {
+        width: 28px; height: 28px; border-radius: 8px; background: #fff3e8;
+        color: #f56b00; display: grid; place-items: center; font-size: 13px;
+    }
+    .hint {
+        background: #fff8f0; border: 1px solid #ffe0c2; border-radius: 12px;
+        padding: 10px 12px; font-size: 12px; color: #a65c00; margin-bottom: 14px; line-height: 1.45;
+    }
+    label { display: block; font-size: 12px; font-weight: 700; color: #666; margin: 10px 0 4px; }
+    .req { color: #e74c3c; }
+    input, select, textarea {
+        width: 100%; padding: 12px 14px; border: 1.5px solid #eee; border-radius: 12px;
+        font-size: 14px; background: #fafafa; box-sizing: border-box;
+    }
+    .file-box {
+        border: 1.5px dashed #ffc999; border-radius: 12px; padding: 12px;
+        background: #fff8f0; margin-top: 6px;
+    }
+    .file-box input[type=file] { font-size: 13px; background: transparent; border: none; padding: 4px 0; }
+    .price-bar {
+        background: linear-gradient(135deg, #fff3e8, #fff8f0); border: 1px solid #ffd0b0;
+        border-radius: 14px; padding: 14px; margin-bottom: 14px; text-align: center;
+    }
+    .price-bar strong { font-size: 18px; color: #e65100; }
+    .btn-submit {
+        width: 100%; padding: 14px; border: none; border-radius: 14px;
+        background: linear-gradient(135deg, #f56b00, #e85d04); color: #fff;
+        font-weight: 800; font-size: 15px; cursor: pointer; margin-top: 8px;
+    }
+</style>
+<header class="topbar">
+    <div>
+        <div class="brand">Cheti cha Kifo</div>
+        <div class="muted">Usajili</div>
+    </div>
+    <a href="{{ url_for('nakala_cheti_menu') }}" class="icon-btn">←</a>
+</header>
+<div class="page f-wrap">
+    <div class="price-bar">
+        Ada ya huduma: <strong>TSh {{ "{:,}".format(price) }}</strong> (inclusive)
+    </div>
+    <div class="hint">
+        Umechagua: <strong>Usajili wa Cheti cha Kifo</strong>. Andika taarifa kwa umakini.
+        Unaweza kupiga picha au kupakia faili za viambatanisho.
+    </div>
+    <form method="POST" enctype="multipart/form-data">
+        <div class="f-card">
+            <h3><span class="ico">A</span> Taarifa za Aliyefariki</h3>
+            <label>Majina kamili <span class="req">*</span></label>
+            <input name="deceased_name" required>
+            <label>Tarehe ya kuzaliwa</label>
+            <input type="date" name="deceased_dob">
+            <label>Tarehe ya kufariki <span class="req">*</span></label>
+            <input type="date" name="death_date" required>
+            <label>Makazi (Mkoa, Wilaya, Kata, Mtaa)</label>
+            <input name="residence" placeholder="Mfano: Kariakoo, Ilala, Dar es Salaam">
+            <label>Eneo kifo kilipotokea (Mkoa, Wilaya, Kata, Mtaa)</label>
+            <input name="death_place_area">
+            <label>Chanzo / Sababu ya kifo</label>
+            <input name="death_cause">
+            <label>Sehemu kifo kilipotokea</label>
+            <select name="death_place_type">
+                <option value="">— Chagua —</option>
+                <option value="Nyumbani">Nyumbani</option>
+                <option value="Hospitali">Hospitali</option>
+                <option value="Kwingine">Kwingine</option>
+            </select>
+        </div>
+
+        <div class="f-card">
+            <h3><span class="ico">B</span> Taarifa za Wazazi wa Marehemu</h3>
+            <label>Majina matatu ya Mama</label>
+            <input name="mother_name">
+            <label>Majina kamili ya Baba</label>
+            <input name="father_name">
+        </div>
+
+        <div class="f-card">
+            <h3><span class="ico">C</span> Taarifa za Mtoa Taarifa (Wewe / Ndugu)</h3>
+            <label>Majina kamili <span class="req">*</span></label>
+            <input name="full_name" required>
+            <label>Namba ya simu <span class="req">*</span></label>
+            <input name="phone" type="tel" required placeholder="07XXXXXXXX">
+            <label>Kazi yako</label>
+            <input name="occupation">
+            <label>Unapoishi (Mkoa, Wilaya, Kata, Mtaa)</label>
+            <input name="informant_address">
+        </div>
+
+        <div class="f-card">
+            <h3><span class="ico">D</span> Nakala / Viambatanisho</h3>
+            <label>1. Kibali cha mazishi (kutoka kituo cha tiba)</label>
+            <div class="file-box"><input type="file" name="burial_permit" accept="image/*,application/pdf" capture="environment"></div>
+            <label>2. Muhtasari wa kikao + barua ya msimamizi wa mirathi</label>
+            <div class="file-box"><input type="file" name="family_minutes" accept="image/*,application/pdf"></div>
+            <label>3. Kadi ya kupigia kura / NIDA ya marehemu</label>
+            <div class="file-box"><input type="file" name="deceased_id" accept="image/*,application/pdf"></div>
+            <label>4. Kitambulisho cha msimamizi wa mirathi</label>
+            <div class="file-box"><input type="file" name="admin_id" accept="image/*,application/pdf"></div>
+            <label>5. Cheti cha ndoa au vyeti vya watoto</label>
+            <div class="file-box"><input type="file" name="marriage_or_children" accept="image/*,application/pdf"></div>
+        </div>
+
+        <button class="btn-submit" type="submit">Endelea — Hakiki Taarifa</button>
+    </form>
+</div>
+{% endblock %}

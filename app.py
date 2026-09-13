@@ -3462,6 +3462,26 @@ def admin_slide_delete(slide_id):
     return redirect(url_for("dashboard"))
 
 
+
+@app.route("/admin/nakala/<int:req_id>", methods=["GET"])
+@admin_required
+def admin_nakala_detail(req_id):
+    """Ukurasa kamili wa ombi la Nakala — taarifa, documents, badilisha status."""
+    req = NakalaRequest.query.get_or_404(req_id)
+    extra = {}
+    if getattr(req, "extra_data", None):
+        try:
+            extra = json.loads(req.extra_data) if isinstance(req.extra_data, str) else (req.extra_data or {})
+        except Exception:
+            extra = {}
+    return render_template(
+        "admin_nakala_detail.html",
+        req=req,
+        extra=extra,
+        current_user=current_user,
+    )
+
+
 @app.route("/admin/nakala/update/<int:req_id>", methods=["POST"])
 @admin_required
 def admin_nakala_update(req_id):
@@ -3501,7 +3521,7 @@ def admin_nakala_update(req_id):
                     price_changed = True
             except (TypeError, ValueError):
                 flash("Bei ya control number si sahihi (weka namba tu).", "error")
-                return redirect(url_for("dashboard") + "#nakala")
+                return redirect(url_for("admin_nakala_detail", req_id=req.id))
 
     result_file = request.files.get("result_file")
     if result_file and result_file.filename:
@@ -3604,7 +3624,8 @@ def admin_nakala_update(req_id):
     except Exception as e:
         print(f"nakala status push: {e}")
     flash(f"Ombi {req.request_code} limehifadhiwa.", "success")
-    return redirect(url_for("dashboard") + "#nakala")
+    # Kaa kwenye ukurasa wa detail (si dashboard) — admin aendelee kazi
+    return redirect(url_for("admin_nakala_detail", req_id=req.id))
 
 
 # ---------------------------------------------------------------------------

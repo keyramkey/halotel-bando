@@ -93,7 +93,12 @@
         <div class="nd-title">
             {% if req.service_type == 'tin' %}TIN Number
             {% elif req.service_type == 'license' %}Leseni ya Biashara
-            {% else %}Online Copy NIDA{% endif %}
+            {% elif req.service_type == 'nida' %}Online Copy NIDA
+            {% elif req.service_type == 'birth_cert' %}Cheti cha Kuzaliwa
+            {% elif req.service_type == 'death_cert' %}Cheti cha Kifo
+            {% elif req.service_type == 'cert_verify' %}Uhakiki wa Cheti
+            {% elif req.service_type == 'business_name' %}Usajili wa Jina la Biashara
+            {% else %}{{ req.service_type }}{% endif %}
         </div>
         <div class="nd-row"><span class="nd-lbl">Code</span><span class="nd-val">{{ req.request_code }}</span></div>
         <div class="nd-row">
@@ -136,6 +141,16 @@
         <div class="nd-row"><span class="nd-lbl">Ada</span><span class="nd-val">TSh {{ "{:,}".format(req.price or 0) }}</span></div>
         {% endif %}
     </div>
+
+    {% if req.extra_data %}
+    {% set xd = req.extra_data|safe %}
+    {# parsed in view ideally; show key fields simply #}
+    <div class="nd-card">
+        <div class="nd-title">Taarifa za Ombi</div>
+        <pre style="font-size:11px;line-height:1.45;white-space:pre-wrap;margin:0;color:#333;background:#fafafa;padding:10px;border-radius:10px;overflow:auto;max-height:280px;">{{ req.extra_data }}</pre>
+        <p class="muted" style="font-size:11px;margin:8px 0 0;">(Admin anaona taarifa kamili + faili kwenye dashboard)</p>
+    </div>
+    {% endif %}
 
     {% if req.service_type == 'license' and req.control_number %}
     <div class="ctrl-box">

@@ -3,46 +3,221 @@
 {% block content %}
 <style>
     .f-wrap { max-width: 640px; margin: 0 auto; }
-    .f-card {
-        background: #fff; border-radius: 16px; border: 1px solid #eee;
-        padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-    }
-    .f-card h3 {
-        margin: 0 0 12px; font-size: 14px; font-weight: 800; color: #222;
-        display: flex; align-items: center; gap: 8px;
-    }
-    .f-card h3 .ico {
-        width: 28px; height: 28px; border-radius: 8px; background: #fff3e8;
-        color: #f56b00; display: grid; place-items: center; font-size: 13px;
-    }
-    .hint {
-        background: #fff8f0; border: 1px solid #ffe0c2; border-radius: 12px;
-        padding: 10px 12px; font-size: 12px; color: #a65c00; margin-bottom: 14px; line-height: 1.45;
-    }
-    label { display: block; font-size: 12px; font-weight: 700; color: #666; margin: 10px 0 4px; }
-    .req { color: #e74c3c; }
-    input, select {
-        width: 100%; padding: 12px 14px; border: 1.5px solid #eee; border-radius: 12px;
-        font-size: 14px; background: #fafafa; box-sizing: border-box;
-    }
-    input:focus, select:focus { outline: none; border-color: #ffc999; background: #fff; }
-    .file-box {
-        border: 1.5px dashed #ffc999; border-radius: 12px; padding: 12px;
-        background: #fff8f0; margin-top: 6px;
-    }
-    .file-box input[type=file] { font-size: 13px; background: transparent; border: none; padding: 4px 0; }
     .price-bar {
-        background: linear-gradient(135deg, #fff3e8, #fff8f0); border: 1px solid #ffd0b0;
-        border-radius: 14px; padding: 14px; margin-bottom: 14px; text-align: center;
+        background: linear-gradient(135deg, #fff3e8, #fff8f0);
+        border: 1px solid #ffd0b0;
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 14px;
+        text-align: center;
     }
     .price-bar strong { font-size: 18px; color: #e65100; }
-    .btn-submit {
-        width: 100%; padding: 14px; border: none; border-radius: 14px;
-        background: linear-gradient(135deg, #f56b00, #e85d04); color: #fff;
-        font-weight: 800; font-size: 15px; cursor: pointer; margin-top: 8px;
+    .hint {
+        background: #fff8f0;
+        border: 1px solid #ffe0c2;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 12px;
+        color: #a65c00;
+        margin-bottom: 14px;
+        line-height: 1.45;
     }
-    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .f-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #eee;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.03);
+    }
+    .panel-title {
+        font-size: 13.5px;
+        font-weight: 800;
+        color: #222;
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .panel-title .num {
+        width: 28px; height: 28px;
+        border-radius: 8px;
+        background: #fff3e8;
+        color: #f56b00;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+    }
+    .panel-title .num svg { width: 15px; height: 15px; }
+    .field { margin-bottom: 13px; }
+    .field label {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 5px;
+    }
+    .field label .req { color: #e53935; }
+    .field .input {
+        width: 100%;
+        padding: 12px 13px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 11px;
+        font-size: 14.5px;
+        background: #fafafa;
+        box-sizing: border-box;
+        outline: none;
+    }
+    .field .input:focus {
+        border-color: #f56b00;
+        background: #fff;
+    }
+    .file-box {
+        border: 1.5px dashed #ffc999;
+        border-radius: 12px;
+        padding: 12px;
+        background: #fff8f0;
+        margin-top: 4px;
+    }
+    .file-box input[type=file] {
+        font-size: 13px;
+        background: transparent;
+        border: none;
+        padding: 4px 0;
+        width: 100%;
+    }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
+        flex: 1;
+        min-width: 100px;
+        text-align: center;
+        padding: 12px 10px;
+        border-radius: 11px;
+        border: 1.5px solid #e8e8e8;
+        background: #fafafa;
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #555;
+        cursor: pointer;
+        user-select: none;
+    }
+    .chip.active {
+        background: linear-gradient(135deg, #f56b00, #e85d04);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 3px 10px rgba(245, 107, 0, 0.28);
+    }
+    .loc-list {
+        max-height: 220px;
+        overflow-y: auto;
+        border-radius: 12px;
+        border: 1px solid #f0f0f0;
+        background: #fcfcfc;
+        margin-top: 6px;
+        scrollbar-width: none;
+    }
+    .loc-list::-webkit-scrollbar { display: none; }
+    .loc-item {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 13px;
+        border-bottom: 1px solid #f3f3f3;
+        cursor: pointer;
+    }
+    .loc-item.visible { display: flex; }
+    .loc-item:last-child { border-bottom: none; }
+    .loc-item:hover { background: #fff8f3; }
+    .loc-item.selected {
+        background: linear-gradient(90deg, #fff3e8, #fff);
+        box-shadow: inset 3px 0 0 #f56b00;
+    }
+    .loc-item .dot {
+        width: 18px; height: 18px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+    }
+    .loc-item.selected .dot {
+        border-color: #f56b00;
+        background: #f56b00;
+    }
+    .loc-item.selected .dot::after {
+        content: '';
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: #fff;
+    }
+    .loc-item .name { font-size: 13px; font-weight: 700; color: #222; }
+    .loc-picked {
+        display: none;
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #fff8f0;
+        border: 1px solid #ffe0c2;
+        font-size: 13px;
+        font-weight: 700;
+        color: #e65100;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .loc-picked.show { display: flex; }
+    .loc-picked button {
+        border: 1px solid #ffcc80;
+        background: #fff;
+        color: #e65100;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 5px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .loc-block { margin-bottom: 14px; }
+    .loc-block .search-wrap { margin-bottom: 6px; position: relative; }
+    .loc-block.done .loc-list,
+    .loc-block.done .search-wrap { display: none !important; }
+    .search-wrap input {
+        width: 100%;
+        padding: 11px 12px 11px 38px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 11px;
+        font-size: 13.5px;
+        background: #f9f9f9;
+        box-sizing: border-box;
+        outline: none;
+    }
+    .search-wrap input:focus { border-color: #f56b00; background: #fff; }
+    .search-wrap .icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px; height: 16px;
+        opacity: 0.45;
+        pointer-events: none;
+    }
+    .search-wrap .icon svg { width: 16px; height: 16px; }
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f56b00, #e85d04);
+        color: #fff;
+        font-weight: 800;
+        font-size: 14.5px;
+        cursor: pointer;
+        margin-top: 6px;
+        box-shadow: 0 5px 14px rgba(245, 107, 0, 0.3);
+    }
+    .btn-submit:active { transform: scale(0.98); }
+    .date-hint { font-size: 11px; color: #999; margin-top: 4px; font-weight: 500; }
 </style>
+
 <header class="topbar">
     <div>
         <div class="brand">Cheti cha Kuzaliwa</div>
@@ -50,6 +225,7 @@
     </div>
     <a href="{{ url_for('nakala_cheti_menu') }}" class="icon-btn">←</a>
 </header>
+
 <div class="page f-wrap">
     <div class="price-bar">
         Ada ya huduma: <strong>TSh {{ "{:,}".format(price) }}</strong> (inclusive)
@@ -58,92 +234,375 @@
         Pakia <strong>angalau viambatanisho VIWILI</strong>: kitambulisho cha mzazi, kitambulisho cha muombaji,
         au picha mbele + nyuma ya kitambulisho (kwa pamoja).
     </div>
-    <form method="POST" enctype="multipart/form-data">
+
+    <form method="POST" enctype="multipart/form-data" id="birthForm">
+        <input type="hidden" name="gender" id="gender" value="">
+
         <div class="f-card">
-            <h3><span class="ico">📎</span> Viambatanisho</h3>
-            <label>Kitambulisho cha mzazi (mpiga kura au chochote chenye majina + DOB)</label>
-            <div class="file-box"><input type="file" name="parent_id" accept="image/*,application/pdf"></div>
-            <label>Kitambulisho cha muombaji (leaving cert, mpiga kura, clinic…)</label>
-            <div class="file-box"><input type="file" name="applicant_id" accept="image/*,application/pdf"></div>
-            <label>Picha mbele ya kitambulisho</label>
-            <div class="file-box"><input type="file" name="id_front" accept="image/*" capture="environment"></div>
-            <label>Picha nyuma ya kitambulisho</label>
-            <div class="file-box"><input type="file" name="id_back" accept="image/*" capture="environment"></div>
+            <div class="panel-title">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                </span>
+                Viambatanisho
+            </div>
+            <div class="field">
+                <label>Kitambulisho cha mzazi (mpiga kura au chenye majina + DOB)</label>
+                <div class="file-box"><input type="file" name="parent_id" accept="image/*,application/pdf"></div>
+            </div>
+            <div class="field">
+                <label>Kitambulisho cha muombaji (leaving cert, mpiga kura, clinic…)</label>
+                <div class="file-box"><input type="file" name="applicant_id" accept="image/*,application/pdf"></div>
+            </div>
+            <div class="field">
+                <label>Picha mbele ya kitambulisho</label>
+                <div class="file-box"><input type="file" name="id_front" accept="image/*" capture="environment"></div>
+            </div>
+            <div class="field">
+                <label>Picha nyuma ya kitambulisho</label>
+                <div class="file-box"><input type="file" name="id_back" accept="image/*" capture="environment"></div>
+            </div>
         </div>
 
         <div class="f-card">
-            <h3><span class="ico">👤</span> Taarifa za Muombaji</h3>
-            <label>Majina kamili matatu <span class="req">*</span></label>
-            <input name="full_name" required placeholder="Jina la kwanza kati la mwisho">
-            <label>Jinsia <span class="req">*</span></label>
-            <select name="gender" required>
-                <option value="">— Chagua —</option>
-                <option value="Mwanaume">Mwanaume</option>
-                <option value="Mwanamke">Mwanamke</option>
-            </select>
-            <label>Tarehe ya kuzaliwa (YYYY-MM-DD) <span class="req">*</span></label>
-            <input type="date" name="dob" required>
-            <div class="grid2">
-                <div><label>Mkoa unaoishi</label><input name="region" placeholder="Mkoa"></div>
-                <div><label>Wilaya</label><input name="district" placeholder="Wilaya"></div>
+            <div class="panel-title">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                Taarifa za Muombaji
             </div>
-            <div class="grid2">
-                <div><label>Kata</label><input name="ward" placeholder="Kata"></div>
-                <div><label>Mtaa</label><input name="street" placeholder="Mtaa"></div>
+            <div class="field">
+                <label>Majina kamili matatu <span class="req">*</span></label>
+                <input class="input" name="full_name" required placeholder="Jina la kwanza kati la mwisho">
             </div>
-            <label>Kazi yako</label>
-            <input name="occupation" placeholder="Kazi">
-            <label>Namba ya simu <span class="req">*</span></label>
-            <input name="phone" type="tel" required placeholder="07XXXXXXXX">
+            <div class="field">
+                <label>Jinsia <span class="req">*</span></label>
+                <div class="chip-row">
+                    <div class="chip" data-val="Mwanaume" onclick="pickGender(this)">Mwanaume</div>
+                    <div class="chip" data-val="Mwanamke" onclick="pickGender(this)">Mwanamke</div>
+                </div>
+            </div>
+            <div class="field">
+                <label>Tarehe ya kuzaliwa <span class="req">*</span></label>
+                <input class="input" name="dob" required placeholder="Mfano: 15/03/1998 au 1998-03-15" autocomplete="off">
+                <div class="date-hint">Andika tarehe mwenyewe (siku/mwezi/mwaka)</div>
+            </div>
+            <div class="field">
+                <label>Kazi yako</label>
+                <input class="input" name="occupation" placeholder="Kazi">
+            </div>
+            <div class="field">
+                <label>Namba ya simu <span class="req">*</span></label>
+                <input class="input" name="phone" type="tel" required placeholder="07XXXXXXXX">
+            </div>
+
+            <div class="panel-title" style="margin-top:8px;">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                Anapoishi
+            </div>
+            <div id="locApp"></div>
+            <input type="hidden" name="region" id="app_region" value="">
+            <input type="hidden" name="district" id="app_district" value="">
+            <input type="hidden" name="ward" id="app_ward" value="">
+            <input type="hidden" name="street" id="app_street" value="">
         </div>
 
         <div class="f-card">
-            <h3><span class="ico">👩</span> Taarifa za Mama</h3>
-            <label>Majina kamili <span class="req">*</span></label>
-            <input name="mother_name" required>
-            <label>Tarehe ya kuzaliwa</label>
-            <input type="date" name="mother_dob">
-            <div class="grid2">
-                <div><label>Mkoa</label><input name="mother_region"></div>
-                <div><label>Wilaya</label><input name="mother_district"></div>
+            <div class="panel-title">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                Taarifa za Mama
             </div>
-            <div class="grid2">
-                <div><label>Kata</label><input name="mother_ward"></div>
-                <div><label>Mtaa</label><input name="mother_street"></div>
+            <div class="field">
+                <label>Majina kamili <span class="req">*</span></label>
+                <input class="input" name="mother_name" required>
             </div>
-            <label>Kazi</label>
-            <input name="mother_occupation">
-            <label>Namba ya simu</label>
-            <input name="mother_phone" type="tel">
+            <div class="field">
+                <label>Tarehe ya kuzaliwa</label>
+                <input class="input" name="mother_dob" placeholder="Mfano: 10/05/1975" autocomplete="off">
+                <div class="date-hint">Andika tarehe mwenyewe</div>
+            </div>
+            <div class="field">
+                <label>Kazi</label>
+                <input class="input" name="mother_occupation">
+            </div>
+            <div class="field">
+                <label>Namba ya simu</label>
+                <input class="input" name="mother_phone" type="tel">
+            </div>
+            <div class="panel-title" style="margin-top:8px;">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                Anapoishi Mama
+            </div>
+            <div id="locMom"></div>
+            <input type="hidden" name="mother_region" id="mom_region" value="">
+            <input type="hidden" name="mother_district" id="mom_district" value="">
+            <input type="hidden" name="mother_ward" id="mom_ward" value="">
+            <input type="hidden" name="mother_street" id="mom_street" value="">
         </div>
 
         <div class="f-card">
-            <h3><span class="ico">👨</span> Taarifa za Baba</h3>
-            <label>Majina kamili <span class="req">*</span></label>
-            <input name="father_name" required>
-            <label>Tarehe ya kuzaliwa</label>
-            <input type="date" name="father_dob">
-            <label>Mkoa anaoishi</label>
-            <input name="father_region">
-            <label>Namba ya simu</label>
-            <input name="father_phone" type="tel">
-            <label>Kazi</label>
-            <input name="father_occupation">
+            <div class="panel-title">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                Taarifa za Baba
+            </div>
+            <div class="field">
+                <label>Majina kamili <span class="req">*</span></label>
+                <input class="input" name="father_name" required>
+            </div>
+            <div class="field">
+                <label>Tarehe ya kuzaliwa</label>
+                <input class="input" name="father_dob" placeholder="Mfano: 20/08/1970" autocomplete="off">
+                <div class="date-hint">Andika tarehe mwenyewe</div>
+            </div>
+            <div class="field">
+                <label>Kazi</label>
+                <input class="input" name="father_occupation">
+            </div>
+            <div class="field">
+                <label>Namba ya simu</label>
+                <input class="input" name="father_phone" type="tel">
+            </div>
+            <div class="field">
+                <label>Mkoa anaoishi</label>
+                <div id="locDad"></div>
+                <input type="hidden" name="father_region" id="dad_region" value="">
+            </div>
         </div>
 
         <div class="f-card">
-            <h3><span class="ico">📍</span> Eneo la Muombaji alipo sasa</h3>
-            <label>Mkoa <span class="req">*</span></label>
-            <input name="curr_region" required>
-            <div class="grid2">
-                <div><label>Wilaya</label><input name="curr_district"></div>
-                <div><label>Kata</label><input name="curr_ward"></div>
+            <div class="panel-title">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                Eneo la Muombaji alipo sasa
             </div>
-            <label>Kijiji / Mtaa</label>
-            <input name="curr_street">
+            <div id="locCurr"></div>
+            <input type="hidden" name="curr_region" id="curr_region" value="">
+            <input type="hidden" name="curr_district" id="curr_district" value="">
+            <input type="hidden" name="curr_ward" id="curr_ward" value="">
+            <input type="hidden" name="curr_street" id="curr_street" value="">
         </div>
 
-        <button class="btn-submit" type="submit">Endelea — Hakiki Taarifa</button>
+        <button class="btn-submit" type="submit" onclick="return validateBirth()">
+            Endelea — Hakiki Taarifa
+        </button>
     </form>
 </div>
+
+<script src="{{ url_for('static', filename='tz_locations.js') }}"></script>
+<script>
+function pickGender(el) {
+    document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+    el.classList.add('active');
+    document.getElementById('gender').value = el.dataset.val;
+}
+
+var ROOT = (window.TZ_LOCATIONS && window.TZ_LOCATIONS.regions) || window.TZ_LOCATIONS || {};
+var SEARCH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>';
+
+function buildLocUI(containerId, prefix, levels) {
+    var host = document.getElementById(containerId);
+    if (!host) return;
+    var state = { mkoa: '', wilaya: '', kata: '', mtaa: '' };
+    var ids = {};
+    var labels = { mkoa: 'Mkoa', wilaya: 'Wilaya', kata: 'Kata', mtaa: 'Mtaa / Kijiji' };
+
+    levels.forEach(function(level, idx) {
+        var block = document.createElement('div');
+        block.className = 'loc-block';
+        block.id = prefix + '_block_' + level;
+        if (idx > 0) block.style.display = 'none';
+        block.innerHTML =
+            '<label style="font-size:12.5px;font-weight:700;color:#444;">' + labels[level] +
+            (idx === 0 ? ' <span style="color:#e53935;">*</span>' : '') + '</label>' +
+            '<div class="search-wrap"><span class="icon">' + SEARCH_SVG + '</span>' +
+            '<input type="text" placeholder="Tafuta ' + labels[level].toLowerCase() + '..."></div>' +
+            '<div class="loc-list"></div>' +
+            '<div class="loc-picked"><span></span><button type="button">Badilisha</button></div>';
+        host.appendChild(block);
+        ids[level] = {
+            block: block,
+            list: block.querySelector('.loc-list'),
+            search: block.querySelector('input'),
+            picked: block.querySelector('.loc-picked'),
+            searchWrap: block.querySelector('.search-wrap')
+        };
+        ids[level].picked.querySelector('button').addEventListener('click', function() {
+            clearFrom(level);
+        });
+        ids[level].search.addEventListener('input', function() {
+            filterList(ids[level].list, this.value);
+        });
+    });
+
+    function filterList(listEl, q) {
+        q = (q || '').toLowerCase().trim();
+        listEl.querySelectorAll('.loc-item').forEach(function(item) {
+            item.classList.toggle('visible', !q || (item.dataset.search || '').indexOf(q) !== -1);
+        });
+    }
+
+    function fillList(listEl, items, onPick) {
+        listEl.innerHTML = '';
+        listEl.style.display = '';
+        (items || []).forEach(function(name) {
+            var div = document.createElement('div');
+            div.className = 'loc-item visible';
+            div.dataset.search = name.toLowerCase();
+            div.innerHTML = '<div class="dot"></div><div class="name"></div>';
+            div.querySelector('.name').textContent = name;
+            div.addEventListener('click', function() {
+                listEl.querySelectorAll('.loc-item').forEach(function(i){ i.classList.remove('selected'); });
+                div.classList.add('selected');
+                onPick(name);
+            });
+            listEl.appendChild(div);
+        });
+    }
+
+    function markPicked(level, name) {
+        var o = ids[level];
+        o.block.classList.add('done');
+        o.picked.classList.add('show');
+        o.picked.querySelector('span').textContent = name;
+        o.list.style.display = 'none';
+        o.searchWrap.style.display = 'none';
+    }
+
+    function showLevel(level) {
+        var o = ids[level];
+        if (!o) return;
+        o.block.style.display = 'block';
+        o.block.classList.remove('done');
+        o.picked.classList.remove('show');
+        o.list.style.display = '';
+        o.searchWrap.style.display = '';
+        o.search.value = '';
+    }
+
+    function hideFrom(startIdx) {
+        for (var i = startIdx; i < levels.length; i++) {
+            var lv = levels[i];
+            if (!ids[lv]) continue;
+            ids[lv].block.style.display = 'none';
+            ids[lv].block.classList.remove('done');
+            ids[lv].picked.classList.remove('show');
+            state[lv] = '';
+        }
+    }
+
+    function clearFrom(level) {
+        var idx = levels.indexOf(level);
+        state[level] = '';
+        for (var i = idx + 1; i < levels.length; i++) state[levels[i]] = '';
+        showLevel(level);
+        hideFrom(idx + 1);
+        if (level === 'mkoa') fillList(ids.mkoa.list, Object.keys(ROOT).sort(), onMkoa);
+        else if (level === 'wilaya') fillList(ids.wilaya.list, Object.keys(ROOT[state.mkoa] || {}).sort(), onWilaya);
+        else if (level === 'kata') fillList(ids.kata.list, Object.keys((ROOT[state.mkoa] || {})[state.wilaya] || {}).sort(), onKata);
+        else if (level === 'mtaa') setupMtaa();
+        syncHidden();
+    }
+
+    function setupMtaa() {
+        var streets = ((ROOT[state.mkoa] || {})[state.wilaya] || {})[state.kata] || [];
+        streets = streets.filter(function(s){ return s && String(s).trim(); });
+        if (streets.length) {
+            ids.mtaa.search.placeholder = 'Tafuta mtaa...';
+            ids.mtaa.search.oninput = function(){ filterList(ids.mtaa.list, this.value); };
+            fillList(ids.mtaa.list, streets, onMtaa);
+        } else {
+            ids.mtaa.list.innerHTML = '';
+            ids.mtaa.list.style.display = 'none';
+            ids.mtaa.search.placeholder = 'Andika jina la mtaa...';
+            ids.mtaa.search.oninput = function() {
+                state.mtaa = (this.value || '').trim();
+                syncHidden();
+                if (state.mtaa) markPicked('mtaa', state.mtaa);
+            };
+        }
+    }
+
+    function onMkoa(name) {
+        state.mkoa = name; state.wilaya = state.kata = state.mtaa = '';
+        markPicked('mkoa', name);
+        if (ids.wilaya) {
+            showLevel('wilaya');
+            fillList(ids.wilaya.list, Object.keys(ROOT[name] || {}).sort(), onWilaya);
+            hideFrom(levels.indexOf('wilaya') + 1);
+        }
+        syncHidden();
+    }
+    function onWilaya(name) {
+        state.wilaya = name; state.kata = state.mtaa = '';
+        markPicked('wilaya', name);
+        if (ids.kata) {
+            showLevel('kata');
+            fillList(ids.kata.list, Object.keys((ROOT[state.mkoa] || {})[name] || {}).sort(), onKata);
+            hideFrom(levels.indexOf('kata') + 1);
+        }
+        syncHidden();
+    }
+    function onKata(name) {
+        state.kata = name; state.mtaa = '';
+        markPicked('kata', name);
+        if (ids.mtaa) {
+            showLevel('mtaa');
+            setupMtaa();
+        }
+        syncHidden();
+    }
+    function onMtaa(name) {
+        state.mtaa = name;
+        markPicked('mtaa', name);
+        syncHidden();
+    }
+
+    function syncHidden() {
+        if (prefix === 'dad') {
+            var d = document.getElementById('dad_region');
+            if (d) d.value = state.mkoa || '';
+            return;
+        }
+        var map = {
+            app: ['app_region','app_district','app_ward','app_street'],
+            mom: ['mom_region','mom_district','mom_ward','mom_street'],
+            curr: ['curr_region','curr_district','curr_ward','curr_street']
+        };
+        var keys = map[prefix];
+        if (!keys) return;
+        var vals = [state.mkoa, state.wilaya, state.kata, state.mtaa];
+        keys.forEach(function(id, i) {
+            var el = document.getElementById(id);
+            if (el) el.value = vals[i] || '';
+        });
+    }
+
+    if (ids.mkoa) fillList(ids.mkoa.list, Object.keys(ROOT).sort(), onMkoa);
+}
+
+buildLocUI('locApp', 'app', ['mkoa','wilaya','kata','mtaa']);
+buildLocUI('locMom', 'mom', ['mkoa','wilaya','kata','mtaa']);
+buildLocUI('locCurr', 'curr', ['mkoa','wilaya','kata','mtaa']);
+buildLocUI('locDad', 'dad', ['mkoa']);
+
+function validateBirth() {
+    if (!document.getElementById('gender').value) {
+        alert('Chagua jinsia.');
+        return false;
+    }
+    if (!document.getElementById('curr_region').value) {
+        alert('Chagua mkoa wa eneo la sasa.');
+        return false;
+    }
+    return true;
+}
+</script>
 {% endblock %}

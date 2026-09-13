@@ -305,6 +305,19 @@ def to_dar_es_salaam(dt):
     return local.strftime("%d/%m/%Y %H:%M")
 
 
+@app.template_filter("from_json")
+def from_json_filter(value):
+    """Parse JSON string for templates (Nakala extra_data)."""
+    if not value:
+        return {}
+    if isinstance(value, dict):
+        return value
+    try:
+        return json.loads(value)
+    except Exception:
+        return {}
+
+
 
 
 def touch_chat_presence(conversation_user_id, viewer_role):

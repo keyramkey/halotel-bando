@@ -661,7 +661,7 @@
     <div class="tab-panel" id="panel-nakala">
         <div style="margin:0 0 12px;">
             <h2 class="dash-section-title">📄 Maombi ya Nakala {% if nakala_pending %}<span class="status pending" style="font-size:11px;">{{ nakala_pending }}</span>{% endif %}</h2>
-            <p class="dash-section-sub">TIN • Leseni • Online Copy NIDA</p>
+            <p class="dash-section-sub">TIN • Leseni • NIDA • Cheti • Jina la Biashara</p>
         </div>
 
         {% if nakala_list %}
@@ -674,7 +674,12 @@
                     <div class="application-network">
                         {% if req.service_type == 'tin' %}TIN Number
                         {% elif req.service_type == 'license' %}Leseni · {{ req.license_type }}
-                        {% else %}Online Copy NIDA{% endif %}
+                        {% elif req.service_type == 'nida' %}Online Copy NIDA
+                        {% elif req.service_type == 'birth_cert' %}Cheti cha Kuzaliwa
+                        {% elif req.service_type == 'death_cert' %}Cheti cha Kifo
+                        {% elif req.service_type == 'cert_verify' %}Uhakiki wa Cheti
+                        {% elif req.service_type == 'business_name' %}Jina la Biashara
+                        {% else %}{{ req.service_type }}{% endif %}
                         · Ada TSh {{ "{:,}".format(req.price) }}
                     </div>
                 </div>
@@ -1307,7 +1312,12 @@
                         <div class="application-network">
                             {% if req.service_type == 'tin' %}TIN
                             {% elif req.service_type == 'license' %}Leseni · {{ req.license_type }}
-                            {% else %}NIDA Copy{% endif %}
+                            {% elif req.service_type == 'nida' %}NIDA Copy
+                            {% elif req.service_type == 'birth_cert' %}Cheti Kuzaliwa
+                            {% elif req.service_type == 'death_cert' %}Cheti Kifo
+                            {% elif req.service_type == 'cert_verify' %}Uhakiki
+                            {% elif req.service_type == 'business_name' %}Jina Biashara
+                            {% else %}{{ req.service_type }}{% endif %}
                             · Ada TSh {{ "{:,}".format(req.price or 0) }}
                         </div>
                     </div>

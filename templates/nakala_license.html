@@ -3,7 +3,6 @@
 {% block content %}
 <style>
     .lic-wrap { max-width: 640px; margin: 0 auto; }
-
     .lic-hero {
         background: linear-gradient(135deg, #f56b00 0%, #e85d04 50%, #dc2f02 100%);
         border-radius: 14px;
@@ -24,7 +23,6 @@
         margin: 0;
         line-height: 1.4;
     }
-
     .step-bar {
         display: flex;
         gap: 6px;
@@ -44,7 +42,6 @@
         background: #fff3e8;
         color: #f56b00;
     }
-
     .panel {
         background: #fff;
         border-radius: 14px;
@@ -73,7 +70,6 @@
         font-weight: 800;
         flex-shrink: 0;
     }
-
     .cat-scroll {
         display: flex;
         gap: 6px;
@@ -104,7 +100,6 @@
         border-color: transparent;
         box-shadow: 0 3px 10px rgba(245, 107, 0, 0.28);
     }
-
     .search-wrap {
         position: relative;
         margin-bottom: 10px;
@@ -132,7 +127,6 @@
         opacity: 0.5;
         pointer-events: none;
     }
-
     .license-list {
         max-height: 340px;
         overflow-y: auto;
@@ -218,7 +212,6 @@
         opacity: 1;
         color: #e65100;
     }
-
     .empty-msg {
         padding: 24px 14px;
         text-align: center;
@@ -226,7 +219,6 @@
         font-size: 13px;
         display: none;
     }
-
     .select-card {
         display: none;
         margin-top: 12px;
@@ -311,7 +303,6 @@
         margin-top: 4px;
         line-height: 1.35;
     }
-
     .field { margin-bottom: 13px; }
     .field label {
         display: block;
@@ -360,7 +351,6 @@
         padding-right: 36px;
         cursor: pointer;
     }
-
     .submit-btn, .next-btn, .back-btn {
         width: 100%;
         padding: 14px;
@@ -382,10 +372,8 @@
         color: #444;
         margin-bottom: 8px;
     }
-
     .step-panel { display: none; }
     .step-panel.active { display: block; }
-
     .selected-summary {
         background: #fff8f0;
         border: 1px solid #ffe0c2;
@@ -408,7 +396,6 @@
         line-height: 1.35;
     }
     .loc-note.show { display: block; }
-
     /* Location lists — same style as license list */
     .loc-list {
         max-height: 240px;
@@ -484,9 +471,10 @@
     }
     .loc-block { margin-bottom: 14px; }
     .loc-block .search-wrap { margin-bottom: 6px; }
+    /* Hide list + search when picked (class) — also clear inline display */
     .loc-block.done .loc-list,
-    .loc-block.done .search-wrap { display: none; }
-
+    .loc-block.done .search-wrap,
+    .loc-block.done #mtaaTextWrap { display: none !important; }
     /* App modal (si browser alert) */
     .app-modal-overlay {
         display: none;
@@ -548,7 +536,6 @@
         cursor: pointer;
     }
 </style>
-
 <header class="topbar">
     <div>
         <div class="brand">Leseni ya Biashara</div>
@@ -556,40 +543,32 @@
     </div>
     <a href="{{ url_for('nakala') }}" class="icon-btn">←</a>
 </header>
-
 <div class="page lic-wrap">
-
     <div class="lic-hero">
         <h1>Ombi la Leseni</h1>
         <p>Chagua leseni → jaza taarifa → lipa ada ya huduma. Bei ya control number inaanzia kutoka TSh 7,000 hadi TSh 200,000 (kulingana na aina ya leseni).</p>
     </div>
-
     <div class="step-bar">
         <div class="step-pill on" id="pill1">1. Leseni</div>
         <div class="step-pill" id="pill2">2. Taarifa</div>
         <div class="step-pill" id="pill3">3. Malipo</div>
     </div>
-
     <form method="POST" action="{{ url_for('nakala_license') }}" id="licenseForm">
         <input type="hidden" name="license_type" id="license_type" required>
-
         <!-- ========== STEP 1: Chagua leseni ========== -->
         <div class="step-panel active" id="step1">
             <div class="panel">
                 <div class="panel-title"><span class="num">1</span> Chagua Leseni</div>
-
                 <div class="cat-scroll" id="catScroll">
                     <div class="cat-chip active" data-cat="all" onclick="filterCat(this)">Zote</div>
                     {% for cat in categories %}
                     <div class="cat-chip" data-cat="{{ cat }}" onclick="filterCat(this)">{{ loop.index }}. {{ cat }}</div>
                     {% endfor %}
                 </div>
-
                 <div class="search-wrap">
                     <span class="icon">🔍</span>
                     <input type="text" id="licenseSearch" placeholder="Tafuta... mfano: uwakala, duka, salon, garage">
                 </div>
-
                 <div class="license-list" id="licenseList">
                     {% for lic in licenses %}
                     <div
@@ -614,11 +593,9 @@
                     {% endfor %}
                 </div>
                 <div class="empty-msg" id="emptyMsg">Hakuna leseni inayolingana.</div>
-
                 <button type="button" id="changeChoice" class="back-btn" style="display:none;margin-top:6px;" onclick="showLicenseListAgain()">
                     ← Badilisha leseni
                 </button>
-
                 <div class="select-card" id="priceBox">
                     <div class="select-card-top">
                         <div class="lbl">Leseni uliyochagua</div>
@@ -638,25 +615,20 @@
                     </div>
                 </div>
             </div>
-
             <button type="button" class="next-btn" id="btnNext" onclick="goStep2()">
                 Next → Jaza Taarifa
             </button>
         </div>
-
         <!-- ========== STEP 2: Taarifa ========== -->
         <div class="step-panel" id="step2">
             <button type="button" class="back-btn" onclick="goStep1()">← Rudi chagua leseni</button>
-
             <div class="selected-summary" id="summaryBox">
                 <strong id="sumName">—</strong>
                 <div class="sum-row">Control Number: <strong>Inaanzia TSh 7,000 – 200,000</strong></div>
                 <div class="sum-row">Ada ya huduma: <strong>TSh {{ "{:,}".format(service_fee|default(10000)) }}</strong></div>
             </div>
-
             <div class="panel">
                 <div class="panel-title"><span class="num">2</span> Taarifa Binafsi</div>
-
                 <div class="field">
                     <label>Jina Kamili (Kwanza + Kati + Mwisho) <span class="req">*</span></label>
                     <input type="text" name="full_name" class="input" placeholder="Mfano: Juma Ally Hassan" required>
@@ -680,13 +652,11 @@
                     <input type="tel" name="phone2" class="input" placeholder="07XXXXXXXX">
                 </div>
             </div>
-
             <div class="panel">
                 <div class="panel-title"><span class="num">3</span> Eneo la Leseni / Biashara</div>
                 <p style="font-size:12px;color:#888;margin:0 0 12px;line-height:1.4;">
                     Chagua Mkoa → Wilaya → Kata → Mtaa (kama orodha ya leseni). Ikiwa mtaa haupo, andika mwenyewe.
                 </p>
-
                 <!-- MKOA -->
                 <div class="loc-block" id="blockMkoa">
                     <label style="font-size:12.5px;font-weight:700;color:#444;">Mkoa <span class="req" style="color:#e53935;">*</span></label>
@@ -698,7 +668,6 @@
                     <div class="loc-picked" id="pickedMkoa"><span></span><button type="button" data-reset="mkoa">Badilisha</button></div>
                     <input type="hidden" name="license_mkoa" id="license_mkoa" value="">
                 </div>
-
                 <!-- WILAYA -->
                 <div class="loc-block" id="blockWilaya" style="display:none;">
                     <label style="font-size:12.5px;font-weight:700;color:#444;">Wilaya <span class="req" style="color:#e53935;">*</span></label>
@@ -710,7 +679,6 @@
                     <div class="loc-picked" id="pickedWilaya"><span></span><button type="button" data-reset="wilaya">Badilisha</button></div>
                     <input type="hidden" name="license_wilaya" id="license_wilaya" value="">
                 </div>
-
                 <!-- KATA -->
                 <div class="loc-block" id="blockKata" style="display:none;">
                     <label style="font-size:12.5px;font-weight:700;color:#444;">Kata <span class="req" style="color:#e53935;">*</span></label>
@@ -722,7 +690,6 @@
                     <div class="loc-picked" id="pickedKata"><span></span><button type="button" data-reset="kata">Badilisha</button></div>
                     <input type="hidden" name="license_kata" id="license_kata" value="">
                 </div>
-
                 <!-- MTAA -->
                 <div class="loc-block" id="blockMtaa" style="display:none;">
                     <label style="font-size:12.5px;font-weight:700;color:#444;">Mtaa <span class="req" style="color:#e53935;">*</span></label>
@@ -738,13 +705,10 @@
                     <div class="loc-picked" id="pickedMtaa"><span></span><button type="button" data-reset="mtaa">Badilisha</button></div>
                     <input type="hidden" name="license_mtaa" id="license_mtaa" value="">
                 </div>
-
                 <input type="hidden" name="license_location" id="license_location" value="">
             </div>
-
             <div class="panel">
-                <div class="panel-title"><span class="num">4</span> Shule & Usajili wa NIDA</div>
-
+                <div class="panel-title"><span class="num">4</span> Shule &amp; Usajili wa NIDA</div>
                 <div class="field">
                     <label>Jina la Shule ya Msingi <span class="req">*</span></label>
                     <input type="text" name="primary_school" class="input" required>
@@ -774,13 +738,11 @@
                     <input type="text" name="nida_reg_street" class="input" required>
                 </div>
             </div>
-
             <button type="submit" class="submit-btn" onclick="return validateLicense()">
-                Endelea → Hakiki & Lipa Ada TSh {{ "{:,}".format(service_fee|default(10000)) }}
+                Endelea → Hakiki &amp; Lipa Ada TSh {{ "{:,}".format(service_fee|default(10000)) }}
             </button>
         </div>
     </form>
-
 <!-- App modal -->
 <div class="app-modal-overlay" id="appModal">
     <div class="app-modal">
@@ -790,21 +752,17 @@
         <button type="button" class="modal-btn" id="appModalOk">Sawa</button>
     </div>
 </div>
-
 </div>
-
 <script src="{{ url_for('static', filename='tz_locations.js') }}"></script>
 <script>
 let currentCat = 'all';
 let selectedName = '';
-
 function filterCat(el) {
     document.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
     el.classList.add('active');
     currentCat = el.dataset.cat;
     applyFilters();
 }
-
 function applyFilters() {
     const q = document.getElementById('licenseSearch').value.toLowerCase().trim();
     let shown = 0;
@@ -817,9 +775,7 @@ function applyFilters() {
     });
     document.getElementById('emptyMsg').style.display = shown ? 'none' : 'block';
 }
-
 document.getElementById('licenseSearch').addEventListener('input', applyFilters);
-
 function selectLicense(el) {
     document.querySelectorAll('.license-item').forEach(i => i.classList.remove('selected'));
     el.classList.add('selected');
@@ -827,29 +783,24 @@ function selectLicense(el) {
     selectedName = el.dataset.name;
     document.getElementById('selectedName').textContent = selectedName;
     document.getElementById('priceBox').classList.add('show');
-
     ['catScroll', 'licenseList', 'emptyMsg'].forEach(function(id) {
         var n = document.getElementById(id);
         if (n) n.style.display = 'none';
     });
-    var sw = document.querySelector('.search-wrap');
+    var sw = document.querySelector('#step1 .search-wrap');
     if (sw) sw.style.display = 'none';
-
     var ch = document.getElementById('changeChoice');
     if (ch) ch.style.display = 'block';
-
     document.getElementById('priceBox').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
-
 function showLicenseListAgain() {
     document.getElementById('license_type').value = '';
     selectedName = '';
     document.querySelectorAll('.license-item').forEach(i => i.classList.remove('selected'));
     document.getElementById('priceBox').classList.remove('show');
-
     var cat = document.getElementById('catScroll');
     if (cat) cat.style.display = 'flex';
-    var sw = document.querySelector('.search-wrap');
+    var sw = document.querySelector('#step1 .search-wrap');
     if (sw) sw.style.display = 'block';
     var list = document.getElementById('licenseList');
     if (list) list.style.display = 'block';
@@ -857,7 +808,6 @@ function showLicenseListAgain() {
     if (ch) ch.style.display = 'none';
     applyFilters();
 }
-
 function goStep2() {
     if (!document.getElementById('license_type').value) {
         showAppModal('Chagua Leseni', 'Tafadhali chagua aina ya leseni kwenye orodha kwanza.');
@@ -865,14 +815,12 @@ function goStep2() {
         return;
     }
     document.getElementById('sumName').textContent = selectedName;
-
     document.getElementById('step1').classList.remove('active');
     document.getElementById('step2').classList.add('active');
     document.getElementById('pill1').classList.remove('on');
     document.getElementById('pill2').classList.add('on');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 function goStep1() {
     document.getElementById('step2').classList.remove('active');
     document.getElementById('step1').classList.add('active');
@@ -880,21 +828,19 @@ function goStep1() {
     document.getElementById('pill1').classList.add('on');
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
-
 function validateLicense() {
     if (!document.getElementById('license_type').value) {
         showAppModal('Chagua Leseni', 'Tafadhali chagua aina ya leseni.');
         goStep1();
         return false;
     }
-    syncLoc();
+    if (window.syncLoc) window.syncLoc();
     if (!document.getElementById('license_mtaa').value) {
         showAppModal('Eneo la Leseni', 'Chagua au andika mtaa wa eneo la leseni.');
         return false;
     }
     return true;
 }
-
 /* ---- App modal ---- */
 function showAppModal(title, msg) {
     document.getElementById('appModalTitle').textContent = title || 'Taarifa';
@@ -907,12 +853,10 @@ document.getElementById('appModalOk').addEventListener('click', function () {
 document.getElementById('appModal').addEventListener('click', function (e) {
     if (e.target === this) this.classList.remove('show');
 });
-
 /* ---- Location lists: Mkoa → Wilaya → Kata → Mtaa ---- */
 (function () {
     var root = (window.TZ_LOCATIONS && window.TZ_LOCATIONS.regions) || window.TZ_LOCATIONS || {};
     var state = { mkoa: '', wilaya: '', kata: '', mtaa: '' };
-
     var listMkoa = document.getElementById('listMkoa');
     var listWilaya = document.getElementById('listWilaya');
     var listKata = document.getElementById('listKata');
@@ -935,7 +879,6 @@ document.getElementById('appModal').addEventListener('click', function (e) {
             container.appendChild(div);
         });
     }
-
     function filterList(container, q) {
         q = (q || '').toLowerCase().trim();
         container.querySelectorAll('.loc-item').forEach(function (item) {
@@ -943,7 +886,6 @@ document.getElementById('appModal').addEventListener('click', function (e) {
             item.classList.toggle('visible', ok);
         });
     }
-
     function syncLoc() {
         document.getElementById('license_mkoa').value = state.mkoa;
         document.getElementById('license_wilaya').value = state.wilaya;
@@ -952,15 +894,21 @@ document.getElementById('appModal').addEventListener('click', function (e) {
         document.getElementById('license_location').value =
             [state.mtaa, state.kata, state.wilaya, state.mkoa].filter(Boolean).join(', ');
     }
-
+    /** Funga orodha, onyesha picked — sawa kwa mkoa/wilaya/kata/mtaa */
     function markPicked(blockId, pickedId, name) {
         var block = document.getElementById(blockId);
         var picked = document.getElementById(pickedId);
         block.classList.add('done');
         picked.classList.add('show');
         picked.querySelector('span').textContent = name;
+        // Ondoa inline display ili CSS .done ifanye kazi
+        var list = block.querySelector('.loc-list');
+        var search = block.querySelector('.search-wrap');
+        if (list) list.style.display = 'none';
+        if (search) search.style.display = 'none';
+        var textWrap = block.querySelector('#mtaaTextWrap');
+        if (textWrap) textWrap.style.display = 'none';
     }
-
     function clearFrom(level) {
         if (level === 'mkoa') {
             state.mkoa = state.wilaya = state.kata = state.mtaa = '';
@@ -973,6 +921,11 @@ document.getElementById('appModal').addEventListener('click', function (e) {
             document.getElementById('pickedWilaya').classList.remove('show');
             document.getElementById('pickedKata').classList.remove('show');
             document.getElementById('pickedMtaa').classList.remove('show');
+            // Rudisha orodha ya mkoa
+            var lm = document.getElementById('listMkoa');
+            var sm = document.getElementById('blockMkoa').querySelector('.search-wrap');
+            if (lm) lm.style.display = '';
+            if (sm) sm.style.display = '';
         } else if (level === 'wilaya') {
             state.wilaya = state.kata = state.mtaa = '';
             document.getElementById('blockWilaya').classList.remove('done');
@@ -983,6 +936,10 @@ document.getElementById('appModal').addEventListener('click', function (e) {
             document.getElementById('blockMtaa').style.display = 'none';
             document.getElementById('blockMtaa').classList.remove('done');
             document.getElementById('pickedMtaa').classList.remove('show');
+            var lw = document.getElementById('listWilaya');
+            var sw = document.getElementById('blockWilaya').querySelector('.search-wrap');
+            if (lw) lw.style.display = '';
+            if (sw) sw.style.display = '';
         } else if (level === 'kata') {
             state.kata = state.mtaa = '';
             document.getElementById('blockKata').classList.remove('done');
@@ -990,24 +947,36 @@ document.getElementById('appModal').addEventListener('click', function (e) {
             document.getElementById('blockMtaa').style.display = 'none';
             document.getElementById('blockMtaa').classList.remove('done');
             document.getElementById('pickedMtaa').classList.remove('show');
+            var lk = document.getElementById('listKata');
+            var sk = document.getElementById('blockKata').querySelector('.search-wrap');
+            if (lk) lk.style.display = '';
+            if (sk) sk.style.display = '';
         } else if (level === 'mtaa') {
             state.mtaa = '';
             document.getElementById('blockMtaa').classList.remove('done');
             document.getElementById('pickedMtaa').classList.remove('show');
-            document.getElementById('mtaaTextWrap').style.display = 'none';
-            document.getElementById('listMtaa').style.display = 'block';
-            document.getElementById('mtaaSearchWrap').style.display = 'block';
+            // Rudisha search + list au text
+            var streets = ((root[state.mkoa] || {})[state.wilaya] || {})[state.kata] || [];
+            streets = streets.filter(function (s) { return s && String(s).trim(); });
+            if (streets.length) {
+                document.getElementById('mtaaTextWrap').style.display = 'none';
+                document.getElementById('listMtaa').style.display = '';
+                document.getElementById('mtaaSearchWrap').style.display = '';
+            } else {
+                document.getElementById('listMtaa').style.display = 'none';
+                document.getElementById('mtaaSearchWrap').style.display = 'none';
+                document.getElementById('mtaaTextWrap').style.display = 'block';
+                document.getElementById('license_mtaa_text').value = '';
+            }
         }
         syncLoc();
     }
-
     // Reset buttons
     document.querySelectorAll('[data-reset]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             clearFrom(btn.getAttribute('data-reset'));
         });
     });
-
     // Load regions
     fillList(listMkoa, Object.keys(root).sort(), function (name) {
         state.mkoa = name;
@@ -1030,8 +999,8 @@ document.getElementById('appModal').addEventListener('click', function (e) {
                 document.getElementById('pickedMtaa').classList.remove('show');
                 if (streets.length) {
                     document.getElementById('mtaaTextWrap').style.display = 'none';
-                    document.getElementById('listMtaa').style.display = 'block';
-                    document.getElementById('mtaaSearchWrap').style.display = 'block';
+                    document.getElementById('listMtaa').style.display = '';
+                    document.getElementById('mtaaSearchWrap').style.display = '';
                     fillList(listMtaa, streets, function (mname) {
                         state.mtaa = mname;
                         markPicked('blockMtaa', 'pickedMtaa', mname);
@@ -1055,17 +1024,24 @@ document.getElementById('appModal').addEventListener('click', function (e) {
             document.getElementById('blockKata').style.display = 'block';
             document.getElementById('blockKata').classList.remove('done');
             document.getElementById('pickedKata').classList.remove('show');
+            var lk = document.getElementById('listKata');
+            var sk = document.getElementById('blockKata').querySelector('.search-wrap');
+            if (lk) lk.style.display = '';
+            if (sk) sk.style.display = '';
             document.getElementById('blockMtaa').style.display = 'none';
             syncLoc();
         });
         document.getElementById('blockWilaya').style.display = 'block';
         document.getElementById('blockWilaya').classList.remove('done');
         document.getElementById('pickedWilaya').classList.remove('show');
+        var lw = document.getElementById('listWilaya');
+        var sw = document.getElementById('blockWilaya').querySelector('.search-wrap');
+        if (lw) lw.style.display = '';
+        if (sw) sw.style.display = '';
         document.getElementById('blockKata').style.display = 'none';
         document.getElementById('blockMtaa').style.display = 'none';
         syncLoc();
     });
-
     document.getElementById('searchMkoa').addEventListener('input', function () {
         filterList(listMkoa, this.value);
     });
@@ -1078,7 +1054,6 @@ document.getElementById('appModal').addEventListener('click', function (e) {
     document.getElementById('searchMtaa').addEventListener('input', function () {
         filterList(listMtaa, this.value);
     });
-
     window.syncLoc = syncLoc;
 })();
 </script>

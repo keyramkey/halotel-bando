@@ -56,14 +56,19 @@
     .cp {
         border: none;
         background: #f0f0f0;
-        border-radius: 6px;
-        padding: 3px 8px;
-        font-size: 10px;
-        font-weight: 800;
+        border-radius: 8px;
+        width: 32px;
+        height: 32px;
+        padding: 0;
+        display: inline-grid;
+        place-items: center;
         color: #666;
         cursor: pointer;
+        flex-shrink: 0;
     }
+    .cp svg { width: 15px; height: 15px; pointer-events: none; }
     .cp.ok { background: #e8f5e9; color: #2e7d32; }
+    .cp:active { transform: scale(0.92); }
     .doc-grid { display: grid; gap: 8px; }
     .doc-a {
         display: flex;
@@ -189,8 +194,10 @@
         <div class="ad-row">
             <span class="ad-lbl">{{ label }}</span>
             <span class="ad-val">
-                <span>{{ value }}</span>
-                <button type="button" class="cp" onclick="cp(this, {{ value|tojson }})">Nakili</button>
+                <span class="ad-val-text">{{ value }}</span>
+                <button type="button" class="cp" data-copy="{{ value|e }}" title="Nakili" aria-label="Nakili">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                </button>
             </span>
         </div>
         {% endif %}
@@ -282,32 +289,78 @@ TIN: {{ application.tin_number }}
 </div>
 
 <script>
-function cp(btn, text) {
-    text = text == null ? '' : String(text);
-    function ok() {
-        var t = btn.textContent;
-        btn.textContent = '✓';
-        btn.classList.add('ok');
-        setTimeout(function(){ btn.textContent = t; btn.classList.remove('ok'); }, 900);
+(function() {
+    var CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    var COPY = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>';
+
+    function fallbackCopy(text) {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.cssText = 'position:fixed;top:0;left:0;width:2px;height:2px;padding:0;border:none;opacity:0;';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        ta.setSelectionRange(0, text.length);
+        var ok = false;
+        try { ok = document.execCommand('copy'); } catch (e) {}
+        document.body.removeChild(ta);
+        return ok;
     }
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(ok).catch(function(){ fb(text); ok(); });
-    } else { fb(text); ok(); }
-}
-function cpAll() {
-    var box = document.getElementById('copyAll');
-    var text = box ? (box.innerText || box.textContent) : '';
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(text).then(function(){ alert('Zimenakiliwa!'); });
-    } else { fb(text); alert('Zimenakiliwa!'); }
-}
-function fb(text) {
-    var ta = document.createElement('textarea');
-    ta.value = text;
-    document.body.appendChild(ta);
-    ta.select();
-    try { document.execCommand('copy'); } catch(e) {}
-    document.body.removeChild(ta);
-}
+
+    function writeClipboard(text) {
+        text = text == null ? '' : String(text);
+        if (navigator.clipboard && window.isSecureContext) {
+            return navigator.clipboard.writeText(text).then(function(){ return true; }).catch(function(){
+                return fallbackCopy(text);
+            });
+        }
+        return Promise.resolve(fallbackCopy(text));
+    }
+
+    function flashBtn(btn) {
+        var prev = btn.innerHTML;
+        btn.classList.add('ok');
+        btn.innerHTML = CHECK;
+        setTimeout(function(){
+            btn.classList.remove('ok');
+            btn.innerHTML = prev;
+        }, 1200);
+    }
+
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('button.cp');
+        if (!btn) return;
+        e.preventDefault();
+        var text = btn.getAttribute('data-copy');
+        if (text == null || text === '') {
+            var row = btn.closest('.ad-row');
+            var span = row ? row.querySelector('.ad-val-text') : null;
+            text = span ? (span.textContent || '') : '';
+        }
+        writeClipboard(text).then(function(ok) {
+            if (ok) flashBtn(btn);
+            else alert('Imeshindwa kunakili. Jaribu tena.');
+        });
+    });
+
+    window.cpAll = function() {
+        var box = document.getElementById('copyAll');
+        var text = box ? (box.innerText || box.textContent || '').trim() : '';
+        if (!text) {
+            var parts = [];
+            document.querySelectorAll('.ad-row').forEach(function(row) {
+                var l = row.querySelector('.ad-lbl');
+                var v = row.querySelector('.ad-val-text');
+                if (l && v) parts.push(l.textContent.trim() + ': ' + v.textContent.trim());
+            });
+            text = parts.join('\n');
+        }
+        writeClipboard(text).then(function(ok) {
+            if (ok) alert('Taarifa zote zimenakiliwa kwenye clipboard ✓');
+            else alert('Imeshindwa kunakili.');
+        });
+    };
+})();
 </script>
 {% endblock %}

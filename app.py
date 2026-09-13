@@ -228,7 +228,8 @@ class NakalaRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     request_code = db.Column(db.String(30), unique=True, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    service_type = db.Column(db.String(50), nullable=False)  # tin | license | nida
+    # tin | license | nida | birth_cert | death_cert | cert_verify | business_name
+    service_type = db.Column(db.String(50), nullable=False)
     full_name = db.Column(db.String(150), nullable=False)
     mother_name = db.Column(db.String(150), default="")
     nida_number = db.Column(db.String(20), default="")
@@ -255,6 +256,8 @@ class NakalaRequest(db.Model):
     admin_note = db.Column(db.Text, default="")
     result_message = db.Column(db.Text, default="")
     result_file = db.Column(db.String(255), default="")
+    # JSON: form fields + uploaded file paths (cheti / business name)
+    extra_data = db.Column(db.Text, default="")
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user = db.relationship("User", backref="nakala_requests")
 
@@ -2163,6 +2166,48 @@ LICENSE_CATALOG = [
 LICENSE_BY_ID = {x["id"]: x for x in LICENSE_CATALOG}
 LICENSE_SERVICE_FEE = 10000  # ada ya mtoa huduma kwa ombi la leseni
 
+# Bei za huduma mpya za Nakala (inclusive)
+NAKALA_PRICE_BIRTH_CERT = 30000
+NAKALA_PRICE_DEATH_CERT = 18000
+NAKALA_PRICE_CERT_VERIFY = 9000
+NAKALA_PRICE_BUSINESS_NAME = 45000
+
+
+def save_nakala_upload(file_storage, prefix="doc"):
+    """Save uploaded file under uploads/nakala/ and return relative path."""
+    if not file_storage or not file_storage.filename:
+        return ""
+    allowed = {"png", "jpg", "jpeg", "gif", "webp", "pdf", "bmp"}
+    ext = file_storage.filename.rsplit(".", 1)[-1].lower() if "." in file_storage.filename else ""
+    if ext not in allowed:
+        return ""
+    folder = os.path.join(app.config["UPLOAD_FOLDER"], "nakala")
+    os.makedirs(folder, exist_ok=True)
+    filename = secure_filename(f"{prefix}_{secrets.token_hex(6)}.{ext}")
+    file_storage.save(os.path.join(folder, filename))
+    return f"nakala/{filename}"
+
+
+def nakala_service_label(service_type, extra=None):
+    """Jina la huduma kwa UI / admin."""
+    labels = {
+        "tin": "TIN Number",
+        "license": "Leseni ya Biashara",
+        "nida": "Online Copy NIDA",
+        "birth_cert": "Cheti cha Kuzaliwa",
+        "death_cert": "Cheti cha Kifo",
+        "cert_verify": "Uhakiki wa Cheti",
+        "business_name": "Usajili wa Jina la Biashara",
+    }
+    base = labels.get(service_type, service_type or "—")
+    if service_type == "cert_verify" and isinstance(extra, dict):
+        sub = extra.get("verify_type") or ""
+        if sub == "birth":
+            return "Uhakiki — Cheti cha Kuzaliwa"
+        if sub == "death":
+            return "Uhakiki — Cheti cha Kifo"
+    return base
+
 
 
 @app.route("/nakala/license", methods=["GET", "POST"])
@@ -2294,6 +2339,281 @@ def nakala_nida():
     return render_template("nakala_nida.html")
 
 
+# ---------------------------------------------------------------------------
+# Nakala — Cheti (Kuzaliwa / Kifo / Verification) + Usajili wa Jina la Biashara
+# ---------------------------------------------------------------------------
+@app.route("/nakala/cheti")
+@login_required
+def nakala_cheti_menu():
+    return render_template("nakala_cheti_menu.html")
+
+
+@app.route("/nakala/cheti/verification")
+@login_required
+def nakala_cheti_verify_menu():
+    return render_template("nakala_cheti_verify_menu.html")
+
+
+@app.route("/nakala/cheti/kuzaliwa", methods=["GET", "POST"])
+@login_required
+def nakala_birth_cert():
+    if request.method == "POST":
+        # Applicant
+        full_name = request.form.get("full_name", "").strip()
+        gender = request.form.get("gender", "").strip()
+        dob = request.form.get("dob", "").strip()
+        region = request.form.get("region", "").strip()
+        district = request.form.get("district", "").strip()
+        ward = request.form.get("ward", "").strip()
+        street = request.form.get("street", "").strip()
+        occupation = request.form.get("occupation", "").strip()
+        phone = request.form.get("phone", "").strip()
+        # Mother
+        mother_name = request.form.get("mother_name", "").strip()
+        mother_dob = request.form.get("mother_dob", "").strip()
+        mother_region = request.form.get("mother_region", "").strip()
+        mother_district = request.form.get("mother_district", "").strip()
+        mother_ward = request.form.get("mother_ward", "").strip()
+        mother_street = request.form.get("mother_street", "").strip()
+        mother_occupation = request.form.get("mother_occupation", "").strip()
+        mother_phone = request.form.get("mother_phone", "").strip()
+        # Father
+        father_name = request.form.get("father_name", "").strip()
+        father_dob = request.form.get("father_dob", "").strip()
+        father_region = request.form.get("father_region", "").strip()
+        father_phone = request.form.get("father_phone", "").strip()
+        father_occupation = request.form.get("father_occupation", "").strip()
+        # Current location
+        curr_region = request.form.get("curr_region", "").strip()
+        curr_district = request.form.get("curr_district", "").strip()
+        curr_ward = request.form.get("curr_ward", "").strip()
+        curr_street = request.form.get("curr_street", "").strip()
+
+        required = [full_name, gender, dob, phone, mother_name, father_name, curr_region]
+        if not all(required):
+            flash("Jaza taarifa zote muhimu (majina, jinsia, tarehe, simu, wazazi, eneo).", "error")
+            return redirect(url_for("nakala_birth_cert"))
+
+        # Documents — at least 2 of: parent_id, applicant_id, id_front+id_back
+        parent_id = save_nakala_upload(request.files.get("parent_id"), "birth_parent_id")
+        applicant_id = save_nakala_upload(request.files.get("applicant_id"), "birth_applicant_id")
+        id_front = save_nakala_upload(request.files.get("id_front"), "birth_id_front")
+        id_back = save_nakala_upload(request.files.get("id_back"), "birth_id_back")
+        docs_count = sum(1 for x in [parent_id, applicant_id, (id_front and id_back)] if x)
+        if docs_count < 2:
+            flash(
+                "Pakia angalau viambatanisho VIWILI: "
+                "kitambulisho cha mzazi, kitambulisho cha muombaji, "
+                "au picha mbele + nyuma ya kitambulisho.",
+                "error",
+            )
+            return redirect(url_for("nakala_birth_cert"))
+
+        session["nakala_draft"] = {
+            "service_type": "birth_cert",
+            "full_name": full_name,
+            "phone1": phone,
+            "phone": phone,
+            "gender": gender,
+            "dob": dob,
+            "region": region,
+            "district": district,
+            "ward": ward,
+            "street": street,
+            "occupation": occupation,
+            "mother_name": mother_name,
+            "mother_dob": mother_dob,
+            "mother_region": mother_region,
+            "mother_district": mother_district,
+            "mother_ward": mother_ward,
+            "mother_street": mother_street,
+            "mother_occupation": mother_occupation,
+            "mother_phone": mother_phone,
+            "father_name": father_name,
+            "father_dob": father_dob,
+            "father_region": father_region,
+            "father_phone": father_phone,
+            "father_occupation": father_occupation,
+            "curr_region": curr_region,
+            "curr_district": curr_district,
+            "curr_ward": curr_ward,
+            "curr_street": curr_street,
+            "docs": {
+                "parent_id": parent_id,
+                "applicant_id": applicant_id,
+                "id_front": id_front,
+                "id_back": id_back,
+            },
+            "price": NAKALA_PRICE_BIRTH_CERT,
+        }
+        return redirect(url_for("nakala_review"))
+
+    return render_template("nakala_birth_cert.html", price=NAKALA_PRICE_BIRTH_CERT)
+
+
+@app.route("/nakala/cheti/kifo", methods=["GET", "POST"])
+@login_required
+def nakala_death_cert():
+    if request.method == "POST":
+        # Deceased
+        deceased_name = request.form.get("deceased_name", "").strip()
+        deceased_dob = request.form.get("deceased_dob", "").strip()
+        death_date = request.form.get("death_date", "").strip()
+        residence = request.form.get("residence", "").strip()
+        death_place_area = request.form.get("death_place_area", "").strip()
+        death_cause = request.form.get("death_cause", "").strip()
+        death_place_type = request.form.get("death_place_type", "").strip()
+        # Parents
+        mother_name = request.form.get("mother_name", "").strip()
+        father_name = request.form.get("father_name", "").strip()
+        # Informant
+        full_name = request.form.get("full_name", "").strip()
+        phone = request.form.get("phone", "").strip()
+        occupation = request.form.get("occupation", "").strip()
+        informant_address = request.form.get("informant_address", "").strip()
+
+        if not all([deceased_name, death_date, full_name, phone]):
+            flash("Jaza majina ya marehemu, tarehe ya kifo, jina lako na simu.", "error")
+            return redirect(url_for("nakala_death_cert"))
+
+        docs = {
+            "burial_permit": save_nakala_upload(request.files.get("burial_permit"), "death_burial"),
+            "family_minutes": save_nakala_upload(request.files.get("family_minutes"), "death_minutes"),
+            "deceased_id": save_nakala_upload(request.files.get("deceased_id"), "death_deceased_id"),
+            "admin_id": save_nakala_upload(request.files.get("admin_id"), "death_admin_id"),
+            "marriage_or_children": save_nakala_upload(
+                request.files.get("marriage_or_children"), "death_marriage"
+            ),
+        }
+
+        session["nakala_draft"] = {
+            "service_type": "death_cert",
+            "full_name": full_name,
+            "phone1": phone,
+            "phone": phone,
+            "deceased_name": deceased_name,
+            "deceased_dob": deceased_dob,
+            "death_date": death_date,
+            "residence": residence,
+            "death_place_area": death_place_area,
+            "death_cause": death_cause,
+            "death_place_type": death_place_type,
+            "mother_name": mother_name,
+            "father_name": father_name,
+            "occupation": occupation,
+            "informant_address": informant_address,
+            "docs": docs,
+            "price": NAKALA_PRICE_DEATH_CERT,
+        }
+        return redirect(url_for("nakala_review"))
+
+    return render_template("nakala_death_cert.html", price=NAKALA_PRICE_DEATH_CERT)
+
+
+@app.route("/nakala/cheti/verification/kuzaliwa", methods=["GET", "POST"])
+@login_required
+def nakala_verify_birth():
+    if request.method == "POST":
+        entry_number = request.form.get("entry_number", "").strip()
+        birth_place = request.form.get("birth_place", "").strip()
+        full_name = request.form.get("full_name", "").strip()
+        gender = request.form.get("gender", "").strip()
+        father_name = request.form.get("father_name", "").strip()
+        mother_name = request.form.get("mother_name", "").strip()
+        phone = request.form.get("phone", "").strip()
+
+        if not all([entry_number, full_name, phone]):
+            flash("Jaza entry number, majina kamili na namba ya simu.", "error")
+            return redirect(url_for("nakala_verify_birth"))
+
+        session["nakala_draft"] = {
+            "service_type": "cert_verify",
+            "verify_type": "birth",
+            "full_name": full_name,
+            "phone1": phone,
+            "phone": phone,
+            "entry_number": entry_number,
+            "birth_place": birth_place,
+            "gender": gender,
+            "father_name": father_name,
+            "mother_name": mother_name,
+            "price": NAKALA_PRICE_CERT_VERIFY,
+        }
+        return redirect(url_for("nakala_review"))
+
+    return render_template(
+        "nakala_verify_birth.html",
+        price=NAKALA_PRICE_CERT_VERIFY,
+    )
+
+
+@app.route("/nakala/cheti/verification/kifo", methods=["GET", "POST"])
+@login_required
+def nakala_verify_death():
+    if request.method == "POST":
+        entry_number = request.form.get("entry_number", "").strip()
+        full_name = request.form.get("full_name", "").strip()
+        gender = request.form.get("gender", "").strip()
+        father_name = request.form.get("father_name", "").strip()
+        mother_name = request.form.get("mother_name", "").strip()
+        phone = request.form.get("phone", "").strip()
+
+        if not all([entry_number, full_name, phone]):
+            flash("Jaza entry number, majina kamili na namba ya simu.", "error")
+            return redirect(url_for("nakala_verify_death"))
+
+        session["nakala_draft"] = {
+            "service_type": "cert_verify",
+            "verify_type": "death",
+            "full_name": full_name,
+            "phone1": phone,
+            "phone": phone,
+            "entry_number": entry_number,
+            "gender": gender,
+            "father_name": father_name,
+            "mother_name": mother_name,
+            "price": NAKALA_PRICE_CERT_VERIFY,
+        }
+        return redirect(url_for("nakala_review"))
+
+    return render_template(
+        "nakala_verify_death.html",
+        price=NAKALA_PRICE_CERT_VERIFY,
+    )
+
+
+@app.route("/nakala/business-name", methods=["GET", "POST"])
+@login_required
+def nakala_business_name():
+    if request.method == "POST":
+        nida_number = request.form.get("nida_number", "").strip()
+        business_name = request.form.get("business_name", "").strip()
+        email = request.form.get("email", "").strip()
+        phone = request.form.get("phone", "").strip()
+        full_name = request.form.get("full_name", "").strip()
+
+        if not all([nida_number, business_name, phone, full_name]):
+            flash("Jaza NIDA, jina la biashara, simu na majina yako matatu.", "error")
+            return redirect(url_for("nakala_business_name"))
+
+        session["nakala_draft"] = {
+            "service_type": "business_name",
+            "full_name": full_name,
+            "phone1": phone,
+            "phone": phone,
+            "nida_number": nida_number,
+            "business_name": business_name,
+            "email": email,
+            "price": NAKALA_PRICE_BUSINESS_NAME,
+        }
+        return redirect(url_for("nakala_review"))
+
+    return render_template(
+        "nakala_business_name.html",
+        price=NAKALA_PRICE_BUSINESS_NAME,
+    )
+
+
 @app.route("/nakala/review")
 @login_required
 def nakala_review():
@@ -2301,7 +2621,11 @@ def nakala_review():
     if not draft:
         flash("Hakuna taarifa za kukaguliwa. Anza upya.", "error")
         return redirect(url_for("nakala"))
-    return render_template("nakala_review.html", draft=draft)
+    return render_template(
+        "nakala_review.html",
+        draft=draft,
+        service_label=nakala_service_label(draft.get("service_type"), draft),
+    )
 
 
 @app.route("/nakala/pay", methods=["POST"])
@@ -2340,14 +2664,29 @@ def nakala_pay():
         price_val = LICENSE_SERVICE_FEE
         svc_fee = LICENSE_SERVICE_FEE
 
+    # extra_data: store full form payload for new services (exclude large binary)
+    extra_payload = draft.get("extra_data")
+    if extra_payload is None and draft.get("service_type") in (
+        "birth_cert", "death_cert", "cert_verify", "business_name"
+    ):
+        # keep a copy of draft fields for admin display
+        skip_keys = {"price", "service_fee", "control_number_fee"}
+        extra_payload = {k: v for k, v in draft.items() if k not in skip_keys and not str(k).startswith("_")}
+    extra_json = ""
+    if extra_payload:
+        try:
+            extra_json = json.dumps(extra_payload, ensure_ascii=False)
+        except Exception:
+            extra_json = ""
+
     req = NakalaRequest(
         request_code=code,
         user_id=user.id,
         service_type=draft["service_type"],
-        full_name=draft["full_name"],
+        full_name=(draft.get("full_name") or "")[:150] or "—",
         mother_name=draft.get("mother_name", ""),
         nida_number=draft.get("nida_number", ""),
-        phone1=draft["phone1"],
+        phone1=(draft.get("phone1") or draft.get("phone") or "")[:20] or "—",
         phone2=draft.get("phone2", ""),
         primary_school=draft.get("primary_school", ""),
         year_completed=draft.get("year_completed", ""),
@@ -2364,6 +2703,7 @@ def nakala_pay():
         service_fee=svc_fee,
         price=price_val,
         status="pending",
+        extra_data=extra_json,
     )
     try:
         db.session.add(req)
@@ -2483,7 +2823,18 @@ def nakala_detail(req_id):
     if req.user_id != user.id and not user.is_admin:
         flash("Huna ruhusa.", "error")
         return redirect(url_for("my_nakala"))
-    return render_template("nakala_detail.html", req=req)
+    extra = {}
+    if req.extra_data:
+        try:
+            extra = json.loads(req.extra_data) if isinstance(req.extra_data, str) else (req.extra_data or {})
+        except Exception:
+            extra = {}
+    return render_template(
+        "nakala_detail.html",
+        req=req,
+        extra=extra,
+        service_label=nakala_service_label(req.service_type, extra),
+    )
 
 
 @app.route("/nakala/<int:req_id>/repay", methods=["GET", "POST"])
@@ -3387,6 +3738,7 @@ def ensure_agency_columns():
                 "control_number_fee": "INTEGER DEFAULT 0",
                 "control_expires_at": "TIMESTAMP",
                 "service_fee": "INTEGER DEFAULT 0",
+                "extra_data": "TEXT DEFAULT ''",
             }
             with db.engine.begin() as conn:
                 for name, typedef in nakala_cols.items():

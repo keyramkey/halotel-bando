@@ -142,13 +142,47 @@
         {% endif %}
     </div>
 
-    {% if req.extra_data %}
-    {% set xd = req.extra_data|safe %}
-    {# parsed in view ideally; show key fields simply #}
+    {% set xd = extra if extra is defined and extra else (req.extra_data|from_json if req.extra_data else {}) %}
+    {% if req.service_type == 'business_name' %}
     <div class="nd-card">
         <div class="nd-title">Taarifa za Ombi</div>
-        <pre style="font-size:11px;line-height:1.45;white-space:pre-wrap;margin:0;color:#333;background:#fafafa;padding:10px;border-radius:10px;overflow:auto;max-height:280px;">{{ req.extra_data }}</pre>
-        <p class="muted" style="font-size:11px;margin:8px 0 0;">(Admin anaona taarifa kamili + faili kwenye dashboard)</p>
+        <div class="nd-row"><span class="nd-lbl">Jina la Biashara</span><span class="nd-val">{{ xd.business_name or '—' }}</span></div>
+        <div class="nd-row"><span class="nd-lbl">NIDA</span><span class="nd-val">{{ xd.nida_number or req.nida_number or '—' }}</span></div>
+        {% if xd.email %}<div class="nd-row"><span class="nd-lbl">Email</span><span class="nd-val">{{ xd.email }}</span></div>{% endif %}
+        <div class="nd-row"><span class="nd-lbl">Majina Yako</span><span class="nd-val">{{ req.full_name }}</span></div>
+        <div class="nd-row"><span class="nd-lbl">Simu</span><span class="nd-val">{{ req.phone1 }}</span></div>
+    </div>
+    {% elif req.service_type == 'birth_cert' %}
+    <div class="nd-card">
+        <div class="nd-title">Taarifa za Ombi</div>
+        <div class="nd-row"><span class="nd-lbl">Muombaji</span><span class="nd-val">{{ req.full_name }}</span></div>
+        {% if xd.gender %}<div class="nd-row"><span class="nd-lbl">Jinsia</span><span class="nd-val">{{ xd.gender }}</span></div>{% endif %}
+        {% if xd.dob %}<div class="nd-row"><span class="nd-lbl">Tarehe ya Kuzaliwa</span><span class="nd-val">{{ xd.dob }}</span></div>{% endif %}
+        <div class="nd-row"><span class="nd-lbl">Simu</span><span class="nd-val">{{ req.phone1 }}</span></div>
+        {% if xd.mother_name %}<div class="nd-row"><span class="nd-lbl">Mama</span><span class="nd-val">{{ xd.mother_name }}</span></div>{% endif %}
+        {% if xd.father_name %}<div class="nd-row"><span class="nd-lbl">Baba</span><span class="nd-val">{{ xd.father_name }}</span></div>{% endif %}
+        {% if xd.curr_region %}<div class="nd-row"><span class="nd-lbl">Eneo sasa</span><span class="nd-val">{{ [xd.curr_street, xd.curr_ward, xd.curr_district, xd.curr_region]|select|join(', ') }}</span></div>{% endif %}
+    </div>
+    {% elif req.service_type == 'death_cert' %}
+    <div class="nd-card">
+        <div class="nd-title">Taarifa za Ombi</div>
+        <div class="nd-row"><span class="nd-lbl">Marehemu</span><span class="nd-val">{{ xd.deceased_name or '—' }}</span></div>
+        {% if xd.death_date %}<div class="nd-row"><span class="nd-lbl">Tarehe ya Kifo</span><span class="nd-val">{{ xd.death_date }}</span></div>{% endif %}
+        <div class="nd-row"><span class="nd-lbl">Mtoa taarifa</span><span class="nd-val">{{ req.full_name }}</span></div>
+        <div class="nd-row"><span class="nd-lbl">Simu</span><span class="nd-val">{{ req.phone1 }}</span></div>
+        {% if xd.mother_name %}<div class="nd-row"><span class="nd-lbl">Mama</span><span class="nd-val">{{ xd.mother_name }}</span></div>{% endif %}
+        {% if xd.father_name %}<div class="nd-row"><span class="nd-lbl">Baba</span><span class="nd-val">{{ xd.father_name }}</span></div>{% endif %}
+    </div>
+    {% elif req.service_type == 'cert_verify' %}
+    <div class="nd-card">
+        <div class="nd-title">Taarifa za Ombi</div>
+        <div class="nd-row"><span class="nd-lbl">Aina</span><span class="nd-val">{% if xd.verify_type == 'death' %}Cheti cha Kifo{% else %}Cheti cha Kuzaliwa{% endif %}</span></div>
+        <div class="nd-row"><span class="nd-lbl">Entry Number</span><span class="nd-val">{{ xd.entry_number or '—' }}</span></div>
+        <div class="nd-row"><span class="nd-lbl">Majina</span><span class="nd-val">{{ req.full_name }}</span></div>
+        {% if xd.gender %}<div class="nd-row"><span class="nd-lbl">Jinsia</span><span class="nd-val">{{ xd.gender }}</span></div>{% endif %}
+        {% if xd.father_name %}<div class="nd-row"><span class="nd-lbl">Baba</span><span class="nd-val">{{ xd.father_name }}</span></div>{% endif %}
+        {% if xd.mother_name %}<div class="nd-row"><span class="nd-lbl">Mama</span><span class="nd-val">{{ xd.mother_name }}</span></div>{% endif %}
+        <div class="nd-row"><span class="nd-lbl">Simu</span><span class="nd-val">{{ req.phone1 }}</span></div>
     </div>
     {% endif %}
 

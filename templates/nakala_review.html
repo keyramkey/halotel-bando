@@ -5,12 +5,19 @@
     .review-row {
         display: flex;
         justify-content: space-between;
+        gap: 12px;
         padding: 10px 0;
         border-bottom: 1px solid #f0f0f0;
         font-size: 13px;
     }
-    .review-row .label { color: #777; }
-    .review-row .value { font-weight: 600; text-align: right; max-width: 60%; }
+    .review-row:last-child { border-bottom: none; }
+    .review-row .label { color: #777; flex-shrink: 0; max-width: 42%; }
+    .review-row .value {
+        font-weight: 600;
+        text-align: right;
+        max-width: 58%;
+        word-break: break-word;
+    }
     .price-box {
         background: #fff8f0;
         border: 1px solid #ffe0c2;
@@ -24,8 +31,24 @@
         font-weight: 900;
         color: #f56b00;
     }
+    .section-label {
+        font-size: 12px;
+        font-weight: 800;
+        color: #f56b00;
+        margin: 14px 0 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    .doc-ok {
+        color: #2e7d32;
+        font-weight: 700;
+        font-size: 12px;
+    }
+    .doc-miss {
+        color: #999;
+        font-size: 12px;
+    }
 </style>
-
 <header class="topbar">
     <div>
         <div class="brand">Hakiki Taarifa</div>
@@ -33,88 +56,443 @@
     </div>
     <a href="{{ url_for('nakala') }}" class="icon-btn">←</a>
 </header>
-
 <div class="page">
     <div class="info-box">
         <strong>Hakiki vizuri!</strong> Hakikisha taarifa zote ni sahihi kabla ya kulipa na kutuma kwa admin.
     </div>
 
     <div class="card">
+        {# ===== HUDUMA ===== #}
         <div class="review-row">
             <span class="label">Huduma</span>
             <span class="value">
-                {% if draft.service_type == 'tin' %}TIN Number
+                {% if service_label %}
+                    {{ service_label }}
+                {% elif draft.service_type == 'tin' %}TIN Number
                 {% elif draft.service_type == 'license' %}Leseni ya Biashara
-                {% else %}Online Copy NIDA{% endif %}
+                {% elif draft.service_type == 'nida' %}Online Copy NIDA
+                {% elif draft.service_type == 'birth_cert' %}Cheti cha Kuzaliwa
+                {% elif draft.service_type == 'death_cert' %}Cheti cha Kifo
+                {% elif draft.service_type == 'cert_verify' %}
+                    {% if draft.verify_type == 'death' %}Uhakiki — Cheti cha Kifo
+                    {% else %}Uhakiki — Cheti cha Kuzaliwa{% endif %}
+                {% elif draft.service_type == 'business_name' %}Usajili wa Jina la Biashara
+                {% else %}{{ draft.service_type }}{% endif %}
             </span>
         </div>
-        {% if draft.license_type %}
-        <div class="review-row">
-            <span class="label">Aina ya Leseni</span>
-            <span class="value">{{ 'Uwakala' if draft.license_type == 'uwakala' else 'Duka' }}</span>
-        </div>
-        {% endif %}
-        <div class="review-row">
-            <span class="label">Jina Kamili</span>
-            <span class="value">{{ draft.full_name }}</span>
-        </div>
-        <div class="review-row">
-            <span class="label">Jina la Mama</span>
-            <span class="value">{{ draft.mother_name }}</span>
-        </div>
-        <div class="review-row">
-            <span class="label">NIDA / NIN</span>
-            <span class="value">{{ draft.nida_number }}</span>
-        </div>
-        <div class="review-row">
-            <span class="label">Simu 1</span>
-            <span class="value">{{ draft.phone1 }}</span>
-        </div>
-        {% if draft.phone2 %}
-        <div class="review-row">
-            <span class="label">Simu 2</span>
-            <span class="value">{{ draft.phone2 }}</span>
-        </div>
-        {% endif %}
-        <div class="review-row">
-            <span class="label">Shule ya Msingi</span>
-            <span class="value">{{ draft.primary_school }}</span>
-        </div>
-        <div class="review-row">
-            <span class="label">Mwaka wa Kuhitimu</span>
-            <span class="value">{{ draft.year_completed }}</span>
-        </div>
-        <div class="review-row">
-            <span class="label">Wilaya (Shule)</span>
-            <span class="value">{{ draft.school_district }}</span>
-        </div>
-        <div class="review-row">
-            <span class="label">Mkoa (Shule)</span>
-            <span class="value">{{ draft.school_region }}</span>
-        </div>
-        <div class="review-row">
-            <span class="label">Wilaya (NIDA)</span>
-            <span class="value">{{ draft.nida_reg_district }}</span>
-        </div>
-        <div class="review-row">
-            <span class="label">Mkoa (NIDA)</span>
-            <span class="value">{{ draft.nida_reg_region }}</span>
-        </div>
-        <div class="review-row">
-            <span class="label">Mtaa/Kijiji (NIDA)</span>
-            <span class="value">{{ draft.nida_reg_street }}</span>
-        </div>
-        {% if draft.nida_reg_phone %}
-        <div class="review-row">
-            <span class="label">Simu ya Usajili NIDA</span>
-            <span class="value">{{ draft.nida_reg_phone }}</span>
-        </div>
+
+        {# ========== TIN / NIDA / LICENSE (ya zamani) ========== #}
+        {% if draft.service_type in ['tin', 'nida', 'license'] %}
+
+            {% if draft.license_type %}
+            <div class="review-row">
+                <span class="label">Aina ya Leseni</span>
+                <span class="value">{{ draft.license_type }}</span>
+            </div>
+            {% endif %}
+            {% if draft.license_location %}
+            <div class="review-row">
+                <span class="label">Eneo la Leseni</span>
+                <span class="value">{{ draft.license_location }}</span>
+            </div>
+            {% endif %}
+
+            <div class="review-row">
+                <span class="label">Jina Kamili</span>
+                <span class="value">{{ draft.full_name }}</span>
+            </div>
+            {% if draft.mother_name %}
+            <div class="review-row">
+                <span class="label">Jina la Mama</span>
+                <span class="value">{{ draft.mother_name }}</span>
+            </div>
+            {% endif %}
+            {% if draft.nida_number %}
+            <div class="review-row">
+                <span class="label">NIDA / NIN</span>
+                <span class="value">{{ draft.nida_number }}</span>
+            </div>
+            {% endif %}
+            <div class="review-row">
+                <span class="label">Simu 1</span>
+                <span class="value">{{ draft.phone1 }}</span>
+            </div>
+            {% if draft.phone2 %}
+            <div class="review-row">
+                <span class="label">Simu 2</span>
+                <span class="value">{{ draft.phone2 }}</span>
+            </div>
+            {% endif %}
+            {% if draft.primary_school %}
+            <div class="review-row">
+                <span class="label">Shule ya Msingi</span>
+                <span class="value">{{ draft.primary_school }}</span>
+            </div>
+            {% endif %}
+            {% if draft.year_completed %}
+            <div class="review-row">
+                <span class="label">Mwaka wa Kuhitimu</span>
+                <span class="value">{{ draft.year_completed }}</span>
+            </div>
+            {% endif %}
+            {% if draft.school_district %}
+            <div class="review-row">
+                <span class="label">Wilaya (Shule)</span>
+                <span class="value">{{ draft.school_district }}</span>
+            </div>
+            {% endif %}
+            {% if draft.school_region %}
+            <div class="review-row">
+                <span class="label">Mkoa (Shule)</span>
+                <span class="value">{{ draft.school_region }}</span>
+            </div>
+            {% endif %}
+            {% if draft.nida_reg_district %}
+            <div class="review-row">
+                <span class="label">Wilaya (NIDA)</span>
+                <span class="value">{{ draft.nida_reg_district }}</span>
+            </div>
+            {% endif %}
+            {% if draft.nida_reg_region %}
+            <div class="review-row">
+                <span class="label">Mkoa (NIDA)</span>
+                <span class="value">{{ draft.nida_reg_region }}</span>
+            </div>
+            {% endif %}
+            {% if draft.nida_reg_street %}
+            <div class="review-row">
+                <span class="label">Mtaa/Kijiji (NIDA)</span>
+                <span class="value">{{ draft.nida_reg_street }}</span>
+            </div>
+            {% endif %}
+            {% if draft.nida_reg_phone %}
+            <div class="review-row">
+                <span class="label">Simu ya Usajili NIDA</span>
+                <span class="value">{{ draft.nida_reg_phone }}</span>
+            </div>
+            {% endif %}
+            {% if draft.had_tin_before %}
+            <div class="review-row">
+                <span class="label">Uliwahi kuwa na TIN?</span>
+                <span class="value">{{ draft.had_tin_before }}</span>
+            </div>
+            {% endif %}
+
+        {# ========== CHETI CHA KUZALIWA ========== #}
+        {% elif draft.service_type == 'birth_cert' %}
+
+            <div class="section-label">Muombaji</div>
+            <div class="review-row">
+                <span class="label">Majina Kamili</span>
+                <span class="value">{{ draft.full_name }}</span>
+            </div>
+            {% if draft.gender %}
+            <div class="review-row">
+                <span class="label">Jinsia</span>
+                <span class="value">{{ draft.gender }}</span>
+            </div>
+            {% endif %}
+            {% if draft.dob %}
+            <div class="review-row">
+                <span class="label">Tarehe ya Kuzaliwa</span>
+                <span class="value">{{ draft.dob }}</span>
+            </div>
+            {% endif %}
+            {% if draft.region or draft.district or draft.ward or draft.street %}
+            <div class="review-row">
+                <span class="label">Anapoishi</span>
+                <span class="value">{{ [draft.street, draft.ward, draft.district, draft.region]|select|join(', ') }}</span>
+            </div>
+            {% endif %}
+            {% if draft.occupation %}
+            <div class="review-row">
+                <span class="label">Kazi</span>
+                <span class="value">{{ draft.occupation }}</span>
+            </div>
+            {% endif %}
+            <div class="review-row">
+                <span class="label">Simu</span>
+                <span class="value">{{ draft.phone1 or draft.phone }}</span>
+            </div>
+
+            <div class="section-label">Mama</div>
+            <div class="review-row">
+                <span class="label">Majina</span>
+                <span class="value">{{ draft.mother_name }}</span>
+            </div>
+            {% if draft.mother_dob %}
+            <div class="review-row">
+                <span class="label">Tarehe ya Kuzaliwa</span>
+                <span class="value">{{ draft.mother_dob }}</span>
+            </div>
+            {% endif %}
+            {% if draft.mother_region or draft.mother_district %}
+            <div class="review-row">
+                <span class="label">Anapoishi</span>
+                <span class="value">{{ [draft.mother_street, draft.mother_ward, draft.mother_district, draft.mother_region]|select|join(', ') }}</span>
+            </div>
+            {% endif %}
+            {% if draft.mother_occupation %}
+            <div class="review-row">
+                <span class="label">Kazi</span>
+                <span class="value">{{ draft.mother_occupation }}</span>
+            </div>
+            {% endif %}
+            {% if draft.mother_phone %}
+            <div class="review-row">
+                <span class="label">Simu</span>
+                <span class="value">{{ draft.mother_phone }}</span>
+            </div>
+            {% endif %}
+
+            <div class="section-label">Baba</div>
+            <div class="review-row">
+                <span class="label">Majina</span>
+                <span class="value">{{ draft.father_name }}</span>
+            </div>
+            {% if draft.father_dob %}
+            <div class="review-row">
+                <span class="label">Tarehe ya Kuzaliwa</span>
+                <span class="value">{{ draft.father_dob }}</span>
+            </div>
+            {% endif %}
+            {% if draft.father_region %}
+            <div class="review-row">
+                <span class="label">Mkoa</span>
+                <span class="value">{{ draft.father_region }}</span>
+            </div>
+            {% endif %}
+            {% if draft.father_occupation %}
+            <div class="review-row">
+                <span class="label">Kazi</span>
+                <span class="value">{{ draft.father_occupation }}</span>
+            </div>
+            {% endif %}
+            {% if draft.father_phone %}
+            <div class="review-row">
+                <span class="label">Simu</span>
+                <span class="value">{{ draft.father_phone }}</span>
+            </div>
+            {% endif %}
+
+            <div class="section-label">Eneo la sasa</div>
+            <div class="review-row">
+                <span class="label">Mahali</span>
+                <span class="value">{{ [draft.curr_street, draft.curr_ward, draft.curr_district, draft.curr_region]|select|join(', ') }}</span>
+            </div>
+
+            {% if draft.docs %}
+            <div class="section-label">Viambatanisho</div>
+            <div class="review-row">
+                <span class="label">Kitambulisho cha mzazi</span>
+                <span class="value">{% if draft.docs.parent_id %}<span class="doc-ok">✓ Imepakuliwa</span>{% else %}<span class="doc-miss">—</span>{% endif %}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Kitambulisho cha muombaji</span>
+                <span class="value">{% if draft.docs.applicant_id %}<span class="doc-ok">✓ Imepakuliwa</span>{% else %}<span class="doc-miss">—</span>{% endif %}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Picha mbele</span>
+                <span class="value">{% if draft.docs.id_front %}<span class="doc-ok">✓ Imepakuliwa</span>{% else %}<span class="doc-miss">—</span>{% endif %}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Picha nyuma</span>
+                <span class="value">{% if draft.docs.id_back %}<span class="doc-ok">✓ Imepakuliwa</span>{% else %}<span class="doc-miss">—</span>{% endif %}</span>
+            </div>
+            {% endif %}
+
+        {# ========== CHETI CHA KIFO ========== #}
+        {% elif draft.service_type == 'death_cert' %}
+
+            <div class="section-label">Aliyefariki</div>
+            <div class="review-row">
+                <span class="label">Majina Kamili</span>
+                <span class="value">{{ draft.deceased_name }}</span>
+            </div>
+            {% if draft.deceased_dob %}
+            <div class="review-row">
+                <span class="label">Tarehe ya Kuzaliwa</span>
+                <span class="value">{{ draft.deceased_dob }}</span>
+            </div>
+            {% endif %}
+            <div class="review-row">
+                <span class="label">Tarehe ya Kifo</span>
+                <span class="value">{{ draft.death_date }}</span>
+            </div>
+            {% if draft.residence %}
+            <div class="review-row">
+                <span class="label">Makazi</span>
+                <span class="value">{{ draft.residence }}</span>
+            </div>
+            {% endif %}
+            {% if draft.death_place_area %}
+            <div class="review-row">
+                <span class="label">Eneo kifo kilipotokea</span>
+                <span class="value">{{ draft.death_place_area }}</span>
+            </div>
+            {% endif %}
+            {% if draft.death_cause %}
+            <div class="review-row">
+                <span class="label">Sababu ya kifo</span>
+                <span class="value">{{ draft.death_cause }}</span>
+            </div>
+            {% endif %}
+            {% if draft.death_place_type %}
+            <div class="review-row">
+                <span class="label">Sehemu (nyumbani/hospitali…)</span>
+                <span class="value">{{ draft.death_place_type }}</span>
+            </div>
+            {% endif %}
+
+            <div class="section-label">Wazazi wa Marehemu</div>
+            {% if draft.mother_name %}
+            <div class="review-row">
+                <span class="label">Mama</span>
+                <span class="value">{{ draft.mother_name }}</span>
+            </div>
+            {% endif %}
+            {% if draft.father_name %}
+            <div class="review-row">
+                <span class="label">Baba</span>
+                <span class="value">{{ draft.father_name }}</span>
+            </div>
+            {% endif %}
+
+            <div class="section-label">Mtoa Taarifa</div>
+            <div class="review-row">
+                <span class="label">Majina</span>
+                <span class="value">{{ draft.full_name }}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Simu</span>
+                <span class="value">{{ draft.phone1 or draft.phone }}</span>
+            </div>
+            {% if draft.occupation %}
+            <div class="review-row">
+                <span class="label">Kazi</span>
+                <span class="value">{{ draft.occupation }}</span>
+            </div>
+            {% endif %}
+            {% if draft.informant_address %}
+            <div class="review-row">
+                <span class="label">Anapoishi</span>
+                <span class="value">{{ draft.informant_address }}</span>
+            </div>
+            {% endif %}
+
+            {% if draft.docs %}
+            <div class="section-label">Viambatanisho</div>
+            <div class="review-row">
+                <span class="label">Kibali cha mazishi</span>
+                <span class="value">{% if draft.docs.burial_permit %}<span class="doc-ok">✓ Imepakuliwa</span>{% else %}<span class="doc-miss">—</span>{% endif %}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Muhtasari / barua mirathi</span>
+                <span class="value">{% if draft.docs.family_minutes %}<span class="doc-ok">✓ Imepakuliwa</span>{% else %}<span class="doc-miss">—</span>{% endif %}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Kitambulisho cha marehemu</span>
+                <span class="value">{% if draft.docs.deceased_id %}<span class="doc-ok">✓ Imepakuliwa</span>{% else %}<span class="doc-miss">—</span>{% endif %}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Kitambulisho cha msimamizi</span>
+                <span class="value">{% if draft.docs.admin_id %}<span class="doc-ok">✓ Imepakuliwa</span>{% else %}<span class="doc-miss">—</span>{% endif %}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Cheti ndoa / watoto</span>
+                <span class="value">{% if draft.docs.marriage_or_children %}<span class="doc-ok">✓ Imepakuliwa</span>{% else %}<span class="doc-miss">—</span>{% endif %}</span>
+            </div>
+            {% endif %}
+
+        {# ========== UHAKIKI WA CHETI ========== #}
+        {% elif draft.service_type == 'cert_verify' %}
+
+            <div class="review-row">
+                <span class="label">Aina</span>
+                <span class="value">
+                    {% if draft.verify_type == 'death' %}Cheti cha Kifo
+                    {% else %}Cheti cha Kuzaliwa{% endif %}
+                </span>
+            </div>
+            <div class="review-row">
+                <span class="label">Entry Number</span>
+                <span class="value">{{ draft.entry_number }}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Majina Matatu</span>
+                <span class="value">{{ draft.full_name }}</span>
+            </div>
+            {% if draft.gender %}
+            <div class="review-row">
+                <span class="label">Jinsia</span>
+                <span class="value">{{ draft.gender }}</span>
+            </div>
+            {% endif %}
+            {% if draft.birth_place %}
+            <div class="review-row">
+                <span class="label">Sehemu ulipozaliwa</span>
+                <span class="value">{{ draft.birth_place }}</span>
+            </div>
+            {% endif %}
+            {% if draft.father_name %}
+            <div class="review-row">
+                <span class="label">Majina ya Baba</span>
+                <span class="value">{{ draft.father_name }}</span>
+            </div>
+            {% endif %}
+            {% if draft.mother_name %}
+            <div class="review-row">
+                <span class="label">Majina ya Mama</span>
+                <span class="value">{{ draft.mother_name }}</span>
+            </div>
+            {% endif %}
+            <div class="review-row">
+                <span class="label">Simu</span>
+                <span class="value">{{ draft.phone1 or draft.phone }}</span>
+            </div>
+
+        {# ========== JINA LA BIASHARA ========== #}
+        {% elif draft.service_type == 'business_name' %}
+
+            <div class="review-row">
+                <span class="label">NIDA Number</span>
+                <span class="value">{{ draft.nida_number }}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Jina la Biashara</span>
+                <span class="value">{{ draft.business_name }}</span>
+            </div>
+            {% if draft.email %}
+            <div class="review-row">
+                <span class="label">Email</span>
+                <span class="value">{{ draft.email }}</span>
+            </div>
+            {% endif %}
+            <div class="review-row">
+                <span class="label">Phone</span>
+                <span class="value">{{ draft.phone1 or draft.phone }}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Majina Yako Matatu</span>
+                <span class="value">{{ draft.full_name }}</span>
+            </div>
+
+        {# ========== FALLBACK ========== #}
+        {% else %}
+            <div class="review-row">
+                <span class="label">Jina</span>
+                <span class="value">{{ draft.full_name }}</span>
+            </div>
+            <div class="review-row">
+                <span class="label">Simu</span>
+                <span class="value">{{ draft.phone1 or draft.phone }}</span>
+            </div>
         {% endif %}
     </div>
 
     <div class="price-box">
         <div class="muted" style="font-size:12px;">Kiasi cha kulipa</div>
-        <div class="amount">TSh {{ "{:,}".format(draft.price) }}</div>
+        <div class="amount">TSh {{ "{:,}".format(draft.price or 0) }}</div>
     </div>
 
     <form method="POST" action="{{ url_for('nakala_pay') }}">
@@ -125,11 +503,10 @@
                 Utapokea popup ya kuweka PIN ili kukamilisha malipo.
             </p>
             <button type="submit" class="btn orange" style="margin-top:14px;">
-                Lipia & Tuma kwa Admin
+                Lipia &amp; Tuma kwa Admin
             </button>
         </div>
     </form>
-
     <a href="{{ url_for('nakala') }}" class="btn" style="background:#eee; color:#333; margin-top:10px; display:block; text-align:center;">
         Rudi Nyuma
     </a>

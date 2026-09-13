@@ -3065,7 +3065,10 @@ def dashboard():
         .all()
     )
     chat_threads = []
-    chat_unread = 0
+    # Hesabu ujumbe wa mteja ambao admin HAJASOMA (is_read=False)
+    chat_unread = (
+        Message.query.filter_by(sender="customer", is_read=False).count()
+    )
     for u, last_at, msg_count in chat_rows:
         last_msg = (
             Message.query.filter_by(user_id=u.id)
@@ -3075,12 +3078,14 @@ def dashboard():
         last_text = ""
         last_sender = ""
         unread = False
+        unread_count = 0
         if last_msg:
             last_text = (last_msg.message or ("[Picha]" if last_msg.image else "—"))[:100]
             last_sender = last_msg.sender or ""
-            unread = last_sender == "customer"
-            if unread:
-                chat_unread += 1
+            unread_count = (
+                Message.query.filter_by(user_id=u.id, sender="customer", is_read=False).count()
+            )
+            unread = unread_count > 0
         chat_threads.append({
             "user": u,
             "last_at": last_at,
@@ -3088,6 +3093,7 @@ def dashboard():
             "last_message": last_text,
             "last_sender": last_sender,
             "unread_from_customer": unread,
+            "unread_count": unread_count,
         })
 
     return render_template(
@@ -3275,6 +3281,25 @@ def admin_user_orders_csv(user_id):
 
 
 
+
+@app.route("/admin/agency/<int:application_id>", methods=["GET"])
+@admin_required
+def admin_agency_detail(application_id):
+    """Ukurasa kamili wa ombi la Uwakala — taarifa, files, badilisha status."""
+    application = Application.query.get_or_404(application_id)
+    extra = {}
+    if getattr(application, "extra_data", None):
+        try:
+            extra = json.loads(application.extra_data) if isinstance(application.extra_data, str) else (application.extra_data or {})
+        except Exception:
+            extra = {}
+    return render_template(
+        "admin_agency_detail.html",
+        application=application,
+        extra=extra,
+    )
+
+
 @app.route("/admin/agency/status/<int:application_id>", methods=["POST"])
 @admin_required
 def update_agency_status(application_id):
@@ -3313,7 +3338,7 @@ def update_agency_status(application_id):
     except Exception as e:
         print(f"agency status push: {e}")
     flash("Status imehifadhiwa.", "success")
-    return redirect(url_for("dashboard"))
+    return redirect(url_for("admin_agency_detail", application_id=application.id))
 
 
 @app.route("/admin/agency/chat/<int:application_id>", methods=["GET", "POST"])
@@ -3478,7 +3503,6 @@ def admin_nakala_detail(req_id):
         "admin_nakala_detail.html",
         req=req,
         extra=extra,
-        current_user=current_user,
     )
 
 

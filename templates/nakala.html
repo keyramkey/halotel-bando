@@ -98,7 +98,7 @@
 <header class="topbar">
     <div>
         <div class="brand">Nakala</div>
-        <div class="muted">TIN · Leseni · NIDA</div>
+        <div class="muted">TIN · Leseni · NIDA · Cheti · Biashara</div>
     </div>
     <a href="{{ url_for('home') }}" class="icon-btn">←</a>
 </header>
@@ -137,6 +137,26 @@
                 <p>Ombi la nakala ya kitambulisho cha taifa</p>
             </div>
             <div class="nk-price">TSh 3,000</div>
+            <div class="nk-arrow">›</div>
+        </a>
+
+        <a class="nk-card" href="{{ url_for('nakala_cheti_menu') }}">
+            <div class="nk-icon" style="background:#fce4ec;">📜</div>
+            <div class="nk-body">
+                <h3>Cheti Cha Kuzaliwa / Kifo</h3>
+                <p>Usajili · Uhakiki wa cheti</p>
+            </div>
+            <div class="nk-price">kutoka 9,000</div>
+            <div class="nk-arrow">›</div>
+        </a>
+
+        <a class="nk-card" href="{{ url_for('nakala_business_name') }}">
+            <div class="nk-icon" style="background:#ede7f6;">🏷️</div>
+            <div class="nk-body">
+                <h3>Usajili wa Jina la Biashara</h3>
+                <p>Sajili jina la biashara — bei inclusive</p>
+            </div>
+            <div class="nk-price">TSh 45,000</div>
             <div class="nk-arrow">›</div>
         </a>
     </div>

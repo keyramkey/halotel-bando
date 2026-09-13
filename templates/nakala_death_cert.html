@@ -3,44 +3,218 @@
 {% block content %}
 <style>
     .f-wrap { max-width: 640px; margin: 0 auto; }
-    .f-card {
-        background: #fff; border-radius: 16px; border: 1px solid #eee;
-        padding: 16px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.04);
-    }
-    .f-card h3 {
-        margin: 0 0 12px; font-size: 14px; font-weight: 800; color: #222;
-        display: flex; align-items: center; gap: 8px;
-    }
-    .f-card h3 .ico {
-        width: 28px; height: 28px; border-radius: 8px; background: #fff3e8;
-        color: #f56b00; display: grid; place-items: center; font-size: 13px;
-    }
-    .hint {
-        background: #fff8f0; border: 1px solid #ffe0c2; border-radius: 12px;
-        padding: 10px 12px; font-size: 12px; color: #a65c00; margin-bottom: 14px; line-height: 1.45;
-    }
-    label { display: block; font-size: 12px; font-weight: 700; color: #666; margin: 10px 0 4px; }
-    .req { color: #e74c3c; }
-    input, select, textarea {
-        width: 100%; padding: 12px 14px; border: 1.5px solid #eee; border-radius: 12px;
-        font-size: 14px; background: #fafafa; box-sizing: border-box;
-    }
-    .file-box {
-        border: 1.5px dashed #ffc999; border-radius: 12px; padding: 12px;
-        background: #fff8f0; margin-top: 6px;
-    }
-    .file-box input[type=file] { font-size: 13px; background: transparent; border: none; padding: 4px 0; }
     .price-bar {
-        background: linear-gradient(135deg, #fff3e8, #fff8f0); border: 1px solid #ffd0b0;
-        border-radius: 14px; padding: 14px; margin-bottom: 14px; text-align: center;
+        background: linear-gradient(135deg, #fff3e8, #fff8f0);
+        border: 1px solid #ffd0b0;
+        border-radius: 14px;
+        padding: 14px;
+        margin-bottom: 14px;
+        text-align: center;
     }
     .price-bar strong { font-size: 18px; color: #e65100; }
-    .btn-submit {
-        width: 100%; padding: 14px; border: none; border-radius: 14px;
-        background: linear-gradient(135deg, #f56b00, #e85d04); color: #fff;
-        font-weight: 800; font-size: 15px; cursor: pointer; margin-top: 8px;
+    .hint {
+        background: #fff8f0;
+        border: 1px solid #ffe0c2;
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 12px;
+        color: #a65c00;
+        margin-bottom: 14px;
+        line-height: 1.45;
     }
+    .f-card {
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid #eee;
+        padding: 14px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.03);
+    }
+    .panel-title {
+        font-size: 13.5px;
+        font-weight: 800;
+        color: #222;
+        margin: 0 0 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .panel-title .num {
+        width: 28px; height: 28px;
+        border-radius: 8px;
+        background: #fff3e8;
+        color: #f56b00;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+    }
+    .panel-title .num svg { width: 15px; height: 15px; }
+    .field { margin-bottom: 13px; }
+    .field label {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #444;
+        margin-bottom: 5px;
+    }
+    .field label .req { color: #e53935; }
+    .field .input {
+        width: 100%;
+        padding: 12px 13px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 11px;
+        font-size: 14.5px;
+        background: #fafafa;
+        box-sizing: border-box;
+        outline: none;
+    }
+    .field .input:focus { border-color: #f56b00; background: #fff; }
+    .file-box {
+        border: 1.5px dashed #ffc999;
+        border-radius: 12px;
+        padding: 12px;
+        background: #fff8f0;
+        margin-top: 4px;
+    }
+    .file-box input[type=file] {
+        font-size: 13px;
+        background: transparent;
+        border: none;
+        padding: 4px 0;
+        width: 100%;
+    }
+    .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .chip {
+        flex: 1;
+        min-width: 90px;
+        text-align: center;
+        padding: 12px 10px;
+        border-radius: 11px;
+        border: 1.5px solid #e8e8e8;
+        background: #fafafa;
+        font-size: 13px;
+        font-weight: 700;
+        color: #555;
+        cursor: pointer;
+        user-select: none;
+    }
+    .chip.active {
+        background: linear-gradient(135deg, #f56b00, #e85d04);
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 3px 10px rgba(245, 107, 0, 0.28);
+    }
+    .loc-list {
+        max-height: 220px;
+        overflow-y: auto;
+        border-radius: 12px;
+        border: 1px solid #f0f0f0;
+        background: #fcfcfc;
+        margin-top: 6px;
+        scrollbar-width: none;
+    }
+    .loc-list::-webkit-scrollbar { display: none; }
+    .loc-item {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        padding: 11px 13px;
+        border-bottom: 1px solid #f3f3f3;
+        cursor: pointer;
+    }
+    .loc-item.visible { display: flex; }
+    .loc-item:last-child { border-bottom: none; }
+    .loc-item:hover { background: #fff8f3; }
+    .loc-item.selected {
+        background: linear-gradient(90deg, #fff3e8, #fff);
+        box-shadow: inset 3px 0 0 #f56b00;
+    }
+    .loc-item .dot {
+        width: 18px; height: 18px;
+        border-radius: 50%;
+        border: 2px solid #ddd;
+        flex-shrink: 0;
+        display: grid;
+        place-items: center;
+    }
+    .loc-item.selected .dot {
+        border-color: #f56b00;
+        background: #f56b00;
+    }
+    .loc-item.selected .dot::after {
+        content: '';
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: #fff;
+    }
+    .loc-item .name { font-size: 13px; font-weight: 700; color: #222; }
+    .loc-picked {
+        display: none;
+        margin-top: 8px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: #fff8f0;
+        border: 1px solid #ffe0c2;
+        font-size: 13px;
+        font-weight: 700;
+        color: #e65100;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+    }
+    .loc-picked.show { display: flex; }
+    .loc-picked button {
+        border: 1px solid #ffcc80;
+        background: #fff;
+        color: #e65100;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 5px 10px;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .loc-block { margin-bottom: 14px; }
+    .loc-block .search-wrap { margin-bottom: 6px; position: relative; }
+    .loc-block.done .loc-list,
+    .loc-block.done .search-wrap { display: none !important; }
+    .search-wrap input {
+        width: 100%;
+        padding: 11px 12px 11px 38px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 11px;
+        font-size: 13.5px;
+        background: #f9f9f9;
+        box-sizing: border-box;
+        outline: none;
+    }
+    .search-wrap input:focus { border-color: #f56b00; background: #fff; }
+    .search-wrap .icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 16px; height: 16px;
+        opacity: 0.45;
+        pointer-events: none;
+    }
+    .search-wrap .icon svg { width: 16px; height: 16px; }
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f56b00, #e85d04);
+        color: #fff;
+        font-weight: 800;
+        font-size: 14.5px;
+        cursor: pointer;
+        margin-top: 6px;
+        box-shadow: 0 5px 14px rgba(245, 107, 0, 0.3);
+    }
+    .btn-submit:active { transform: scale(0.98); }
+    .date-hint { font-size: 11px; color: #999; margin-top: 4px; font-weight: 500; }
 </style>
+
 <header class="topbar">
     <div>
         <div class="brand">Cheti cha Kifo</div>
@@ -48,6 +222,7 @@
     </div>
     <a href="{{ url_for('nakala_cheti_menu') }}" class="icon-btn">←</a>
 </header>
+
 <div class="page f-wrap">
     <div class="price-bar">
         Ada ya huduma: <strong>TSh {{ "{:,}".format(price) }}</strong> (inclusive)
@@ -56,65 +231,340 @@
         Umechagua: <strong>Usajili wa Cheti cha Kifo</strong>. Andika taarifa kwa umakini.
         Unaweza kupiga picha au kupakia faili za viambatanisho.
     </div>
-    <form method="POST" enctype="multipart/form-data">
+
+    <form method="POST" enctype="multipart/form-data" id="deathForm">
+        <input type="hidden" name="death_place_type" id="death_place_type" value="">
+        <input type="hidden" name="residence" id="residence" value="">
+        <input type="hidden" name="death_place_area" id="death_place_area" value="">
+        <input type="hidden" name="informant_address" id="informant_address" value="">
+
+        <!-- A. MAREHEMU -->
         <div class="f-card">
-            <h3><span class="ico">A</span> Taarifa za Aliyefariki</h3>
-            <label>Majina kamili <span class="req">*</span></label>
-            <input name="deceased_name" required>
-            <label>Tarehe ya kuzaliwa</label>
-            <input type="date" name="deceased_dob">
-            <label>Tarehe ya kufariki <span class="req">*</span></label>
-            <input type="date" name="death_date" required>
-            <label>Makazi (Mkoa, Wilaya, Kata, Mtaa)</label>
-            <input name="residence" placeholder="Mfano: Kariakoo, Ilala, Dar es Salaam">
-            <label>Eneo kifo kilipotokea (Mkoa, Wilaya, Kata, Mtaa)</label>
-            <input name="death_place_area">
-            <label>Chanzo / Sababu ya kifo</label>
-            <input name="death_cause">
-            <label>Sehemu kifo kilipotokea</label>
-            <select name="death_place_type">
-                <option value="">— Chagua —</option>
-                <option value="Nyumbani">Nyumbani</option>
-                <option value="Hospitali">Hospitali</option>
-                <option value="Kwingine">Kwingine</option>
-            </select>
+            <div class="panel-title">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                A. Taarifa za Aliyefariki
+            </div>
+            <div class="field">
+                <label>Majina kamili <span class="req">*</span></label>
+                <input class="input" name="deceased_name" required placeholder="Majina matatu">
+            </div>
+            <div class="field">
+                <label>Tarehe ya kuzaliwa</label>
+                <input class="input" name="deceased_dob" placeholder="Mfano: 15/03/1950" autocomplete="off">
+                <div class="date-hint">Andika tarehe mwenyewe (siku/mwezi/mwaka)</div>
+            </div>
+            <div class="field">
+                <label>Tarehe ya kufariki <span class="req">*</span></label>
+                <input class="input" name="death_date" required placeholder="Mfano: 10/01/2026" autocomplete="off">
+                <div class="date-hint">Andika tarehe mwenyewe</div>
+            </div>
+            <div class="field">
+                <label>Chanzo / Sababu ya kifo</label>
+                <input class="input" name="death_cause" placeholder="Sababu ya kifo">
+            </div>
+            <div class="field">
+                <label>Sehemu kifo kilipotokea</label>
+                <div class="chip-row">
+                    <div class="chip" data-val="Nyumbani" onclick="pickPlaceType(this)">Nyumbani</div>
+                    <div class="chip" data-val="Hospitali" onclick="pickPlaceType(this)">Hospitali</div>
+                    <div class="chip" data-val="Kwingine" onclick="pickPlaceType(this)">Kwingine</div>
+                </div>
+            </div>
+
+            <div class="panel-title" style="margin-top:8px;">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                Makazi ya Marehemu
+            </div>
+            <div id="locRes"></div>
+
+            <div class="panel-title" style="margin-top:8px;">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                Eneo kifo kilipotokea
+            </div>
+            <div id="locDeath"></div>
         </div>
 
+        <!-- B. WAZAZI -->
         <div class="f-card">
-            <h3><span class="ico">B</span> Taarifa za Wazazi wa Marehemu</h3>
-            <label>Majina matatu ya Mama</label>
-            <input name="mother_name">
-            <label>Majina kamili ya Baba</label>
-            <input name="father_name">
+            <div class="panel-title">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                </span>
+                B. Taarifa za Wazazi wa Marehemu
+            </div>
+            <div class="field">
+                <label>Majina matatu ya Mama</label>
+                <input class="input" name="mother_name" placeholder="Majina ya mama">
+            </div>
+            <div class="field">
+                <label>Majina kamili ya Baba</label>
+                <input class="input" name="father_name" placeholder="Majina ya baba">
+            </div>
         </div>
 
+        <!-- C. MTOA TAARIFA -->
         <div class="f-card">
-            <h3><span class="ico">C</span> Taarifa za Mtoa Taarifa (Wewe / Ndugu)</h3>
-            <label>Majina kamili <span class="req">*</span></label>
-            <input name="full_name" required>
-            <label>Namba ya simu <span class="req">*</span></label>
-            <input name="phone" type="tel" required placeholder="07XXXXXXXX">
-            <label>Kazi yako</label>
-            <input name="occupation">
-            <label>Unapoishi (Mkoa, Wilaya, Kata, Mtaa)</label>
-            <input name="informant_address">
+            <div class="panel-title">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                </span>
+                C. Taarifa za Mtoa Taarifa (Wewe / Ndugu)
+            </div>
+            <div class="field">
+                <label>Majina kamili <span class="req">*</span></label>
+                <input class="input" name="full_name" required placeholder="Majina matatu">
+            </div>
+            <div class="field">
+                <label>Namba ya simu <span class="req">*</span></label>
+                <input class="input" name="phone" type="tel" required placeholder="07XXXXXXXX">
+            </div>
+            <div class="field">
+                <label>Kazi yako</label>
+                <input class="input" name="occupation" placeholder="Kazi">
+            </div>
+            <div class="panel-title" style="margin-top:8px;">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </span>
+                Unapoishi
+            </div>
+            <div id="locInfo"></div>
         </div>
 
+        <!-- D. DOCUMENTS -->
         <div class="f-card">
-            <h3><span class="ico">D</span> Nakala / Viambatanisho</h3>
-            <label>1. Kibali cha mazishi (kutoka kituo cha tiba)</label>
-            <div class="file-box"><input type="file" name="burial_permit" accept="image/*,application/pdf" capture="environment"></div>
-            <label>2. Muhtasari wa kikao + barua ya msimamizi wa mirathi</label>
-            <div class="file-box"><input type="file" name="family_minutes" accept="image/*,application/pdf"></div>
-            <label>3. Kadi ya kupigia kura / NIDA ya marehemu</label>
-            <div class="file-box"><input type="file" name="deceased_id" accept="image/*,application/pdf"></div>
-            <label>4. Kitambulisho cha msimamizi wa mirathi</label>
-            <div class="file-box"><input type="file" name="admin_id" accept="image/*,application/pdf"></div>
-            <label>5. Cheti cha ndoa au vyeti vya watoto</label>
-            <div class="file-box"><input type="file" name="marriage_or_children" accept="image/*,application/pdf"></div>
+            <div class="panel-title">
+                <span class="num">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+                </span>
+                D. Nakala / Viambatanisho
+            </div>
+            <div class="field">
+                <label>1. Kibali cha mazishi (kutoka kituo cha tiba)</label>
+                <div class="file-box"><input type="file" name="burial_permit" accept="image/*,application/pdf" capture="environment"></div>
+            </div>
+            <div class="field">
+                <label>2. Muhtasari wa kikao + barua ya msimamizi wa mirathi</label>
+                <div class="file-box"><input type="file" name="family_minutes" accept="image/*,application/pdf"></div>
+            </div>
+            <div class="field">
+                <label>3. Kadi ya kupigia kura / NIDA ya marehemu</label>
+                <div class="file-box"><input type="file" name="deceased_id" accept="image/*,application/pdf"></div>
+            </div>
+            <div class="field">
+                <label>4. Kitambulisho cha msimamizi wa mirathi</label>
+                <div class="file-box"><input type="file" name="admin_id" accept="image/*,application/pdf"></div>
+            </div>
+            <div class="field">
+                <label>5. Cheti cha ndoa au vyeti vya watoto</label>
+                <div class="file-box"><input type="file" name="marriage_or_children" accept="image/*,application/pdf"></div>
+            </div>
         </div>
 
-        <button class="btn-submit" type="submit">Endelea — Hakiki Taarifa</button>
+        <button class="btn-submit" type="submit" onclick="return validateDeath()">
+            Endelea — Hakiki Taarifa
+        </button>
     </form>
 </div>
+
+<script src="{{ url_for('static', filename='tz_locations.js') }}"></script>
+<script>
+function pickPlaceType(el) {
+    document.querySelectorAll('.chip').forEach(function(c){ c.classList.remove('active'); });
+    el.classList.add('active');
+    document.getElementById('death_place_type').value = el.dataset.val;
+}
+
+var ROOT = (window.TZ_LOCATIONS && window.TZ_LOCATIONS.regions) || window.TZ_LOCATIONS || {};
+var SEARCH_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>';
+
+/* Store location state for combined address fields */
+var LOC = {
+    res: { mkoa:'', wilaya:'', kata:'', mtaa:'' },
+    death: { mkoa:'', wilaya:'', kata:'', mtaa:'' },
+    info: { mkoa:'', wilaya:'', kata:'', mtaa:'' }
+};
+
+function joinLoc(st) {
+    return [st.mtaa, st.kata, st.wilaya, st.mkoa].filter(Boolean).join(', ');
+}
+
+function syncAddresses() {
+    document.getElementById('residence').value = joinLoc(LOC.res);
+    document.getElementById('death_place_area').value = joinLoc(LOC.death);
+    document.getElementById('informant_address').value = joinLoc(LOC.info);
+}
+
+function buildLocUI(containerId, key) {
+    var host = document.getElementById(containerId);
+    if (!host) return;
+    var levels = ['mkoa','wilaya','kata','mtaa'];
+    var state = LOC[key];
+    var ids = {};
+    var labels = { mkoa: 'Mkoa', wilaya: 'Wilaya', kata: 'Kata', mtaa: 'Mtaa / Kijiji' };
+
+    levels.forEach(function(level, idx) {
+        var block = document.createElement('div');
+        block.className = 'loc-block';
+        if (idx > 0) block.style.display = 'none';
+        block.innerHTML =
+            '<label style="font-size:12.5px;font-weight:700;color:#444;">' + labels[level] +
+            (idx === 0 ? ' <span style="color:#e53935;">*</span>' : '') + '</label>' +
+            '<div class="search-wrap"><span class="icon">' + SEARCH_SVG + '</span>' +
+            '<input type="text" placeholder="Tafuta ' + labels[level].toLowerCase() + '..."></div>' +
+            '<div class="loc-list"></div>' +
+            '<div class="loc-picked"><span></span><button type="button">Badilisha</button></div>';
+        host.appendChild(block);
+        ids[level] = {
+            block: block,
+            list: block.querySelector('.loc-list'),
+            search: block.querySelector('input'),
+            picked: block.querySelector('.loc-picked'),
+            searchWrap: block.querySelector('.search-wrap')
+        };
+        ids[level].picked.querySelector('button').addEventListener('click', function() {
+            clearFrom(level);
+        });
+        ids[level].search.addEventListener('input', function() {
+            filterList(ids[level].list, this.value);
+        });
+    });
+
+    function filterList(listEl, q) {
+        q = (q || '').toLowerCase().trim();
+        listEl.querySelectorAll('.loc-item').forEach(function(item) {
+            item.classList.toggle('visible', !q || (item.dataset.search || '').indexOf(q) !== -1);
+        });
+    }
+
+    function fillList(listEl, items, onPick) {
+        listEl.innerHTML = '';
+        listEl.style.display = '';
+        (items || []).forEach(function(name) {
+            var div = document.createElement('div');
+            div.className = 'loc-item visible';
+            div.dataset.search = name.toLowerCase();
+            div.innerHTML = '<div class="dot"></div><div class="name"></div>';
+            div.querySelector('.name').textContent = name;
+            div.addEventListener('click', function() {
+                listEl.querySelectorAll('.loc-item').forEach(function(i){ i.classList.remove('selected'); });
+                div.classList.add('selected');
+                onPick(name);
+            });
+            listEl.appendChild(div);
+        });
+    }
+
+    function markPicked(level, name) {
+        var o = ids[level];
+        o.block.classList.add('done');
+        o.picked.classList.add('show');
+        o.picked.querySelector('span').textContent = name;
+        o.list.style.display = 'none';
+        o.searchWrap.style.display = 'none';
+    }
+
+    function showLevel(level) {
+        var o = ids[level];
+        if (!o) return;
+        o.block.style.display = 'block';
+        o.block.classList.remove('done');
+        o.picked.classList.remove('show');
+        o.list.style.display = '';
+        o.searchWrap.style.display = '';
+        o.search.value = '';
+    }
+
+    function hideFrom(startIdx) {
+        for (var i = startIdx; i < levels.length; i++) {
+            var lv = levels[i];
+            ids[lv].block.style.display = 'none';
+            ids[lv].block.classList.remove('done');
+            ids[lv].picked.classList.remove('show');
+            state[lv] = '';
+        }
+    }
+
+    function clearFrom(level) {
+        var idx = levels.indexOf(level);
+        state[level] = '';
+        for (var i = idx + 1; i < levels.length; i++) state[levels[i]] = '';
+        showLevel(level);
+        hideFrom(idx + 1);
+        if (level === 'mkoa') fillList(ids.mkoa.list, Object.keys(ROOT).sort(), onMkoa);
+        else if (level === 'wilaya') fillList(ids.wilaya.list, Object.keys(ROOT[state.mkoa] || {}).sort(), onWilaya);
+        else if (level === 'kata') fillList(ids.kata.list, Object.keys((ROOT[state.mkoa] || {})[state.wilaya] || {}).sort(), onKata);
+        else if (level === 'mtaa') setupMtaa();
+        syncAddresses();
+    }
+
+    function setupMtaa() {
+        var streets = ((ROOT[state.mkoa] || {})[state.wilaya] || {})[state.kata] || [];
+        streets = streets.filter(function(s){ return s && String(s).trim(); });
+        if (streets.length) {
+            ids.mtaa.search.placeholder = 'Tafuta mtaa...';
+            ids.mtaa.search.oninput = function(){ filterList(ids.mtaa.list, this.value); };
+            fillList(ids.mtaa.list, streets, onMtaa);
+        } else {
+            ids.mtaa.list.innerHTML = '';
+            ids.mtaa.list.style.display = 'none';
+            ids.mtaa.search.placeholder = 'Andika jina la mtaa...';
+            ids.mtaa.search.oninput = function() {
+                state.mtaa = (this.value || '').trim();
+                syncAddresses();
+                if (state.mtaa) markPicked('mtaa', state.mtaa);
+            };
+        }
+    }
+
+    function onMkoa(name) {
+        state.mkoa = name; state.wilaya = state.kata = state.mtaa = '';
+        markPicked('mkoa', name);
+        showLevel('wilaya');
+        fillList(ids.wilaya.list, Object.keys(ROOT[name] || {}).sort(), onWilaya);
+        hideFrom(2);
+        syncAddresses();
+    }
+    function onWilaya(name) {
+        state.wilaya = name; state.kata = state.mtaa = '';
+        markPicked('wilaya', name);
+        showLevel('kata');
+        fillList(ids.kata.list, Object.keys((ROOT[state.mkoa] || {})[name] || {}).sort(), onKata);
+        hideFrom(3);
+        syncAddresses();
+    }
+    function onKata(name) {
+        state.kata = name; state.mtaa = '';
+        markPicked('kata', name);
+        showLevel('mtaa');
+        setupMtaa();
+        syncAddresses();
+    }
+    function onMtaa(name) {
+        state.mtaa = name;
+        markPicked('mtaa', name);
+        syncAddresses();
+    }
+
+    fillList(ids.mkoa.list, Object.keys(ROOT).sort(), onMkoa);
+}
+
+buildLocUI('locRes', 'res');
+buildLocUI('locDeath', 'death');
+buildLocUI('locInfo', 'info');
+
+function validateDeath() {
+    if (!document.getElementById('residence').value) {
+        alert('Chagua makazi ya marehemu (angalau mkoa).');
+        return false;
+    }
+    return true;
+}
+</script>
 {% endblock %}

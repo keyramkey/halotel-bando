@@ -1,0 +1,451 @@
+{% extends "base.html" %}
+{% block title %}{{ req.request_code }} · Nakala{% endblock %}
+{% block content %}
+<style>
+    .ad-wrap { max-width: 720px; margin: 0 auto; }
+    .ad-hero {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+    .ad-code { font-size: 18px; font-weight: 900; color: #111; letter-spacing: -0.3px; }
+    .ad-meta { font-size: 12px; color: #888; margin-top: 4px; line-height: 1.45; }
+    .ad-status-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+    .ad-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.03);
+    }
+    .ad-card h3 {
+        margin: 0 0 12px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #f56b00;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .ad-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f3f3f3;
+        font-size: 13px;
+    }
+    .ad-row:last-child { border-bottom: none; }
+    .ad-lbl { color: #888; font-weight: 600; max-width: 42%; flex-shrink: 0; }
+    .ad-val {
+        text-align: right;
+        font-weight: 700;
+        color: #222;
+        word-break: break-word;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        flex-wrap: wrap;
+        max-width: 58%;
+    }
+    .cp {
+        border: none;
+        background: #f0f0f0;
+        border-radius: 6px;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 800;
+        color: #666;
+        cursor: pointer;
+    }
+    .cp.ok { background: #e8f5e9; color: #2e7d32; }
+    .doc-grid { display: grid; gap: 8px; }
+    .doc-a {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 14px;
+        background: #fff8f0;
+        border: 1px solid #ffe0c2;
+        border-radius: 12px;
+        text-decoration: none;
+        color: #e65100;
+        font-size: 13px;
+        font-weight: 700;
+    }
+    .doc-a span { color: #999; font-size: 11px; font-weight: 600; }
+    .flash-ok {
+        background: #e8f5e9;
+        border: 1px solid #a5d6a7;
+        color: #1b5e20;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 12px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+    .field { margin-bottom: 12px; }
+    .field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    .field .input, .field select.input, .field textarea.input {
+        width: 100%;
+        padding: 12px 13px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 11px;
+        font-size: 14px;
+        background: #fafafa;
+        box-sizing: border-box;
+        outline: none;
+    }
+    .field .input:focus, .field select.input:focus, .field textarea.input:focus {
+        border-color: #f56b00;
+        background: #fff;
+    }
+    .field textarea.input { min-height: 80px; resize: vertical; }
+    .btn-save {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f56b00, #e85d04);
+        color: #fff;
+        font-weight: 800;
+        font-size: 15px;
+        cursor: pointer;
+        box-shadow: 0 5px 14px rgba(245, 107, 0, 0.28);
+    }
+    .btn-back {
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+        padding: 12px;
+        border-radius: 12px;
+        background: #f2f2f2;
+        color: #444;
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 13px;
+    }
+    .status.awaiting_payment, .status.wait-pay { background:#fff3e0; color:#e65100; border:1px solid #ffcc80; }
+    .status.paid { background:#e8f5e9; color:#2e7d32; border:1px solid #a5d6a7; }
+    .status.payment-failed, .status.pay-fail { background:#fce4ec; color:#c62828; border:1px solid #ef9a9a; }
+</style>
+
+<header class="topbar">
+    <div>
+        <div class="brand">Nakala · Admin</div>
+        <div class="muted">{{ req.request_code }}</div>
+    </div>
+    <a href="{{ url_for('dashboard') }}#nakala" class="icon-btn">←</a>
+</header>
+
+<div class="page ad-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for cat, msg in messages %}
+        <div class="flash-ok">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% set xd = extra if extra is defined else {} %}
+
+    <div class="ad-hero">
+        <div class="ad-code">{{ req.request_code }}</div>
+        <div class="ad-meta">
+            {% if req.service_type == 'tin' %}TIN Number
+            {% elif req.service_type == 'license' %}Leseni ya Biashara{% if req.license_type %} · {{ req.license_type }}{% endif %}
+            {% elif req.service_type == 'nida' %}Online Copy NIDA
+            {% elif req.service_type == 'birth_cert' %}Cheti cha Kuzaliwa
+            {% elif req.service_type == 'death_cert' %}Cheti cha Kifo
+            {% elif req.service_type == 'cert_verify' %}Uhakiki wa Cheti
+            {% elif req.service_type == 'business_name' %}Usajili wa Jina la Biashara
+            {% else %}{{ req.service_type }}{% endif %}
+            · Ada <strong>TSh {{ "{:,}".format(req.price or 0) }}</strong>
+            <br>
+            Muda: {{ to_dar_es_salaam(req.created_at) }} (Dar)
+            {% if req.control_expires_at %}
+            · Control inaisha: {{ to_dar_es_salaam(req.control_expires_at) }}
+            {% endif %}
+        </div>
+        <div class="ad-status-row">
+            {% if req.status == "awaiting_payment" %}<span class="status wait-pay">Inasubiri Malipo</span>
+            {% elif req.status == "payment_failed" %}<span class="status pay-fail">Malipo Yameshindwa</span>
+            {% elif req.status == "pending" %}<span class="status pending">Inasubiri</span>
+            {% elif req.status == "paid" %}<span class="status paid">Imelipwa</span>
+            {% elif req.status == "processing" %}<span class="status processing">Inachakatwa</span>
+            {% elif req.status == "waiting_control_number" %}<span class="status processing">Inasubiri Control</span>
+            {% elif req.status == "control_issued" %}<span class="status pending">Control Imetolewa</span>
+            {% elif req.status == "completed" %}<span class="status completed">Imekamilika</span>
+            {% elif req.status == "rejected" %}<span class="status rejected">Imekataliwa</span>
+            {% else %}<span class="status rejected">{{ req.status }}</span>{% endif %}
+        </div>
+    </div>
+
+    {# ---- TAARIFA ---- #}
+    <div class="ad-card">
+        <h3>Taarifa za Ombi</h3>
+
+        {% macro row(label, value) -%}
+        {% if value is not none and value != '' and value != '—' %}
+        <div class="ad-row">
+            <span class="ad-lbl">{{ label }}</span>
+            <span class="ad-val">
+                <span>{{ value }}</span>
+                <button type="button" class="cp" onclick="cp(this, {{ value|tojson }})">Nakili</button>
+            </span>
+        </div>
+        {% endif %}
+        {%- endmacro %}
+
+        {% if req.service_type in ['tin', 'nida', 'license'] %}
+            {{ row('Jina Kamili', req.full_name) }}
+            {{ row('Mama', req.mother_name) }}
+            {{ row('NIDA / NIN', req.nida_number) }}
+            {{ row('Simu 1', req.phone1) }}
+            {{ row('Simu 2', req.phone2) }}
+            {{ row('Shule ya Msingi', req.primary_school) }}
+            {{ row('Mwaka Kuhitimu', req.year_completed) }}
+            {{ row('Wilaya (Shule)', req.school_district) }}
+            {{ row('Mkoa (Shule)', req.school_region) }}
+            {{ row('Wilaya (NIDA)', req.nida_reg_district) }}
+            {{ row('Mkoa (NIDA)', req.nida_reg_region) }}
+            {{ row('Mtaa (NIDA)', req.nida_reg_street) }}
+            {{ row('Simu Usajili NIDA', req.nida_reg_phone) }}
+            {{ row('Aina Leseni', req.license_type) }}
+            {{ row('Eneo Leseni', req.license_location) }}
+            {% if req.control_number_fee %}{{ row('Bei Control No.', 'TSh ' ~ '{:,}'.format(req.control_number_fee)) }}{% endif %}
+            {{ row('Control Number', req.control_number) }}
+
+        {% elif req.service_type == 'business_name' %}
+            {{ row('Majina', req.full_name) }}
+            {{ row('NIDA', xd.nida_number or req.nida_number) }}
+            {{ row('Jina la Biashara', xd.business_name) }}
+            {{ row('Email', xd.email) }}
+            {{ row('Simu', req.phone1) }}
+
+        {% elif req.service_type == 'birth_cert' %}
+            <div style="font-size:11px;font-weight:800;color:#888;margin:4px 0;">Muombaji</div>
+            {{ row('Majina', req.full_name) }}
+            {{ row('Jinsia', xd.gender) }}
+            {{ row('DOB', xd.dob) }}
+            {{ row('Simu', req.phone1) }}
+            {{ row('Kazi', xd.occupation) }}
+            {{ row('Anapoishi', [xd.street, xd.ward, xd.district, xd.region]|select|join(', ')) }}
+            <div style="font-size:11px;font-weight:800;color:#888;margin:10px 0 4px;">Mama</div>
+            {{ row('Majina', xd.mother_name or req.mother_name) }}
+            {{ row('DOB', xd.mother_dob) }}
+            {{ row('Simu', xd.mother_phone) }}
+            {{ row('Kazi', xd.mother_occupation) }}
+            {{ row('Anapoishi', [xd.mother_street, xd.mother_ward, xd.mother_district, xd.mother_region]|select|join(', ')) }}
+            <div style="font-size:11px;font-weight:800;color:#888;margin:10px 0 4px;">Baba</div>
+            {{ row('Majina', xd.father_name) }}
+            {{ row('DOB', xd.father_dob) }}
+            {{ row('Simu', xd.father_phone) }}
+            {{ row('Kazi', xd.father_occupation) }}
+            {{ row('Mkoa', xd.father_region) }}
+            <div style="font-size:11px;font-weight:800;color:#888;margin:10px 0 4px;">Eneo sasa</div>
+            {{ row('Mahali', [xd.curr_street, xd.curr_ward, xd.curr_district, xd.curr_region]|select|join(', ')) }}
+
+        {% elif req.service_type == 'death_cert' %}
+            <div style="font-size:11px;font-weight:800;color:#888;margin:4px 0;">Marehemu</div>
+            {{ row('Majina', xd.deceased_name) }}
+            {{ row('DOB', xd.deceased_dob) }}
+            {{ row('Tarehe Kifo', xd.death_date) }}
+            {{ row('Makazi', xd.residence) }}
+            {{ row('Eneo kifo', xd.death_place_area) }}
+            {{ row('Sababu', xd.death_cause) }}
+            {{ row('Sehemu', xd.death_place_type) }}
+            <div style="font-size:11px;font-weight:800;color:#888;margin:10px 0 4px;">Wazazi</div>
+            {{ row('Mama', xd.mother_name) }}
+            {{ row('Baba', xd.father_name) }}
+            <div style="font-size:11px;font-weight:800;color:#888;margin:10px 0 4px;">Mtoa Taarifa</div>
+            {{ row('Majina', req.full_name) }}
+            {{ row('Simu', req.phone1) }}
+            {{ row('Kazi', xd.occupation) }}
+            {{ row('Anapoishi', xd.informant_address) }}
+
+        {% elif req.service_type == 'cert_verify' %}
+            {{ row('Aina', 'Cheti cha Kifo' if xd.verify_type == 'death' else 'Cheti cha Kuzaliwa') }}
+            {{ row('Entry Number', xd.entry_number) }}
+            {{ row('Majina', req.full_name) }}
+            {{ row('Jinsia', xd.gender) }}
+            {{ row('Sehemu', xd.birth_place) }}
+            {{ row('Baba', xd.father_name) }}
+            {{ row('Mama', xd.mother_name) }}
+            {{ row('Simu', req.phone1) }}
+
+        {% else %}
+            {{ row('Jina', req.full_name) }}
+            {{ row('Simu', req.phone1) }}
+        {% endif %}
+
+        <button type="button" class="btn" style="width:100%;margin-top:10px;background:#333;color:#fff;"
+                onclick="cpAll()">📋 Nakili Taarifa Zote</button>
+        <div id="copyAll" style="position:absolute;left:-9999px;height:0;overflow:hidden;" aria-hidden="true">
+{% if req.service_type in ['tin','nida','license'] %}
+Jina: {{ req.full_name }}
+Mama: {{ req.mother_name }}
+NIDA: {{ req.nida_number }}
+Simu1: {{ req.phone1 }}{% if req.phone2 %}
+Simu2: {{ req.phone2 }}{% endif %}
+Shule: {{ req.primary_school }} ({{ req.year_completed }})
+Wilaya Shule: {{ req.school_district }} | Mkoa: {{ req.school_region }}
+Wilaya NIDA: {{ req.nida_reg_district }} | Mkoa: {{ req.nida_reg_region }}
+Mtaa: {{ req.nida_reg_street }}{% if req.license_type %}
+Leseni: {{ req.license_type }}{% endif %}{% if req.license_location %}
+Eneo: {{ req.license_location }}{% endif %}{% if req.control_number %}
+Control: {{ req.control_number }}{% endif %}
+{% elif req.service_type == 'business_name' %}
+Majina: {{ req.full_name }}
+NIDA: {{ xd.nida_number or req.nida_number }}
+Jina Biashara: {{ xd.business_name }}
+Email: {{ xd.email }}
+Simu: {{ req.phone1 }}
+{% elif req.service_type == 'birth_cert' %}
+Muombaji: {{ req.full_name }} | {{ xd.gender }} | {{ xd.dob }}
+Simu: {{ req.phone1 }}
+Mama: {{ xd.mother_name or req.mother_name }}
+Baba: {{ xd.father_name }}
+{% elif req.service_type == 'death_cert' %}
+Marehemu: {{ xd.deceased_name }} | Kifo: {{ xd.death_date }}
+Mtoa taarifa: {{ req.full_name }} | {{ req.phone1 }}
+{% else %}
+{{ req.full_name }} | {{ req.phone1 }}
+{% endif %}
+        </div>
+    </div>
+
+    {# ---- DOCUMENTS ---- #}
+    {% if xd.docs %}
+    <div class="ad-card">
+        <h3>Viambatanisho — Pakua</h3>
+        <div class="doc-grid">
+            {% set labels = {
+                'parent_id': 'Kitambulisho cha mzazi',
+                'applicant_id': 'Kitambulisho cha muombaji',
+                'id_front': 'Picha mbele',
+                'id_back': 'Picha nyuma',
+                'burial_permit': 'Kibali cha mazishi',
+                'family_minutes': 'Muhtasari / barua mirathi',
+                'deceased_id': 'Kitambulisho cha marehemu',
+                'admin_id': 'Kitambulisho cha msimamizi',
+                'marriage_or_children': 'Cheti ndoa / watoto'
+            } %}
+            {% for key, path in xd.docs.items() %}
+            {% if path %}
+            <a class="doc-a" href="{{ url_for('media_file', filename=path) }}" target="_blank" download>
+                📄 {{ labels.get(key, key) }}
+                <span>Fungua / Pakua</span>
+            </a>
+            {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if req.result_file %}
+    <div class="ad-card">
+        <h3>Faili ya Matokeo</h3>
+        <a class="doc-a" href="{{ url_for('media_file', filename=req.result_file) }}" target="_blank" download>
+            📎 {{ req.result_file }}
+            <span>Pakua</span>
+        </a>
+    </div>
+    {% endif %}
+
+    {# ---- UPDATE FORM ---- #}
+    <div class="ad-card">
+        <h3>Badilisha Hali / Tuma kwa Mteja</h3>
+        <form method="POST" action="{{ url_for('admin_nakala_update', req_id=req.id) }}" enctype="multipart/form-data">
+            <div class="field">
+                <label>Status</label>
+                <select class="input" name="status">
+                    <option value="pending" {% if req.status == "pending" %}selected{% endif %}>Inasubiri (pending)</option>
+                    <option value="awaiting_payment" {% if req.status == "awaiting_payment" %}selected{% endif %}>Inasubiri Malipo (ClickPesa)</option>
+                    <option value="payment_failed" {% if req.status == "payment_failed" %}selected{% endif %}>Malipo Yameshindwa</option>
+                    <option value="paid" {% if req.status == "paid" %}selected{% endif %}>Imelipwa</option>
+                    <option value="processing" {% if req.status == "processing" %}selected{% endif %}>Inachakatwa</option>
+                    <option value="waiting_control_number" {% if req.status == "waiting_control_number" %}selected{% endif %}>Inasubiri Control Number</option>
+                    <option value="control_issued" {% if req.status == "control_issued" %}selected{% endif %}>Control Number Imetolewa</option>
+                    <option value="completed" {% if req.status == "completed" %}selected{% endif %}>Imekamilika</option>
+                    <option value="rejected" {% if req.status == "rejected" %}selected{% endif %}>Imekataliwa</option>
+                </select>
+            </div>
+
+            {% if req.service_type == 'license' %}
+            <div class="field" style="background:#fff8f0;border:1px solid #ffe0c2;border-radius:12px;padding:12px;">
+                <label>Bei ya Control Number — TSh</label>
+                <input type="number" name="control_number_fee" class="input" min="0" step="1"
+                       value="{{ req.control_number_fee or 0 }}" placeholder="Mfano: 150000">
+                <label style="margin-top:10px;">Control Number</label>
+                <input type="text" name="control_number" class="input"
+                       value="{{ req.control_number or '' }}" placeholder="Weka control number">
+                <p class="muted" style="font-size:11px;margin-top:6px;">
+                    Inaisha baada ya siku 1 baada ya kuiweka.
+                    {% if req.control_expires_at %}<br>Inaisha: {{ to_dar_es_salaam(req.control_expires_at) }}{% endif %}
+                </p>
+            </div>
+            {% endif %}
+
+            <div class="field">
+                <label>Ujumbe / maelezo kwa mteja</label>
+                <textarea class="input" name="admin_note" placeholder="Ujumbe...">{{ req.admin_note or '' }}</textarea>
+            </div>
+            <div class="field">
+                <label>Matokeo (TIN, control number, maelezo)</label>
+                <textarea class="input" name="result_message" placeholder="Matokeo...">{{ req.result_message or '' }}</textarea>
+            </div>
+            <div class="field">
+                <label>Pakia leseni / matokeo (PDF au Picha)</label>
+                <input type="file" name="result_file" class="input" accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.bmp">
+            </div>
+
+            <button type="submit" class="btn-save">Hifadhi &amp; Tuma kwa Mteja</button>
+        </form>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}#nakala" class="btn-back">← Rudi kwenye orodha ya Nakala</a>
+</div>
+
+<script>
+function cp(btn, text) {
+    text = text == null ? '' : String(text);
+    function ok() {
+        var t = btn.textContent;
+        btn.textContent = '✓';
+        btn.classList.add('ok');
+        setTimeout(function(){ btn.textContent = t; btn.classList.remove('ok'); }, 900);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok).catch(function(){ fb(text); ok(); });
+    } else { fb(text); ok(); }
+}
+function cpAll() {
+    var box = document.getElementById('copyAll');
+    var text = box ? (box.innerText || box.textContent) : '';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ alert('Zimenakiliwa!'); });
+    } else { fb(text); alert('Zimenakiliwa!'); }
+}
+function fb(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+}
+</script>
+{% endblock %}

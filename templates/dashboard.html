@@ -825,20 +825,21 @@
     <!-- ==================== MAOMBI YA UWAKALA ==================== -->
     <div class="tab-panel" id="panel-agency">
         <div style="margin:0 0 12px;">
-            <h2 class="dash-section-title">Maombi ya Uwakala</h2>
+            <h2 class="dash-section-title">🏪 Maombi ya Uwakala {% if agency_pending %}<span class="status pending" style="font-size:11px;">{{ agency_pending }} pending</span>{% endif %}</h2>
+            <p class="dash-section-sub">Bonyeza <strong>Tazama</strong> kuona taarifa kamili na kubadilisha status.</p>
         </div>
 
-        <div class="list-more-wrap" data-list="agency" data-limit="3">
+        <div class="list-more-wrap" data-list="agency" data-limit="8">
+        {% if applications %}
         {% for application in applications %}
-        <div class="application-card list-item{% if loop.index > 3 %} list-item-hidden{% endif %}">
+        <div class="application-card list-item{% if loop.index > 8 %} list-item-hidden{% endif %}" style="padding:14px;">
             <div class="application-top">
-                <div>
-                    <div class="application-code">{{ application.application_code }}</div>
-                    <div class="application-network">
+                <div style="min-width:0;flex:1;">
+                    <div class="application-code" style="font-size:14px;">{{ application.application_code }}</div>
+                    <div class="application-network" style="font-size:12px;margin-top:2px;">
                         {{ application.network }} · {{ application.service_type }}
                     </div>
                 </div>
-
                 {% if application.status == "pending" %}
                     <span class="status pending">Inasubiri</span>
                 {% elif application.status == "processing" %}
@@ -851,54 +852,30 @@
                     <span class="status rejected">{{ application.status }}</span>
                 {% endif %}
             </div>
-
-            <div class="meta-time">
+            <div class="meta-time" style="margin-top:8px;">
                 <strong>Muda:</strong> {{ to_dar_es_salaam(application.created_at) }} (Dar)
             </div>
-
-            <div style="margin-top:12px; font-size:13px;">
-                <strong>{{ application.full_name }}</strong>
-                <div class="muted" style="margin-top:3px;">{{ application.phone }}</div>
+            <div style="margin-top:10px;font-size:13px;line-height:1.45;">
+                <strong>{{ application.full_name or '—' }}</strong><br>
+                <span class="muted">{{ application.phone or '—' }}</span>
             </div>
-
-            <form method="POST"
-                  action="{{ url_for('update_agency_status', application_id=application.id) }}"
-                  style="margin-top:14px;">
-
-                <select class="input" name="status">
-                    <option value="pending" {% if application.status == "pending" %}selected{% endif %}>Inasubiri</option>
-                    <option value="processing" {% if application.status == "processing" %}selected{% endif %}>Inachakatwa</option>
-                    <option value="completed" {% if application.status == "completed" %}selected{% endif %}>Imekamilika</option>
-                    <option value="rejected" {% if application.status == "rejected" %}selected{% endif %}>Imekataliwa</option>
-                </select>
-
-                <textarea
-                    class="input"
-                    name="note"
-                    placeholder="Ujumbe / maelezo kwa mteja..."
-                >{{ application.admin_note }}</textarea>
-
-                <button class="btn orange" type="submit" style="margin-top:10px;">
-                    Hifadhi Status
-                </button>
-            </form>
-
-            <a href="{{ url_for('admin_agency_chat', application_id=application.id) }}"
-               class="btn"
-               style="display:block; text-align:center; margin-top:10px; background:#151515;">
-                Fungua Chat na Mteja
+            <a href="{{ url_for('admin_agency_detail', application_id=application.id) }}"
+               class="btn orange"
+               style="display:block;text-align:center;margin-top:12px;text-decoration:none;padding:12px;">
+                Tazama taarifa kamili →
             </a>
-        </div>
-        {% else %}
-        <div class="card">
-            <div class="title" style="font-size:18px;">Hakuna maombi mapya</div>
-            <p class="muted">Maombi ya usajili na uwakala yataonekana hapa.</p>
         </div>
         {% endfor %}
         <button type="button" class="see-more-btn" data-list="agency" style="display:none;" onclick="toggleSeeMore(this)">
             See more
         </button>
         </div>
+        {% else %}
+        <div class="card">
+            <div class="title" style="font-size:18px;">Hakuna maombi mapya</div>
+            <p class="muted">Maombi ya usajili na uwakala yataonekana hapa.</p>
+        </div>
+        {% endif %}
     </div>
 
     <!-- ==================== MATANGAZO / BANNER ==================== -->
@@ -1435,6 +1412,9 @@ if (window.location.hash === '#trash') {
 }
 if (window.location.hash === '#nakala') {
     openDashTab('nakala');
+}
+if (window.location.hash === '#agency') {
+    openDashTab('agency');
 }
 
 function toggleUserDetail(id) {

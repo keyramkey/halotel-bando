@@ -746,38 +746,30 @@
     <!-- ==================== MAOMBI YA NAKALA ==================== -->
     <div class="tab-panel" id="panel-nakala">
         <div style="margin:0 0 12px;">
-            <h2 class="dash-section-title">📄 Maombi ya Nakala {% if nakala_pending %}<span class="status pending" style="font-size:11px;">{{ nakala_pending }}</span>{% endif %}</h2>
-            <p class="dash-section-sub">TIN • Leseni • NIDA • Cheti • Jina la Biashara</p>
+            <h2 class="dash-section-title">📄 Maombi ya Nakala {% if nakala_pending %}<span class="status pending" style="font-size:11px;">{{ nakala_pending }} pending</span>{% endif %}</h2>
+            <p class="dash-section-sub">Bonyeza <strong>Tazama</strong> kuona taarifa kamili, documents, na kubadilisha status.</p>
         </div>
 
+        <div class="list-more-wrap" data-list="nakala" data-limit="8">
         {% if nakala_list %}
-        <div class="list-more-wrap" data-list="nakala" data-limit="3">
-        {% macro nk_row(label, value) -%}
-{% if value is not none and value != '' and value != '—' %}
-<div class="nk-row">
-    <span class="nk-lbl">{{ label }}</span>
-    <span class="nk-val">
-        <span>{{ value }}</span>
-        <button type="button" class="nk-copy-btn" onclick="copyOne(this, {{ value|tojson }})">Nakili</button>
-    </span>
-</div>
-{% endif %}
-{%- endmacro %}
-{% for req in nakala_list %}
-        <div class="application-card list-item{% if loop.index > 3 %} list-item-hidden{% endif %}">
+        {% macro nk_svc(st, lic) -%}
+            {%- if st == 'tin' -%}TIN Number
+            {%- elif st == 'license' -%}Leseni{% if lic %} · {{ lic }}{% endif %}
+            {%- elif st == 'nida' -%}Online Copy NIDA
+            {%- elif st == 'birth_cert' -%}Cheti cha Kuzaliwa
+            {%- elif st == 'death_cert' -%}Cheti cha Kifo
+            {%- elif st == 'cert_verify' -%}Uhakiki wa Cheti
+            {%- elif st == 'business_name' -%}Jina la Biashara
+            {%- else -%}{{ st }}{%- endif -%}
+        {%- endmacro %}
+        {% for req in nakala_list %}
+        <div class="application-card list-item{% if loop.index > 8 %} list-item-hidden{% endif %}" style="padding:14px;">
             <div class="application-top">
-                <div>
-                    <div class="application-code">{{ req.request_code }}</div>
-                    <div class="application-network">
-                        {% if req.service_type == 'tin' %}TIN Number
-                        {% elif req.service_type == 'license' %}Leseni · {{ req.license_type }}
-                        {% elif req.service_type == 'nida' %}Online Copy NIDA
-                        {% elif req.service_type == 'birth_cert' %}Cheti cha Kuzaliwa
-                        {% elif req.service_type == 'death_cert' %}Cheti cha Kifo
-                        {% elif req.service_type == 'cert_verify' %}Uhakiki wa Cheti
-                        {% elif req.service_type == 'business_name' %}Jina la Biashara
-                        {% else %}{{ req.service_type }}{% endif %}
-                        · Ada TSh {{ "{:,}".format(req.price) }}
+                <div style="min-width:0;flex:1;">
+                    <div class="application-code" style="font-size:14px;">{{ req.request_code }}</div>
+                    <div class="application-network" style="font-size:12px;margin-top:2px;">
+                        {{ nk_svc(req.service_type, req.license_type) }}
+                        · Ada TSh {{ "{:,}".format(req.price or 0) }}
                     </div>
                 </div>
                 {% if req.status == "awaiting_payment" %}
@@ -791,7 +783,7 @@
                 {% elif req.status == "processing" %}
                     <span class="status processing">Inachakatwa</span>
                 {% elif req.status == "waiting_control_number" %}
-                    <span class="status processing">Inasubiri Control No.</span>
+                    <span class="status processing">Inasubiri Control</span>
                 {% elif req.status == "control_issued" %}
                     <span class="status pending">Control Imetolewa</span>
                 {% elif req.status == "completed" %}
@@ -802,293 +794,21 @@
                     <span class="status rejected">{{ req.status }}</span>
                 {% endif %}
             </div>
-
-            <div class="meta-time">
+            <div class="meta-time" style="margin-top:8px;">
                 <strong>Muda:</strong> {{ to_dar_es_salaam(req.created_at) }} (Dar)
                 {% if req.control_expires_at %}
                 · <strong>Control inaisha:</strong> {{ to_dar_es_salaam(req.control_expires_at) }}
                 {% endif %}
             </div>
-
-            <div style="margin-top:12px; font-size:13px; line-height:1.5;">
-                <strong>{{ req.full_name }}</strong><br>
-                <span class="muted">{{ req.phone1 }}{% if req.phone2 %} / {{ req.phone2 }}{% endif %}</span>
-                {% if req.status in ("awaiting_payment", "payment_failed") %}
-                <div class="pay-badge-row">
-                    <span class="muted" style="font-size:12px;">ClickPesa · Ada TSh {{ "{:,}".format(req.price or 0) }}</span>
-                </div>
-                {% endif %}
+            <div style="margin-top:10px;font-size:13px;line-height:1.45;">
+                <strong>{{ req.full_name or '—' }}</strong><br>
+                <span class="muted">{{ req.phone1 or '—' }}{% if req.phone2 %} / {{ req.phone2 }}{% endif %}</span>
             </div>
-
-            {% set xd = (req.extra_data|from_json) if req.extra_data else {} %}
-            {# Hidden full-text for "Copy Zote" #}
-            <div id="copy-box-{{ req.id }}" style="position:absolute;left:-9999px;height:0;overflow:hidden;" aria-hidden="true">
-{% if req.service_type in ['tin', 'nida', 'license'] %}
-Jina: {{ req.full_name }}
-Mama: {{ req.mother_name }}
-NIDA: {{ req.nida_number }}
-Simu1: {{ req.phone1 }}{% if req.phone2 %}
-Simu2: {{ req.phone2 }}{% endif %}
-Shule: {{ req.primary_school }} ({{ req.year_completed }})
-Wilaya Shule: {{ req.school_district }} | Mkoa: {{ req.school_region }}
-Wilaya NIDA: {{ req.nida_reg_district }} | Mkoa: {{ req.nida_reg_region }}
-Mtaa: {{ req.nida_reg_street }}{% if req.nida_reg_phone %}
-Simu Usajili NIDA: {{ req.nida_reg_phone }}{% endif %}{% if req.license_type %}
-Aina Leseni: {{ req.license_type }}{% endif %}{% if req.license_location %}
-Eneo: {{ req.license_location }}{% endif %}{% if req.control_number %}
-Control Number: {{ req.control_number }}{% endif %}
-{% elif req.service_type == 'business_name' %}
-Huduma: Usajili wa Jina la Biashara
-Majina: {{ req.full_name }}
-NIDA: {{ xd.nida_number or req.nida_number }}
-Jina la Biashara: {{ xd.business_name or '—' }}
-Email: {{ xd.email or '—' }}
-Simu: {{ req.phone1 }}
-{% elif req.service_type == 'birth_cert' %}
-Huduma: Cheti cha Kuzaliwa
-Muombaji: {{ req.full_name }}
-Jinsia: {{ xd.gender or '—' }}
-DOB: {{ xd.dob or '—' }}
-Simu: {{ req.phone1 }}
-Kazi: {{ xd.occupation or '—' }}
-Anapoishi: {{ [xd.street, xd.ward, xd.district, xd.region]|select|join(', ') }}
-Mama: {{ xd.mother_name or req.mother_name }}
-Mama DOB: {{ xd.mother_dob or '—' }}
-Mama Simu: {{ xd.mother_phone or '—' }}
-Baba: {{ xd.father_name or '—' }}
-Baba DOB: {{ xd.father_dob or '—' }}
-Baba Simu: {{ xd.father_phone or '—' }}
-Eneo sasa: {{ [xd.curr_street, xd.curr_ward, xd.curr_district, xd.curr_region]|select|join(', ') }}
-{% elif req.service_type == 'death_cert' %}
-Huduma: Cheti cha Kifo
-Marehemu: {{ xd.deceased_name or '—' }}
-Kuzaliwa: {{ xd.deceased_dob or '—' }}
-Kifo: {{ xd.death_date or '—' }}
-Makazi: {{ xd.residence or '—' }}
-Eneo kifo: {{ xd.death_place_area or '—' }}
-Sababu: {{ xd.death_cause or '—' }}
-Sehemu: {{ xd.death_place_type or '—' }}
-Mama: {{ xd.mother_name or '—' }}
-Baba: {{ xd.father_name or '—' }}
-Mtoa taarifa: {{ req.full_name }}
-Simu: {{ req.phone1 }}
-Kazi: {{ xd.occupation or '—' }}
-Anapoishi: {{ xd.informant_address or '—' }}
-{% elif req.service_type == 'cert_verify' %}
-Huduma: Uhakiki — {% if xd.verify_type == 'death' %}Cheti cha Kifo{% else %}Cheti cha Kuzaliwa{% endif %}
-Entry Number: {{ xd.entry_number or '—' }}
-Majina: {{ req.full_name }}
-Jinsia: {{ xd.gender or '—' }}
-{% if xd.birth_place %}Sehemu: {{ xd.birth_place }}
-{% endif %}Baba: {{ xd.father_name or '—' }}
-Mama: {{ xd.mother_name or '—' }}
-Simu: {{ req.phone1 }}
-{% else %}
-Jina: {{ req.full_name }}
-Simu: {{ req.phone1 }}
-{% endif %}
-            </div>
-
-            <div class="nk-detail-panel">
-                <div class="nk-detail-head" onclick="toggleNkDetail({{ req.id }})">
-                    <span>📋 Fungua Taarifa Kamili + Documents</span>
-                    <span class="chev" id="nk-chev-{{ req.id }}">▼</span>
-                </div>
-                <div class="nk-detail-body" id="nk-body-{{ req.id }}">
-                    {% if req.service_type in ['tin', 'nida', 'license'] %}
-                    {{ nk_row('Jina Kamili', req.full_name) }}
-                    {{ nk_row('Mama', req.mother_name) }}
-                    {{ nk_row('NIDA / NIN', req.nida_number) }}
-                    {{ nk_row('Simu 1', req.phone1) }}
-                    {{ nk_row('Simu 2', req.phone2) }}
-                    {{ nk_row('Shule ya Msingi', req.primary_school) }}
-                    {{ nk_row('Mwaka Kuhitimu', req.year_completed) }}
-                    {{ nk_row('Wilaya (Shule)', req.school_district) }}
-                    {{ nk_row('Mkoa (Shule)', req.school_region) }}
-                    {{ nk_row('Wilaya (NIDA)', req.nida_reg_district) }}
-                    {{ nk_row('Mkoa (NIDA)', req.nida_reg_region) }}
-                    {{ nk_row('Mtaa (NIDA)', req.nida_reg_street) }}
-                    {{ nk_row('Simu Usajili NIDA', req.nida_reg_phone) }}
-                    {{ nk_row('Aina Leseni', req.license_type) }}
-                    {{ nk_row('Eneo Leseni', req.license_location) }}
-                    {% if req.control_number_fee %}{{ nk_row('Bei Control No.', 'TSh ' ~ '{:,}'.format(req.control_number_fee)) }}{% endif %}
-                    {{ nk_row('Control Number', req.control_number) }}
-
-                    {% elif req.service_type == 'business_name' %}
-                    {{ nk_row('Majina', req.full_name) }}
-                    {{ nk_row('NIDA', xd.nida_number or req.nida_number) }}
-                    {{ nk_row('Jina la Biashara', xd.business_name) }}
-                    {{ nk_row('Email', xd.email) }}
-                    {{ nk_row('Simu', req.phone1) }}
-
-                    {% elif req.service_type == 'birth_cert' %}
-                    <div class="nk-section-lbl">Muombaji</div>
-                    {{ nk_row('Majina', req.full_name) }}
-                    {{ nk_row('Jinsia', xd.gender) }}
-                    {{ nk_row('Tarehe Kuzaliwa', xd.dob) }}
-                    {{ nk_row('Simu', req.phone1) }}
-                    {{ nk_row('Kazi', xd.occupation) }}
-                    {{ nk_row('Anapoishi', [xd.street, xd.ward, xd.district, xd.region]|select|join(', ')) }}
-                    <div class="nk-section-lbl">Mama</div>
-                    {{ nk_row('Majina', xd.mother_name or req.mother_name) }}
-                    {{ nk_row('Tarehe Kuzaliwa', xd.mother_dob) }}
-                    {{ nk_row('Simu', xd.mother_phone) }}
-                    {{ nk_row('Kazi', xd.mother_occupation) }}
-                    {{ nk_row('Anapoishi', [xd.mother_street, xd.mother_ward, xd.mother_district, xd.mother_region]|select|join(', ')) }}
-                    <div class="nk-section-lbl">Baba</div>
-                    {{ nk_row('Majina', xd.father_name) }}
-                    {{ nk_row('Tarehe Kuzaliwa', xd.father_dob) }}
-                    {{ nk_row('Simu', xd.father_phone) }}
-                    {{ nk_row('Kazi', xd.father_occupation) }}
-                    {{ nk_row('Mkoa', xd.father_region) }}
-                    <div class="nk-section-lbl">Eneo la sasa</div>
-                    {{ nk_row('Mahali', [xd.curr_street, xd.curr_ward, xd.curr_district, xd.curr_region]|select|join(', ')) }}
-                    {% if xd.docs %}
-                    <div class="nk-section-lbl">Viambatanisho — Pakua</div>
-                    <div class="nk-docs">
-                        {% if xd.docs.get('parent_id') %}
-                        <a class="nk-doc-link" href="{{ url_for('media_file', filename=xd.docs.parent_id, download=1) }}" target="_blank" download>
-                            📄 Kitambulisho cha mzazi <span>Pakua</span>
-                        </a>
-                        {% endif %}
-                        {% if xd.docs.get('applicant_id') %}
-                        <a class="nk-doc-link" href="{{ url_for('media_file', filename=xd.docs.applicant_id, download=1) }}" target="_blank" download>
-                            📄 Kitambulisho cha muombaji <span>Pakua</span>
-                        </a>
-                        {% endif %}
-                        {% if xd.docs.get('id_front') %}
-                        <a class="nk-doc-link" href="{{ url_for('media_file', filename=xd.docs.id_front, download=1) }}" target="_blank" download>
-                            📷 Picha mbele <span>Pakua</span>
-                        </a>
-                        {% endif %}
-                        {% if xd.docs.get('id_back') %}
-                        <a class="nk-doc-link" href="{{ url_for('media_file', filename=xd.docs.id_back, download=1) }}" target="_blank" download>
-                            📷 Picha nyuma <span>Pakua</span>
-                        </a>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-
-                    {% elif req.service_type == 'death_cert' %}
-                    <div class="nk-section-lbl">Marehemu</div>
-                    {{ nk_row('Majina', xd.deceased_name) }}
-                    {{ nk_row('Tarehe Kuzaliwa', xd.deceased_dob) }}
-                    {{ nk_row('Tarehe Kifo', xd.death_date) }}
-                    {{ nk_row('Makazi', xd.residence) }}
-                    {{ nk_row('Eneo kifo', xd.death_place_area) }}
-                    {{ nk_row('Sababu', xd.death_cause) }}
-                    {{ nk_row('Sehemu', xd.death_place_type) }}
-                    <div class="nk-section-lbl">Wazazi</div>
-                    {{ nk_row('Mama', xd.mother_name) }}
-                    {{ nk_row('Baba', xd.father_name) }}
-                    <div class="nk-section-lbl">Mtoa Taarifa</div>
-                    {{ nk_row('Majina', req.full_name) }}
-                    {{ nk_row('Simu', req.phone1) }}
-                    {{ nk_row('Kazi', xd.occupation) }}
-                    {{ nk_row('Anapoishi', xd.informant_address) }}
-                    {% if xd.docs %}
-                    <div class="nk-section-lbl">Viambatanisho — Pakua</div>
-                    <div class="nk-docs">
-                        {% if xd.docs.get('burial_permit') %}
-                        <a class="nk-doc-link" href="{{ url_for('media_file', filename=xd.docs.burial_permit, download=1) }}" target="_blank" download>
-                            📄 Kibali cha mazishi <span>Pakua</span>
-                        </a>
-                        {% endif %}
-                        {% if xd.docs.get('family_minutes') %}
-                        <a class="nk-doc-link" href="{{ url_for('media_file', filename=xd.docs.family_minutes, download=1) }}" target="_blank" download>
-                            📄 Muhtasari / barua mirathi <span>Pakua</span>
-                        </a>
-                        {% endif %}
-                        {% if xd.docs.get('deceased_id') %}
-                        <a class="nk-doc-link" href="{{ url_for('media_file', filename=xd.docs.deceased_id, download=1) }}" target="_blank" download>
-                            📄 Kitambulisho cha marehemu <span>Pakua</span>
-                        </a>
-                        {% endif %}
-                        {% if xd.docs.get('admin_id') %}
-                        <a class="nk-doc-link" href="{{ url_for('media_file', filename=xd.docs.admin_id, download=1) }}" target="_blank" download>
-                            📄 Kitambulisho cha msimamizi <span>Pakua</span>
-                        </a>
-                        {% endif %}
-                        {% if xd.docs.get('marriage_or_children') %}
-                        <a class="nk-doc-link" href="{{ url_for('media_file', filename=xd.docs.marriage_or_children, download=1) }}" target="_blank" download>
-                            📄 Cheti ndoa / watoto <span>Pakua</span>
-                        </a>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-
-                    {% elif req.service_type == 'cert_verify' %}
-                    {{ nk_row('Aina', 'Cheti cha Kifo' if xd.verify_type == 'death' else 'Cheti cha Kuzaliwa') }}
-                    {{ nk_row('Entry Number', xd.entry_number) }}
-                    {{ nk_row('Majina', req.full_name) }}
-                    {{ nk_row('Jinsia', xd.gender) }}
-                    {{ nk_row('Sehemu', xd.birth_place) }}
-                    {{ nk_row('Baba', xd.father_name) }}
-                    {{ nk_row('Mama', xd.mother_name) }}
-                    {{ nk_row('Simu', req.phone1) }}
-
-                    {% else %}
-                    {{ nk_row('Jina', req.full_name) }}
-                    {{ nk_row('Simu', req.phone1) }}
-                    {% endif %}
-
-                    <button type="button" class="btn" style="margin-top:12px;background:#333;font-size:13px;width:100%;"
-                            onclick="copyNakala({{ req.id }})">
-                        📋 Copy Taarifa Zote
-                    </button>
-                </div>
-            </div>
-
-            <form method="POST"
-                  action="{{ url_for('admin_nakala_update', req_id=req.id) }}"
-                  enctype="multipart/form-data"
-                  style="margin-top:14px;">
-                <select class="input" name="status">
-                    <option value="pending" {% if req.status == "pending" %}selected{% endif %}>Inasubiri (pending)</option>
-                    <option value="awaiting_payment" {% if req.status == "awaiting_payment" %}selected{% endif %}>Inasubiri Malipo (ClickPesa)</option>
-                    <option value="payment_failed" {% if req.status == "payment_failed" %}selected{% endif %}>Malipo Yameshindwa</option>
-                    <option value="paid" {% if req.status == "paid" %}selected{% endif %}>Imelipwa</option>
-                    <option value="processing" {% if req.status == "processing" %}selected{% endif %}>Inachakatwa</option>
-                    <option value="waiting_control_number" {% if req.status == "waiting_control_number" %}selected{% endif %}>Inasubiri Control Number</option>
-                    <option value="control_issued" {% if req.status == "control_issued" %}selected{% endif %}>Control Number Imetolewa</option>
-                    <option value="completed" {% if req.status == "completed" %}selected{% endif %}>Imekamilika</option>
-                    <option value="rejected" {% if req.status == "rejected" %}selected{% endif %}>Imekataliwa</option>
-                </select>
-                {% if req.service_type == 'license' %}
-                <div style="margin-top:10px;background:#fff8f0;border:1px solid #ffe0c2;border-radius:12px;padding:12px;">
-                    <label class="muted" style="font-size:12px;font-weight:700;">Bei ya Control Number — TSh</label>
-                    <input type="number" name="control_number_fee" class="input" min="0" step="1"
-                           value="{{ req.control_number_fee or 0 }}"
-                           placeholder="Mfano: 150000">
-                    <p class="muted" style="font-size:11px;margin-top:6px;line-height:1.4;">
-                        Hariri bei ya control number. Ukibadilisha, mteja atapata <strong>notification</strong> kwa bei mpya.
-                    </p>
-                    <label class="muted" style="font-size:12px;font-weight:700;margin-top:10px;display:block;">Control Number (leseni)</label>
-                    <input type="text" name="control_number" class="input"
-                           value="{{ req.control_number or '' }}"
-                           placeholder="Weka control number hapa">
-                    <p class="muted" style="font-size:11px;margin-top:6px;line-height:1.4;">
-                        Itaisha baada ya <strong>siku 1</strong> baada ya kuiweka.
-                        {% if req.control_expires_at %}<br>Inaisha: {{ req.control_expires_at.strftime('%d/%m/%Y %H:%M') }} UTC{% endif %}
-                    </p>
-                </div>
-                {% endif %}
-                <textarea class="input" name="admin_note" placeholder="Ujumbe / maelezo kwa mteja...">{{ req.admin_note or '' }}</textarea>
-                <textarea class="input" name="result_message" placeholder="Matokeo (TIN, control number, maelezo)...">{{ req.result_message or '' }}</textarea>
-                <div style="margin-top:10px;">
-                    <label class="muted" style="font-size:12px;">Pakia leseni / matokeo (PDF au Picha) — baada ya mteja kulipia control number</label>
-                    <input type="file" name="result_file" class="input"
-                           accept=".pdf,.png,.jpg,.jpeg,.webp,.gif,.bmp">
-                    {% if req.result_file %}
-                    <p class="muted" style="font-size:11px; margin-top:4px;">
-                        Faili iliyopo: <a href="{{ url_for('media_file', filename=req.result_file) }}" target="_blank">{{ req.result_file }}</a>
-                    </p>
-                    {% endif %}
-                </div>
-                <button class="btn orange" type="submit" style="margin-top:10px;">
-                    Hifadhi & Tuma kwa Mteja
-                </button>
-            </form>
+            <a href="{{ url_for('admin_nakala_detail', req_id=req.id) }}"
+               class="btn orange"
+               style="display:block;text-align:center;margin-top:12px;text-decoration:none;padding:12px;">
+                Tazama taarifa kamili →
+            </a>
         </div>
         {% endfor %}
         <button type="button" class="see-more-btn" data-list="nakala" style="display:none;" onclick="toggleSeeMore(this)">
@@ -1628,9 +1348,13 @@ Simu: {{ req.phone1 }}
                     <br><strong style="color:#c62828;">Sababu:</strong> {{ req.admin_note }}
                     {% endif %}
                 </div>
+                <a href="{{ url_for('admin_nakala_detail', req_id=req.id) }}"
+                   class="btn" style="display:block;text-align:center;margin-top:10px;background:#333;color:#fff;text-decoration:none;padding:11px;">
+                    Tazama taarifa →
+                </a>
                 <form method="POST"
                       action="{{ url_for('admin_nakala_delete', req_id=req.id) }}"
-                      style="margin-top:12px;"
+                      style="margin-top:8px;"
                       onsubmit="return confirm('Futa {{ req.request_code }} kabisa?');">
                     <button class="btn btn-danger-soft" type="submit">🗑 Futa nakala hii</button>
                 </form>

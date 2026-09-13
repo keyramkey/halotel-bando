@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+{% block title %}{{ application.application_code }} · Uwakala{% endblock %}
+{% block content %}
+<style>
+    .ad-wrap { max-width: 720px; margin: 0 auto; }
+    .ad-hero {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 16px;
+        padding: 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    }
+    .ad-code { font-size: 18px; font-weight: 900; color: #111; }
+    .ad-meta { font-size: 12px; color: #888; margin-top: 4px; line-height: 1.45; }
+    .ad-status-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .ad-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 16px;
+        padding: 14px 16px;
+        margin-bottom: 12px;
+        box-shadow: 0 1px 6px rgba(0,0,0,0.03);
+    }
+    .ad-card h3 {
+        margin: 0 0 12px;
+        font-size: 13px;
+        font-weight: 800;
+        color: #f56b00;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+    .ad-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #f3f3f3;
+        font-size: 13px;
+    }
+    .ad-row:last-child { border-bottom: none; }
+    .ad-lbl { color: #888; font-weight: 600; max-width: 42%; flex-shrink: 0; }
+    .ad-val {
+        text-align: right;
+        font-weight: 700;
+        color: #222;
+        word-break: break-word;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 6px;
+        flex-wrap: wrap;
+        max-width: 58%;
+    }
+    .cp {
+        border: none;
+        background: #f0f0f0;
+        border-radius: 6px;
+        padding: 3px 8px;
+        font-size: 10px;
+        font-weight: 800;
+        color: #666;
+        cursor: pointer;
+    }
+    .cp.ok { background: #e8f5e9; color: #2e7d32; }
+    .doc-grid { display: grid; gap: 8px; }
+    .doc-a {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 14px;
+        background: #fff8f0;
+        border: 1px solid #ffe0c2;
+        border-radius: 12px;
+        text-decoration: none;
+        color: #e65100;
+        font-size: 13px;
+        font-weight: 700;
+    }
+    .doc-a span { color: #999; font-size: 11px; font-weight: 600; }
+    .flash-ok {
+        background: #e8f5e9;
+        border: 1px solid #a5d6a7;
+        color: #1b5e20;
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 12px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+    .field { margin-bottom: 12px; }
+    .field label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        color: #666;
+        margin-bottom: 5px;
+    }
+    .field .input, .field select.input, .field textarea.input {
+        width: 100%;
+        padding: 12px 13px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 11px;
+        font-size: 14px;
+        background: #fafafa;
+        box-sizing: border-box;
+        outline: none;
+    }
+    .field textarea.input { min-height: 80px; resize: vertical; }
+    .btn-save {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #f56b00, #e85d04);
+        color: #fff;
+        font-weight: 800;
+        font-size: 15px;
+        cursor: pointer;
+        box-shadow: 0 5px 14px rgba(245, 107, 0, 0.28);
+    }
+    .btn-back {
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+        padding: 12px;
+        border-radius: 12px;
+        background: #f2f2f2;
+        color: #444;
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 13px;
+    }
+    .btn-chat {
+        display: block;
+        text-align: center;
+        margin-top: 10px;
+        padding: 12px;
+        border-radius: 12px;
+        background: #151515;
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+        font-size: 13px;
+    }
+</style>
+
+<header class="topbar">
+    <div>
+        <div class="brand">Uwakala · Admin</div>
+        <div class="muted">{{ application.application_code }}</div>
+    </div>
+    <a href="{{ url_for('dashboard') }}#agency" class="icon-btn">←</a>
+</header>
+
+<div class="page ad-wrap">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for cat, msg in messages %}
+        <div class="flash-ok">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    {% set xd = extra if extra is defined else {} %}
+
+    <div class="ad-hero">
+        <div class="ad-code">{{ application.application_code }}</div>
+        <div class="ad-meta">
+            {{ application.network }} · {{ application.service_type }}
+            <br>
+            Muda: {{ to_dar_es_salaam(application.created_at) }} (Dar)
+        </div>
+        <div class="ad-status-row">
+            {% if application.status == "pending" %}<span class="status pending">Inasubiri</span>
+            {% elif application.status == "processing" %}<span class="status processing">Inachakatwa</span>
+            {% elif application.status == "completed" %}<span class="status completed">Imekamilika</span>
+            {% elif application.status == "rejected" %}<span class="status rejected">Imekataliwa</span>
+            {% else %}<span class="status rejected">{{ application.status }}</span>{% endif %}
+        </div>
+    </div>
+
+    <div class="ad-card">
+        <h3>Taarifa za Ombi</h3>
+        {% macro row(label, value) -%}
+        {% if value is not none and value != '' and value != '—' %}
+        <div class="ad-row">
+            <span class="ad-lbl">{{ label }}</span>
+            <span class="ad-val">
+                <span>{{ value }}</span>
+                <button type="button" class="cp" onclick="cp(this, {{ value|tojson }})">Nakili</button>
+            </span>
+        </div>
+        {% endif %}
+        {%- endmacro %}
+
+        {{ row('Jina Kamili', application.full_name) }}
+        {{ row('Simu', application.phone) }}
+        {{ row('Network', application.network) }}
+        {{ row('Huduma', application.service_type) }}
+        {{ row('Aina ya Kitambulisho', application.id_type) }}
+        {{ row('Namba ya Kitambulisho', application.id_number) }}
+        {{ row('Aina ya Line', application.line_type) }}
+        {{ row('Mkoa', application.region) }}
+        {{ row('Wilaya', application.district) }}
+        {{ row('Kata', application.ward) }}
+        {{ row('TIN', application.tin_number) }}
+        {{ row('Simu ya Lengo', application.target_phone) }}
+        {{ row('Simu ya Mawasiliano', application.contact_phone) }}
+        {{ row('Maelezo', application.description) }}
+
+        {% if xd %}
+            {% for k, v in xd.items() %}
+                {% if v and k not in ('docs',) %}
+                {{ row(k|replace('_',' ')|title, v) }}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        <button type="button" class="btn" style="width:100%;margin-top:10px;background:#333;color:#fff;"
+                onclick="cpAll()">📋 Nakili Taarifa Zote</button>
+        <div id="copyAll" style="position:absolute;left:-9999px;height:0;overflow:hidden;" aria-hidden="true">
+Jina: {{ application.full_name }}
+Simu: {{ application.phone }}
+Network: {{ application.network }}
+Huduma: {{ application.service_type }}
+ID: {{ application.id_type }} {{ application.id_number }}
+Eneo: {{ application.ward }}, {{ application.district }}, {{ application.region }}
+TIN: {{ application.tin_number }}
+        </div>
+    </div>
+
+    {% if application.tin_cert or application.id_doc or application.shop_photo %}
+    <div class="ad-card">
+        <h3>Viambatanisho — Pakua</h3>
+        <div class="doc-grid">
+            {% if application.tin_cert %}
+            <a class="doc-a" href="{{ url_for('media_file', filename=application.tin_cert) }}" target="_blank" download>
+                📄 Cheti cha TIN <span>Pakua</span>
+            </a>
+            {% endif %}
+            {% if application.id_doc %}
+            <a class="doc-a" href="{{ url_for('media_file', filename=application.id_doc) }}" target="_blank" download>
+                📄 Kitambulisho <span>Pakua</span>
+            </a>
+            {% endif %}
+            {% if application.shop_photo %}
+            <a class="doc-a" href="{{ url_for('media_file', filename=application.shop_photo) }}" target="_blank" download>
+                📷 Picha ya Duka <span>Pakua</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="ad-card">
+        <h3>Badilisha Hali</h3>
+        <form method="POST" action="{{ url_for('update_agency_status', application_id=application.id) }}">
+            <div class="field">
+                <label>Status</label>
+                <select class="input" name="status">
+                    <option value="pending" {% if application.status == "pending" %}selected{% endif %}>Inasubiri</option>
+                    <option value="processing" {% if application.status == "processing" %}selected{% endif %}>Inachakatwa</option>
+                    <option value="completed" {% if application.status == "completed" %}selected{% endif %}>Imekamilika</option>
+                    <option value="rejected" {% if application.status == "rejected" %}selected{% endif %}>Imekataliwa</option>
+                </select>
+            </div>
+            <div class="field">
+                <label>Ujumbe / maelezo kwa mteja</label>
+                <textarea class="input" name="note" placeholder="Ujumbe...">{{ application.admin_note or '' }}</textarea>
+            </div>
+            <button type="submit" class="btn-save">Hifadhi Status</button>
+        </form>
+        <a href="{{ url_for('admin_agency_chat', application_id=application.id) }}" class="btn-chat">
+            💬 Fungua Chat na Mteja
+        </a>
+    </div>
+
+    <a href="{{ url_for('dashboard') }}#agency" class="btn-back">← Rudi kwenye orodha ya Uwakala</a>
+</div>
+
+<script>
+function cp(btn, text) {
+    text = text == null ? '' : String(text);
+    function ok() {
+        var t = btn.textContent;
+        btn.textContent = '✓';
+        btn.classList.add('ok');
+        setTimeout(function(){ btn.textContent = t; btn.classList.remove('ok'); }, 900);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok).catch(function(){ fb(text); ok(); });
+    } else { fb(text); ok(); }
+}
+function cpAll() {
+    var box = document.getElementById('copyAll');
+    var text = box ? (box.innerText || box.textContent) : '';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function(){ alert('Zimenakiliwa!'); });
+    } else { fb(text); alert('Zimenakiliwa!'); }
+}
+function fb(text) {
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); } catch(e) {}
+    document.body.removeChild(ta);
+}
+</script>
+{% endblock %}

@@ -7,6 +7,8 @@
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="theme-color" content="#f56b00">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='icons/icon-192.png') }}">
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <title>
         {% block title %}MR. SULE DIGITAL SERVICES BUSINESS{% endblock %}
     </title>
@@ -577,7 +579,6 @@
 <div class="app">
     {% block content %}
     {% endblock %}
-
     <nav class="bottom-nav">
         <a href="{{ url_for('home') }}" class="nav-item">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/></svg>
@@ -608,17 +609,14 @@
         {% endif %}
     </nav>
 </div>
-
 <!-- TOP PUSH BANNERS -->
 <div id="pushBannerStack" aria-live="polite"></div>
-
 <!-- Enable notifications bar -->
 <div id="enablePushBar">
     <p>Washa arifa ili upate taarifa za bando, chat na maombi haraka.</p>
     <button type="button" id="enablePushBtn">Washa</button>
     <button type="button" class="dismiss-push" id="dismissPushBtn">Baadaye</button>
 </div>
-
 <!-- APP TOAST MODAL -->
 <div class="app-toast-overlay" id="appToast">
     <div class="app-toast">
@@ -628,7 +626,6 @@
         <button type="button" class="app-toast-btn" id="toastClose">Sawa</button>
     </div>
 </div>
-
 <script>
 (function() {
     var overlay = document.getElementById('appToast');
@@ -636,7 +633,6 @@
     var titleEl = document.getElementById('toastTitle');
     var msgEl = document.getElementById('toastMsg');
     var closeBtn = document.getElementById('toastClose');
-
     function showToast(message, category) {
         if (!message) return;
         var isError = (category || '').indexOf('error') !== -1 || (category || '').indexOf('danger') !== -1;
@@ -646,14 +642,12 @@
         msgEl.textContent = message;
         overlay.classList.add('show');
     }
-
     closeBtn.addEventListener('click', function() {
         overlay.classList.remove('show');
     });
     overlay.addEventListener('click', function(e) {
         if (e.target === overlay) overlay.classList.remove('show');
     });
-
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
@@ -661,7 +655,6 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-
     var stack = document.getElementById('pushBannerStack');
     function showPushBanner(title, body, url) {
         var el = document.createElement('div');
@@ -693,7 +686,6 @@
         });
         setTimeout(dismiss, 5000);
     }
-
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.addEventListener('message', function(event) {
             var d = event.data || {};
@@ -704,12 +696,10 @@
             }
         });
     }
-
     var isLoggedIn = {{ 'true' if current_user else 'false' }};
     var enableBar = document.getElementById('enablePushBar');
     var enableBtn = document.getElementById('enablePushBtn');
     var dismissBtn = document.getElementById('dismissPushBtn');
-
     function urlBase64ToUint8Array(base64String) {
         var padding = '='.repeat((4 - base64String.length % 4) % 4);
         var base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
@@ -718,7 +708,6 @@
         for (var i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
         return outputArray;
     }
-
     async function subscribePush() {
         if (!('serviceWorker' in navigator) || !('PushManager' in window)) return false;
         try {
@@ -742,7 +731,6 @@
             return false;
         }
     }
-
     async function ensurePush() {
         if (!isLoggedIn) return;
         if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) return;
@@ -751,7 +739,6 @@
         try { if (localStorage.getItem('push_dismissed') === '1') return; } catch (_) {}
         enableBar.classList.add('show');
     }
-
     if (enableBtn) {
         enableBtn.addEventListener('click', async function() {
             enableBar.classList.remove('show');
@@ -768,7 +755,6 @@
             try { localStorage.setItem('push_dismissed', '1'); } catch (_) {}
         });
     }
-
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', function() {
             navigator.serviceWorker.register('/sw.js').then(function() {

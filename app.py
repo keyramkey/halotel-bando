@@ -3978,5 +3978,16 @@ def debug_uploads():
     return "<pre style='font-size:13px;padding:16px;white-space:pre-wrap;'>" + "\n".join(lines) + "</pre>"
 
 
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(
+        os.path.join(app.root_path, 'static'),
+        'favicon.png',
+        mimetype='image/png'
+    )
+
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

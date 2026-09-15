@@ -171,7 +171,6 @@
         <div class="ad-meta">
             {% if req.service_type == 'tin' %}TIN Number
             {% elif req.service_type == 'license' %}Leseni ya Biashara{% if req.license_type %} · {{ req.license_type }}{% endif %}
-            {% elif req.service_type == 'nida' %}Online Copy NIDA
             {% elif req.service_type == 'birth_cert' %}Cheti cha Kuzaliwa
             {% elif req.service_type == 'death_cert' %}Cheti cha Kifo
             {% elif req.service_type == 'cert_verify' %}Uhakiki wa Cheti
@@ -216,7 +215,7 @@
         {% endif %}
         {%- endmacro %}
 
-        {% if req.service_type in ['tin', 'nida', 'license'] %}
+        {% if req.service_type in ['tin', 'license'] %}
             {{ row('Jina Kamili', req.full_name) }}
             {{ row('Mama', req.mother_name) }}
             {{ row('NIDA / NIN', req.nida_number) }}
@@ -301,7 +300,7 @@
         <button type="button" class="btn" style="width:100%;margin-top:10px;background:#333;color:#fff;"
                 onclick="cpAll()">📋 Nakili Taarifa Zote</button>
         <div id="copyAll" style="position:absolute;left:-9999px;height:0;overflow:hidden;" aria-hidden="true">
-{% if req.service_type in ['tin','nida','license'] %}
+{% if req.service_type in ['tin','license'] %}
 Jina: {{ req.full_name }}
 Mama: {{ req.mother_name }}
 NIDA: {{ req.nida_number }}

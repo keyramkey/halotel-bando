@@ -61,8 +61,12 @@ os.makedirs(os.path.join(_static_uploads, "slide"), exist_ok=True)
 
 @app.errorhandler(RequestEntityTooLarge)
 def handle_file_too_large(e):
-    flash("Faili ni kubwa mno. Tumia picha chini ya 50 MB au compress kidogo.", "error")
-    return redirect(request.referrer or url_for("home"))
+    # Usifute session — user abaki logged in; rudisha tu ujumbe
+    flash("Faili ni kubwa mno. Tumia picha/PDF chini ya 50 MB au compress kidogo, kisha jaribu tena.", "error")
+    ref = request.referrer
+    if ref and ref.startswith(request.host_url):
+        return redirect(ref)
+    return redirect(url_for("home"))
 
 db = SQLAlchemy(app)
 
@@ -228,7 +232,7 @@ class NakalaRequest(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     request_code = db.Column(db.String(30), unique=True, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    # tin | license | nida | birth_cert | death_cert | cert_verify | business_name
+    # tin | license | birth_cert | death_cert | cert_verify | business_name  (nida service removed)
     service_type = db.Column(db.String(50), nullable=False)
     full_name = db.Column(db.String(150), nullable=False)
     mother_name = db.Column(db.String(150), default="")
@@ -289,6 +293,12 @@ def get_current_user():
     if not uid:
         return None
     return User.query.get(uid)
+
+
+def keep_session_alive():
+    """Hakikisha session haipotei baada ya POST/upload (cookie isibadilike)."""
+    session.permanent = True
+    session.modified = True
 
 
 # Dar es Salaam = Africa/Dar_es_Salaam (EAT, UTC+3)
@@ -1674,6 +1684,7 @@ def agency_service(network, service_type):
             "files": file_paths,
             "fields": config["fields"],
         }
+        keep_session_alive()
         session["agency_draft"] = draft
         return redirect(url_for("agency_review"))
 
@@ -1845,7 +1856,7 @@ def application_detail(application_id):
 
 
 # ---------------------------------------------------------------------------
-# Nakala (TIN, Leseni, NIDA Copy)
+# Nakala (TIN, Leseni, Cheti, Biashara) — Online NIDA imeondolewa
 # ---------------------------------------------------------------------------
 def generate_nakala_code():
     return "NK-" + secrets.token_hex(4).upper()
@@ -1889,6 +1900,7 @@ def nakala_tin():
             flash("Namba ya NIDA/NIN lazima iwe namba tu (max 20).", "error")
             return redirect(url_for("nakala_tin"))
 
+        keep_session_alive()
         session["nakala_draft"] = {
             "service_type": "tin",
             "had_tin_before": had_tin,
@@ -2206,7 +2218,6 @@ def nakala_service_label(service_type, extra=None):
     labels = {
         "tin": "TIN Number",
         "license": "Leseni ya Biashara",
-        "nida": "Online Copy NIDA",
         "birth_cert": "Cheti cha Kuzaliwa",
         "death_cert": "Cheti cha Kifo",
         "cert_verify": "Uhakiki wa Cheti",
@@ -2271,6 +2282,7 @@ def nakala_license():
             return redirect(url_for("nakala_license"))
 
         # Bei ya control number = bei rasmi ya leseni; malipo kwenye app = ada ya huduma 10,000
+        keep_session_alive()
         session["nakala_draft"] = {
             "service_type": "license",
             "license_type": lic["name"],
@@ -2301,55 +2313,6 @@ def nakala_license():
         service_fee=LICENSE_SERVICE_FEE,
     )
 
-
-@app.route("/nakala/nida", methods=["GET", "POST"])
-@login_required
-def nakala_nida():
-    if request.method == "POST":
-        full_name = request.form.get("full_name", "").strip()
-        mother_name = request.form.get("mother_name", "").strip()
-        nida_number = request.form.get("nida_number", "").strip()
-        phone1 = request.form.get("phone1", "").strip()
-        phone2 = request.form.get("phone2", "").strip()
-        primary_school = request.form.get("primary_school", "").strip()
-        year_completed = request.form.get("year_completed", "").strip()
-        school_district = request.form.get("school_district", "").strip()
-        school_region = request.form.get("school_region", "").strip()
-        nida_reg_district = request.form.get("nida_reg_district", "").strip()
-        nida_reg_region = request.form.get("nida_reg_region", "").strip()
-        nida_reg_street = request.form.get("nida_reg_street", "").strip()
-        nida_reg_phone = request.form.get("nida_reg_phone", "").strip()
-
-        if not all([full_name, mother_name, nida_number, phone1, primary_school,
-                    year_completed, school_district, school_region,
-                    nida_reg_district, nida_reg_region, nida_reg_street, nida_reg_phone]):
-            flash("Jaza taarifa zote muhimu.", "error")
-            return redirect(url_for("nakala_nida"))
-
-        if len(nida_number) > 20 or not nida_number.isdigit():
-            flash("Namba ya NIDA/NIN lazima iwe namba tu (max 20).", "error")
-            return redirect(url_for("nakala_nida"))
-
-        session["nakala_draft"] = {
-            "service_type": "nida",
-            "full_name": full_name,
-            "mother_name": mother_name,
-            "nida_number": nida_number,
-            "phone1": phone1,
-            "phone2": phone2,
-            "primary_school": primary_school,
-            "year_completed": year_completed,
-            "school_district": school_district,
-            "school_region": school_region,
-            "nida_reg_district": nida_reg_district,
-            "nida_reg_region": nida_reg_region,
-            "nida_reg_street": nida_reg_street,
-            "nida_reg_phone": nida_reg_phone,
-            "price": 3000,
-        }
-        return redirect(url_for("nakala_review"))
-
-    return render_template("nakala_nida.html")
 
 
 # ---------------------------------------------------------------------------
@@ -2422,6 +2385,7 @@ def nakala_birth_cert():
             )
             return redirect(url_for("nakala_birth_cert"))
 
+        keep_session_alive()
         session["nakala_draft"] = {
             "service_type": "birth_cert",
             "full_name": full_name,
@@ -2499,6 +2463,7 @@ def nakala_death_cert():
             ),
         }
 
+        keep_session_alive()
         session["nakala_draft"] = {
             "service_type": "death_cert",
             "full_name": full_name,
@@ -2539,6 +2504,7 @@ def nakala_verify_birth():
             flash("Jaza entry number, majina kamili na namba ya simu.", "error")
             return redirect(url_for("nakala_verify_birth"))
 
+        keep_session_alive()
         session["nakala_draft"] = {
             "service_type": "cert_verify",
             "verify_type": "birth",
@@ -2575,6 +2541,7 @@ def nakala_verify_death():
             flash("Jaza entry number, majina kamili na namba ya simu.", "error")
             return redirect(url_for("nakala_verify_death"))
 
+        keep_session_alive()
         session["nakala_draft"] = {
             "service_type": "cert_verify",
             "verify_type": "death",
@@ -2609,6 +2576,7 @@ def nakala_business_name():
             flash("Jaza NIDA, jina la biashara, simu na majina yako matatu.", "error")
             return redirect(url_for("nakala_business_name"))
 
+        keep_session_alive()
         session["nakala_draft"] = {
             "service_type": "business_name",
             "full_name": full_name,

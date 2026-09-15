@@ -70,7 +70,6 @@
                     {{ service_label }}
                 {% elif draft.service_type == 'tin' %}TIN Number
                 {% elif draft.service_type == 'license' %}Leseni ya Biashara
-                {% elif draft.service_type == 'nida' %}Online Copy NIDA
                 {% elif draft.service_type == 'birth_cert' %}Cheti cha Kuzaliwa
                 {% elif draft.service_type == 'death_cert' %}Cheti cha Kifo
                 {% elif draft.service_type == 'cert_verify' %}
@@ -82,7 +81,7 @@
         </div>
 
         {# ========== TIN / NIDA / LICENSE (ya zamani) ========== #}
-        {% if draft.service_type in ['tin', 'nida', 'license'] %}
+        {% if draft.service_type in ['tin', 'license'] %}
 
             {% if draft.license_type %}
             <div class="review-row">

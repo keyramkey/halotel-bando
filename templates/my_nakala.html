@@ -38,7 +38,7 @@
 <header class="topbar">
     <div>
         <div class="brand">Nakala Zangu</div>
-        <div class="muted">TIN · Leseni · NIDA</div>
+        <div class="muted">TIN · Leseni · Cheti · Biashara</div>
     </div>
     <a href="{{ url_for('nakala') }}" class="icon-btn">←</a>
 </header>
@@ -53,7 +53,11 @@
                     <div class="application-network">
                         {% if req.service_type == 'tin' %}TIN
                         {% elif req.service_type == 'license' %}Leseni · {{ req.license_type[:40] }}{% if req.license_type|length > 40 %}…{% endif %}
-                        {% else %}NIDA Copy{% endif %}
+                        {% elif req.service_type == 'birth_cert' %}Cheti cha Kuzaliwa
+                        {% elif req.service_type == 'death_cert' %}Cheti cha Kifo
+                        {% elif req.service_type == 'cert_verify' %}Uhakiki wa Cheti
+                        {% elif req.service_type == 'business_name' %}Jina la Biashara
+                        {% else %}{{ req.service_type }}{% endif %}
                     </div>
                 </div>
                 {% if req.status == "awaiting_payment" %}
@@ -104,7 +108,7 @@
 {% else %}
     <div class="card" style="text-align:center;padding:28px 16px;">
         <div class="title" style="font-size:18px;">Hakuna maombi bado</div>
-        <p class="muted" style="margin:10px 0 16px;">Anza ombi jipya la TIN, Leseni au NIDA.</p>
+        <p class="muted" style="margin:10px 0 16px;">Anza ombi jipya la TIN, Leseni, Cheti au Biashara.</p>
         <a href="{{ url_for('nakala') }}" class="btn orange" style="display:block;text-align:center;">Anza Ombi</a>
     </div>
 {% endif %}

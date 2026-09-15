@@ -3956,6 +3956,14 @@ def favicon():
     )
 
 
+@app.route("/.well-known/assetlinks.json")
+def digital_asset_links():
+    return send_from_directory(
+        os.path.join(app.root_path, "static", ".well-known"),
+        "assetlinks.json",
+        mimetype="application/json",
+    )
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

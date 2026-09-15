@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.railway.up.halotel_bando_production.twa",
+        "sha256_cert_fingerprints": ["18:99:DC:3D:BD:0C:94:35:00:58:A9:A1:FB:EF:CB:B8:E4:19:D5:44:92:51:EE:3E:95:B6:29:88:83:D8:4C:13"]
+      }
+    }]

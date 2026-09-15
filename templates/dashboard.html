@@ -755,8 +755,7 @@
         {% macro nk_svc(st, lic) -%}
             {%- if st == 'tin' -%}TIN Number
             {%- elif st == 'license' -%}Leseni{% if lic %} · {{ lic }}{% endif %}
-            {%- elif st == 'nida' -%}Online Copy NIDA
-            {%- elif st == 'birth_cert' -%}Cheti cha Kuzaliwa
+                        {%- elif st == 'birth_cert' -%}Cheti cha Kuzaliwa
             {%- elif st == 'death_cert' -%}Cheti cha Kifo
             {%- elif st == 'cert_verify' -%}Uhakiki wa Cheti
             {%- elif st == 'business_name' -%}Jina la Biashara
@@ -1304,7 +1303,6 @@
                         <div class="application-network">
                             {% if req.service_type == 'tin' %}TIN
                             {% elif req.service_type == 'license' %}Leseni · {{ req.license_type }}
-                            {% elif req.service_type == 'nida' %}NIDA Copy
                             {% elif req.service_type == 'birth_cert' %}Cheti Kuzaliwa
                             {% elif req.service_type == 'death_cert' %}Cheti Kifo
                             {% elif req.service_type == 'cert_verify' %}Uhakiki

@@ -3971,6 +3971,9 @@ def digital_asset_links():
 def robots():
     return send_from_directory(app.static_folder, 'robots.txt')
 
+@app.route('/sitemap.xml')
+def sitemap():
+    return send_from_directory(app.static_folder, 'sitemap.xml')
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)), debug=True)

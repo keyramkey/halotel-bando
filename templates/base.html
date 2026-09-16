@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="orI24BDHjMUPs2x7_Xq9ZNzPV2fjBtPZafupFiDVhSA" />
+
+    <!-- SEO Meta Tags -->
+    <title>{% block title %}Bando Halotel, Uwakala na Nakala | Mr. Sule Digital Services{% endblock %}</title>
+    <meta name="description" content="{% block description %}Nunua bando za Halotel, sajili laini, omba uwakala na nakala (TIN, Leseni, Cheti) kwa urahisi. Huduma za haraka na za kuaminika Tanzania.{% endblock %}">
+    <meta name="keywords" content="bando halotel, uwakala, nakala, tin number, leseni, cheti cha kuzaliwa, usajili wa laini, mr sule digital">
+    <meta name="author" content="Mr. Sule Digital Services">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph (kwa WhatsApp, Facebook n.k.) -->
+    <meta property="og:title" content="{% block og_title %}Bando Halotel, Uwakala na Nakala | Mr. Sule Digital Services{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Nunua bando za Halotel, sajili laini, omba uwakala na nakala kwa urahisi Tanzania.{% endblock %}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://halotel-bando-production.up.railway.app/">
+    <meta property="og:image" content="https://halotel-bando-production.up.railway.app/static/icons/icon-192.png">
+
     <!-- PWA Manifest Links -->
     <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
     <meta name="theme-color" content="#f56b00">
@@ -15,10 +30,6 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon.png') }}?v=3">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon.png') }}?v=3">
     <link rel="shortcut icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}?v=3">
-    
-    <title>
-        {% block title %}MR. SULE DIGITAL SERVICES BUSINESS{% endblock %}
-    </title>
     
     <style>
         * {

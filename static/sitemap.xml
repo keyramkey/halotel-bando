@@ -1,85 +1,141 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-  <!-- Home -->
+  <!-- ==================== HOME ==================== -->
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/</loc>
-    <priority>1.0</priority>
+    <loc>https://mrsulebusinessservices.dutoza.com/</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>daily</changefreq>
+    <priority>1.0</priority>
   </url>
 
-  <!-- Agency -->
+  <!-- ==================== HUDUMA KUU ==================== -->
+  <!-- Bando (Order) -->
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/agency</loc>
-    <priority>0.9</priority>
+    <loc>https://mrsulebusinessservices.dutoza.com/order</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <!-- Uwakala / Agency -->
+  <url>
+    <loc>https://mrsulebusinessservices.dutoza.com/agency</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
-  </url>
-
-  <!-- Nakala Services -->
-  <url>
-    <loc>https://halotel-bando-production.up.railway.app/nakala</loc>
     <priority>0.9</priority>
+  </url>
+
+  <!-- Nakala (Main) -->
+  <url>
+    <loc>https://mrsulebusinessservices.dutoza.com/nakala</loc>
+    <lastmod>2026-10-06</lastmod>
     <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
   </url>
+
+  <!-- ==================== NAKALA SUB-PAGES ==================== -->
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/nakala/tin</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/nakala/tin</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/nakala/license</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/nakala/license</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/nakala/cheti</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/nakala/cheti</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/nakala/cheti/verification</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/nakala/cheti/verification</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/nakala/cheti/kuzaliwa</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/nakala/cheti/kuzaliwa</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/nakala/cheti/kifo</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/nakala/cheti/kifo</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/nakala/business-name</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/nakala/business-name</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- Auth pages -->
+  <!-- ==================== AUTH PAGES ==================== -->
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/register</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/register</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/login</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/login</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/forgot-password</loc>
-    <priority>0.5</priority>
+    <loc>https://mrsulebusinessservices.dutoza.com/forgot-password</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.4</priority>
   </url>
 
-  <!-- Legal pages -->
+  <!-- ==================== SUPPORT & LEGAL ==================== -->
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/privacy</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/contact</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://mrsulebusinessservices.dutoza.com/chat</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.55</priority>
+  </url>
+  <url>
+    <loc>https://mrsulebusinessservices.dutoza.com/delete-account</loc>
+    <lastmod>2026-10-06</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Legal -->
+  <url>
+    <loc>https://mrsulebusinessservices.dutoza.com/privacy</loc>
+    <lastmod>2026-09-15</lastmod>
+    <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/terms</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/terms</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>yearly</changefreq>
     <priority>0.4</priority>
   </url>
   <url>
-    <loc>https://halotel-bando-production.up.railway.app/refund-policy</loc>
+    <loc>https://mrsulebusinessservices.dutoza.com/refund-policy</loc>
+    <lastmod>2026-09-01</lastmod>
+    <changefreq>yearly</changefreq>
     <priority>0.4</priority>
-  </url>
-  <url>
-    <loc>https://halotel-bando-production.up.railway.app/contact</loc>
-    <priority>0.5</priority>
   </url>
 
 </urlset>

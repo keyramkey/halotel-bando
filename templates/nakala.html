@@ -5,106 +5,155 @@
 {% block content %}
 
 <style>
+.notice-wrapper {
+    min-height: 100vh;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    background: #f4f6f9;
+    font-family: Arial, sans-serif;
+}
+
+.notice-card {
+    width: 100%;
+    max-width: 440px;
+    box-sizing: border-box;
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px 14px;
+    text-align: center;
+    box-shadow: 0 3px 12px #00000010;
+    border-top: 3px solid #f47721;
+}
+
+.notice-icon {
+    width: 35px;
+    height: 35px;
+    margin: 0 auto 6px;
+    background: #fff0e5;
+    color: #f47721;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+.notice-card h1 {
+    color: #182230;
+    font-size: 17px;
+    margin: 4px 0 7px;
+}
+
+.notice-card p {
+    color: #566171;
+    font-size: 11px;
+    line-height: 1.45;
+    margin: 5px 0;
+}
+
+.notice-info {
+    background: #fff7ef;
+    border: 1px solid #ffdfc2;
+    border-radius: 7px;
+    padding: 8px;
+    margin: 9px 0;
+}
+
+.notice-info h3 {
+    color: #c65a0a;
+    margin: 0 0 5px;
+    font-size: 12px;
+}
+
+.notice-info p {
+    margin: 3px 0;
+    font-size: 10px;
+    line-height: 1.4;
+    color: #343d49;
+}
+
+.notice-contact {
+    display: inline-block;
+    background: #f47721;
+    color: white !important;
+    text-decoration: none;
+    padding: 8px 13px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: bold;
+    margin-top: 5px;
+}
+
+.notice-footer {
+    margin-top: 9px;
+    padding-top: 7px;
+    border-top: 1px solid #eee;
+    color: #777;
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+.notice-footer strong {
+    color: #222;
+}
+
+@media (max-height: 650px) {
     .notice-wrapper {
-        min-height: 85vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 25px 15px;
-        background: #f4f6f9;
-        font-family: Arial, sans-serif;
+        min-height: 100svh;
+        padding: 4px;
     }
 
     .notice-card {
-        width: 100%;
-        max-width: 600px;
-        background: #ffffff;
-        border-radius: 18px;
-        padding: 30px 24px;
-        text-align: center;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-        border-top: 6px solid #f47721;
+        padding: 8px 10px;
     }
 
     .notice-icon {
-        width: 75px;
-        height: 75px;
-        margin: 0 auto 20px;
-        background: #fff0e5;
-        color: #f47721;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 38px;
-        font-weight: bold;
+        width: 27px;
+        height: 27px;
+        font-size: 17px;
+        margin-bottom: 4px;
     }
 
     .notice-card h1 {
-        color: #182230;
-        font-size: 25px;
-        margin-bottom: 15px;
+        font-size: 15px;
+        margin: 3px 0 5px;
     }
 
     .notice-card p {
-        color: #566171;
-        font-size: 15px;
-        line-height: 1.8;
-        margin-bottom: 16px;
+        font-size: 10px;
+        line-height: 1.3;
+        margin: 4px 0;
     }
 
     .notice-info {
-        background: #fff7ef;
-        border: 1px solid #ffdfc2;
-        border-radius: 12px;
-        padding: 18px;
-        margin: 22px 0;
+        padding: 6px;
+        margin: 6px 0;
     }
 
     .notice-info h3 {
-        color: #c65a0a;
-        margin: 0 0 10px;
-        font-size: 17px;
+        font-size: 11px;
     }
 
     .notice-info p {
-        margin: 5px 0;
-        color: #343d49;
+        font-size: 9px;
+        margin: 2px 0;
     }
 
     .notice-contact {
-        display: inline-block;
-        background: #f47721;
-        color: white !important;
-        text-decoration: none;
-        padding: 13px 22px;
-        border-radius: 9px;
-        font-weight: bold;
-        margin-top: 8px;
-    }
-
-    .notice-contact:hover {
-        background: #d9600c;
+        padding: 7px 10px;
+        margin-top: 3px;
     }
 
     .notice-footer {
-        margin-top: 25px;
-        padding-top: 18px;
-        border-top: 1px solid #eeeeee;
-        color: #777;
-        font-size: 13px;
+        margin-top: 6px;
+        padding-top: 5px;
     }
-
-    @media (max-width: 480px) {
-        .notice-card {
-            padding: 25px 18px;
-        }
-
-        .notice-card h1 {
-            font-size: 22px;
-        }
-    }
-</style>
+}
+    </style>
 
 <div class="notice-wrapper">
     <div class="notice-card">

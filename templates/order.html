@@ -1,115 +1,409 @@
 {% extends "base.html" %}
 
-{% block title %}Taarifa ya Huduma | SULE BUSINESS{% endblock %}
+{% block title %}Taarifa Rasmi | SULE BUSINESS{% endblock %}
 
 {% block content %}
 
 <style>
-    .notice-wrapper {
-        min-height: 85vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 25px 15px;
-        background: #f4f6f9;
-        font-family: Arial, sans-serif;
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+.notice-wrapper {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    font-family: Arial, sans-serif;
+    background: #071426;
+    isolation: isolate;
+}
+
+/* Background animation */
+.notice-wrapper::before,
+.notice-wrapper::after {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    filter: blur(65px);
+    opacity: .55;
+    pointer-events: none;
+    animation: floatGlow 9s ease-in-out infinite alternate;
+}
+
+.notice-wrapper::before {
+    background: #ff791f;
+    top: -100px;
+    left: -100px;
+}
+
+.notice-wrapper::after {
+    background: #1765d1;
+    bottom: -120px;
+    right: -100px;
+    animation-delay: -4s;
+}
+
+@keyframes floatGlow {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(35px, 25px) scale(1.2); }
+}
+
+/* Main card */
+.notice-card {
+    width: 100%;
+    max-width: 430px;
+    max-height: 100%;
+    overflow: hidden;
+    position: relative;
+    background: rgba(255,255,255,.97);
+    border: 1px solid rgba(255,255,255,.5);
+    border-radius: 18px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 15px 55px rgba(0,0,0,.32);
+    animation: cardEnter .7s ease-out both;
+}
+
+@keyframes cardEnter {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(.98);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Brand */
+.brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    color: #13243c;
+    font-size: 17px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+}
+
+.brand-mark {
+    width: 29px;
+    height: 29px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 15px;
+    font-weight: 900;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #ff9b39, #f15a24);
+    box-shadow: 0 4px 12px #f4772140;
+}
+
+/* Animated warning icon */
+.notice-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #f47721;
+    background: #fff0e4;
+    border: 2px solid #ffdbbd;
+    font-size: 27px;
+    font-weight: 900;
+    animation: iconPulse 2.2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% { box-shadow: 0 0 0 0 #f4772125; }
+    50% { box-shadow: 0 0 0 9px #f4772100; }
+}
+
+.notice-card h1 {
+    color: #12223a;
+    font-size: 21px;
+    line-height: 1.2;
+    margin: 5px 0 8px;
+    font-weight: 900;
+}
+
+.status {
+    display: inline-block;
+    padding: 5px 11px;
+    margin-bottom: 8px;
+    border-radius: 30px;
+    background: #fff0e4;
+    color: #c75b12;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .8px;
+    text-transform: uppercase;
+}
+
+.notice-card p {
+    color: #586477;
+    font-size: 11px;
+    line-height: 1.5;
+    margin: 6px 0;
+}
+
+.notice-card strong {
+    color: #172b46;
+}
+
+/* Information panel */
+.notice-info {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #fff8f1, #fff0e3);
+    border: 1px solid #ffdfc3;
+    border-radius: 12px;
+    padding: 10px;
+    margin: 10px 0;
+    text-align: left;
+}
+
+.notice-info::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(#ffad55, #f15a24);
+}
+
+.notice-info h3 {
+    color: #bf570f;
+    font-size: 12px;
+    margin: 0 0 7px;
+    text-align: center;
+    font-weight: 900;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 1px;
+    border-bottom: 1px solid #f4dfcc;
+    font-size: 10px;
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    color: #687386;
+}
+
+.info-value {
+    color: #182b43;
+    text-align: right;
+    font-weight: 800;
+}
+
+.date-value {
+    color: #d45e14;
+}
+
+/* Contact button */
+.notice-contact {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 11px 12px;
+    margin-top: 9px;
+    border-radius: 9px;
+    color: white !important;
+    background: linear-gradient(100deg, #f47721, #f05223);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 900;
+    box-shadow: 0 5px 15px #f4772135;
+    transition: transform .2s, box-shadow .2s;
+    animation: buttonGlow 3s ease-in-out infinite;
+}
+
+.notice-contact:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px #f4772150;
+}
+
+@keyframes buttonGlow {
+    0%, 100% { box-shadow: 0 5px 15px #f4772130; }
+    50% { box-shadow: 0 5px 20px #f4772160; }
+}
+
+.phone {
+    color: #1c344e;
+    font-size: 11px;
+    font-weight: 800;
+    margin-top: 8px;
+}
+
+/* Footer */
+.notice-footer {
+    border-top: 1px solid #e9edf2;
+    margin-top: 11px;
+    padding-top: 8px;
+    color: #8791a0;
+    font-size: 9px;
+    line-height: 1.5;
+}
+
+.notice-footer strong {
+    color: #172b46;
+    letter-spacing: 1px;
+}
+
+/* Short screens */
+@media (max-height: 700px) {
+    .notice-card {
+        padding: 10px 12px;
+        border-radius: 14px;
     }
 
-    .notice-card {
-        width: 100%;
-        max-width: 600px;
-        background: #ffffff;
-        border-radius: 18px;
-        padding: 30px 24px;
-        text-align: center;
-        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
-        border-top: 6px solid #f47721;
+    .brand {
+        font-size: 14px;
+        margin-bottom: 5px;
+    }
+
+    .brand-mark {
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
     }
 
     .notice-icon {
-        width: 75px;
-        height: 75px;
-        margin: 0 auto 20px;
-        background: #fff0e5;
-        color: #f47721;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 38px;
-        font-weight: bold;
+        width: 35px;
+        height: 35px;
+        font-size: 20px;
+        margin-bottom: 5px;
     }
 
     .notice-card h1 {
-        color: #182230;
-        font-size: 25px;
-        margin-bottom: 15px;
+        font-size: 17px;
+        margin: 3px 0 5px;
+    }
+
+    .status {
+        font-size: 9px;
+        padding: 4px 8px;
+        margin-bottom: 4px;
     }
 
     .notice-card p {
-        color: #566171;
-        font-size: 15px;
-        line-height: 1.8;
-        margin-bottom: 16px;
+        font-size: 10px;
+        line-height: 1.35;
+        margin: 4px 0;
     }
 
     .notice-info {
-        background: #fff7ef;
-        border: 1px solid #ffdfc2;
-        border-radius: 12px;
-        padding: 18px;
-        margin: 22px 0;
+        padding: 7px 9px;
+        margin: 6px 0;
     }
 
     .notice-info h3 {
-        color: #c65a0a;
-        margin: 0 0 10px;
-        font-size: 17px;
+        font-size: 11px;
+        margin-bottom: 4px;
     }
 
-    .notice-info p {
-        margin: 5px 0;
-        color: #343d49;
+    .info-row {
+        font-size: 9px;
+        padding: 3px 1px;
     }
 
     .notice-contact {
-        display: inline-block;
-        background: #f47721;
-        color: white !important;
-        text-decoration: none;
-        padding: 13px 22px;
-        border-radius: 9px;
-        font-weight: bold;
-        margin-top: 8px;
+        padding: 8px;
+        font-size: 10px;
+        margin-top: 5px;
     }
 
-    .notice-contact:hover {
-        background: #d9600c;
+    .phone {
+        font-size: 10px;
+        margin-top: 5px;
     }
 
     .notice-footer {
-        margin-top: 25px;
-        padding-top: 18px;
-        border-top: 1px solid #eeeeee;
-        color: #777;
-        font-size: 13px;
+        margin-top: 6px;
+        padding-top: 5px;
+        font-size: 8px;
+    }
+}
+
+/* Very narrow screens */
+@media (max-width: 350px) {
+    .notice-wrapper {
+        padding: 4px;
     }
 
-    @media (max-width: 480px) {
-        .notice-card {
-            padding: 25px 18px;
-        }
-
-        .notice-card h1 {
-            font-size: 22px;
-        }
+    .notice-card {
+        padding: 9px;
     }
+
+    .notice-card h1 {
+        font-size: 16px;
+    }
+
+    .notice-card p {
+        font-size: 9px;
+    }
+
+    .info-row {
+        font-size: 8px;
+    }
+}
+
+/* Respect device animation preferences */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}
 </style>
 
 <div class="notice-wrapper">
-    <div class="notice-card">
+
+    <main class="notice-card">
+
+        <div class="brand">
+            <span class="brand-mark">S</span>
+            <span>SULE BUSINESS</span>
+        </div>
 
         <div class="notice-icon">!</div>
+
+        <div class="status">
+            Taarifa Rasmi kwa Wateja
+        </div>
 
         <h1>Tunaomba Radhi kwa Usumbufu</h1>
 
@@ -119,59 +413,71 @@
 
         <p>
             Uongozi wa <strong>SULE BUSINESS</strong> unaomba radhi
-            kwa usumbufu uliojitokeza kutokana na hitilafu ya
-            mfumo wa malipo ya mtandaoni (Online Payment).
+            kwa hitilafu iliyojitokeza katika mfumo wa malipo ya
+            mtandaoni (<strong>Online Payment</strong>).
         </p>
 
         <p>
-            Kwa sasa, tunafanyia kazi changamoto hii ili kuhakikisha
-            mfumo wa malipo unarejea katika hali ya kawaida na
-            wateja wanaendelea kupata huduma kwa usalama na ufanisi.
+            Timu yetu inafanyia kazi changamoto hii ili kuboresha
+            mfumo na kurejesha huduma kwa ufanisi.
+            Tunashukuru kwa uvumilivu na uaminifu wako.
         </p>
 
-        <div class="notice-info">
-            <h3>Taarifa ya Kurejea kwa Huduma</h3>
+        <section class="notice-info">
 
-            <p>
-                <strong>Huduma:</strong> Ununuzi wa bando na malipo
-                ya mtandaoni
-            </p>
+            <h3>MUHIMU: RATIBA YA HUDUMA</h3>
 
-            <p>
-                <strong>Siku:</strong> Jumatatu
-            </p>
+            <div class="info-row">
+                <span class="info-label">Huduma</span>
+                <span class="info-value">Bando na malipo</span>
+            </div>
 
-            <p>
-                <strong>Tarehe:</strong> 12 Oktoba 2026
-            </p>
+            <div class="info-row">
+                <span class="info-label">Siku ya kurejea</span>
+                <span class="info-value">Jumatatu</span>
+            </div>
 
-            <p>
-                Tunatarajia kurejesha huduma siku hiyo.
-                Tutawajulisha wateja endapo kutakuwa na mabadiliko.
-            </p>
-        </div>
+            <div class="info-row">
+                <span class="info-label">Tarehe</span>
+                <span class="info-value date-value">
+                    12 Oktoba 2026
+                </span>
+            </div>
+
+            <div class="info-row">
+                <span class="info-label">Hali ya huduma</span>
+                <span class="info-value">Matengenezo</span>
+            </div>
+
+        </section>
 
         <p>
-            Kwa msaada au maelezo zaidi kuhusu huduma za bando,
-            tafadhali wasiliana nasi kupitia namba iliyo hapa chini.
+            Kwa msaada kuhusu huduma za bando au maelezo zaidi,
+            tafadhali wasiliana nasi kupitia WhatsApp.
         </p>
 
-        <a class="notice-contact"
-           href="https://wa.me/255766289060">
-            Wasiliana nasi WhatsApp
+        <a
+            class="notice-contact"
+            href="https://wa.me/255766289060"
+            target="_blank"
+            rel="noopener noreferrer"
+        >
+            <span>WASILIANA NASI WHATSAPP</span>
+            <span aria-hidden="true">↗</span>
         </a>
 
-        <p style="margin-top: 14px;">
-            Simu: <strong>+255 766 289 060</strong>
-        </p>
-
-        <div class="notice-footer">
-            <strong>SULE BUSINESS</strong><br>
-            Tunathamini uaminifu wako.<br>
-            Asante kwa kuendelea kuchagua huduma zetu.
+        <div class="phone">
+            +255 766 289 060
         </div>
 
-    </div>
+        <footer class="notice-footer">
+            <strong>SULE BUSINESS</strong><br>
+            Tunathamini uaminifu wako.<br>
+            Asante kwa kuchagua huduma zetu.
+        </footer>
+
+    </main>
+
 </div>
 
 {% endblock %}

@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+
+{% block title %}Taarifa ya Huduma | SULE BUSINESS{% endblock %}
+
+{% block content %}
+
+<style>
+    .notice-wrapper {
+        min-height: 85vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 25px 15px;
+        background: #f4f6f9;
+        font-family: Arial, sans-serif;
+    }
+
+    .notice-card {
+        width: 100%;
+        max-width: 600px;
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 30px 24px;
+        text-align: center;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+        border-top: 6px solid #f47721;
+    }
+
+    .notice-icon {
+        width: 75px;
+        height: 75px;
+        margin: 0 auto 20px;
+        background: #fff0e5;
+        color: #f47721;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        font-weight: bold;
+    }
+
+    .notice-card h1 {
+        color: #182230;
+        font-size: 25px;
+        margin-bottom: 15px;
+    }
+
+    .notice-card p {
+        color: #566171;
+        font-size: 15px;
+        line-height: 1.8;
+        margin-bottom: 16px;
+    }
+
+    .notice-info {
+        background: #fff7ef;
+        border: 1px solid #ffdfc2;
+        border-radius: 12px;
+        padding: 18px;
+        margin: 22px 0;
+    }
+
+    .notice-info h3 {
+        color: #c65a0a;
+        margin: 0 0 10px;
+        font-size: 17px;
+    }
+
+    .notice-info p {
+        margin: 5px 0;
+        color: #343d49;
+    }
+
+    .notice-contact {
+        display: inline-block;
+        background: #f47721;
+        color: white !important;
+        text-decoration: none;
+        padding: 13px 22px;
+        border-radius: 9px;
+        font-weight: bold;
+        margin-top: 8px;
+    }
+
+    .notice-contact:hover {
+        background: #d9600c;
+    }
+
+    .notice-footer {
+        margin-top: 25px;
+        padding-top: 18px;
+        border-top: 1px solid #eeeeee;
+        color: #777;
+        font-size: 13px;
+    }
+
+    @media (max-width: 480px) {
+        .notice-card {
+            padding: 25px 18px;
+        }
+
+        .notice-card h1 {
+            font-size: 22px;
+        }
+    }
+</style>
+
+<div class="notice-wrapper">
+    <div class="notice-card">
+
+        <div class="notice-icon">!</div>
+
+        <h1>Tunaomba Radhi kwa Usumbufu</h1>
+
+        <p>
+            <strong>Mteja wetu mpendwa,</strong>
+        </p>
+
+        <p>
+            Uongozi wa <strong>SULE BUSINESS</strong> unaomba radhi
+            kwa usumbufu uliojitokeza kutokana na hitilafu ya
+            mfumo wa malipo ya mtandaoni (Online Payment).
+        </p>
+
+        <p>
+            Kwa sasa, tunafanyia kazi changamoto hii ili kuhakikisha
+            mfumo wa malipo unarejea katika hali ya kawaida na
+            wateja wanaendelea kupata huduma kwa usalama na ufanisi.
+        </p>
+
+        <div class="notice-info">
+            <h3>Taarifa ya Kurejea kwa Huduma</h3>
+
+            <p>
+                <strong>Huduma:</strong> Ununuzi wa bando na malipo
+                ya mtandaoni
+            </p>
+
+            <p>
+                <strong>Siku:</strong> Jumatatu
+            </p>
+
+            <p>
+                <strong>Tarehe:</strong> 12 Oktoba 2026
+            </p>
+
+            <p>
+                Tunatarajia kurejesha huduma siku hiyo.
+                Tutawajulisha wateja endapo kutakuwa na mabadiliko.
+            </p>
+        </div>
+
+        <p>
+            Kwa msaada au maelezo zaidi kuhusu huduma za bando,
+            tafadhali wasiliana nasi kupitia namba iliyo hapa chini.
+        </p>
+
+        <a class="notice-contact"
+           href="https://wa.me/255766289060">
+            Wasiliana nasi WhatsApp
+        </a>
+
+        <p style="margin-top: 14px;">
+            Simu: <strong>+255 766 289 060</strong>
+        </p>
+
+        <div class="notice-footer">
+            <strong>SULE BUSINESS</strong><br>
+            Tunathamini uaminifu wako.<br>
+            Asante kwa kuendelea kuchagua huduma zetu.
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}
